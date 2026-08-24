@@ -86,13 +86,13 @@ def require_login(request: Request):
         return None, RedirectResponse(url=login_url, status_code=303)
     return user, None
 
+
 def require_login_api(request: Request):
     """API 라우트에서 로그인 여부를 검사하고, 미로그인 시 401을 반환한다."""
     user = get_current_user(request)
     if user is None:
         raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="로그인이 필요합니다."
+            status_code=status.HTTP_401_UNAUTHORIZED, detail="로그인이 필요합니다."
         )
 
     return user
@@ -115,7 +115,9 @@ def require_admin(request: Request):
         login_url = "/login?expired=1" if had_session else "/login"
         return None, RedirectResponse(url=login_url, status_code=303)
     if not user.get("is_admin"):
-        return None, RedirectResponse(url=post_login_redirect_url(False), status_code=303)
+        return None, RedirectResponse(
+            url=post_login_redirect_url(False), status_code=303
+        )
     return user, None
 
 
@@ -125,7 +127,6 @@ def require_admin_api(request: Request):
     user = require_login_api(request)
     if not user.get("is_admin"):
         raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="관리자만 접근할 수 있습니다."
+            status_code=status.HTTP_403_FORBIDDEN, detail="관리자만 접근할 수 있습니다."
         )
     return user

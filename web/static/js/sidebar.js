@@ -39,7 +39,7 @@ document.addEventListener("click", async function (e) {
   if (!confirm("이 대화를 삭제할까요?")) return;
 
   const chatroomId = delBtn.dataset.chatroomId;
-  const res = await fetch(`/chat/api/rooms/${chatroomId}`, { method: "DELETE" });
+  const res = await fetch(`/chat/api/rooms/${chatroomId}/delete`, { method: "DELETE" });
   if (!res.ok) return;
 
   if (window.location.pathname === `/chat/${chatroomId}`) {

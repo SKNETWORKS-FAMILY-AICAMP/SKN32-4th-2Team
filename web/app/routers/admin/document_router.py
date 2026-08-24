@@ -12,7 +12,9 @@ router = APIRouter(
 )
 
 # main.py와 동일한 절대경로 기준으로 템플릿을 로드한다.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 # 문서 관리는 별도로 떠 있는 API 서버를 화면(rag.js)이 직접 호출한다 (우리 백엔드가

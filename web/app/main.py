@@ -49,7 +49,9 @@ app = FastAPI(title="RAG 챗봇", lifespan=lifespan)
 #
 # 실제 인증 유효성은 core/security.py에서 세션의 login_at 기준으로 판단하므로,
 # 쿠키 수명을 늘려도 로그인 유지 시간이 늘어나지는 않는다.
-SESSION_COOKIE_MAX_AGE_SECONDS = SESSION_MAX_AGE_SECONDS + 7 * 24 * 60 * 60  # 세션 유효시간 + 7일 여유
+SESSION_COOKIE_MAX_AGE_SECONDS = (
+    SESSION_MAX_AGE_SECONDS + 7 * 24 * 60 * 60
+)  # 세션 유효시간 + 7일 여유
 
 app.add_middleware(
     SessionMiddleware,
@@ -58,7 +60,9 @@ app.add_middleware(
     same_site="lax",
 )
 
-app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
+app.mount(
+    "/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static"
+)
 app.include_router(pages_router)
 app.include_router(auth_router)
 app.include_router(users_router)

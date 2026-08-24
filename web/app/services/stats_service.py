@@ -18,7 +18,9 @@ def _window_start(days: int = STATS_WINDOW_DAYS) -> datetime:
 
 
 def get_category_ratio(db: Session) -> list[dict]:
-    stmt = select(Chat.topic).where(Chat.speaker == "user", Chat.created_at >= _window_start())
+    stmt = select(Chat.topic).where(
+        Chat.speaker == "user", Chat.created_at >= _window_start()
+    )
     topics = db.scalars(stmt).all()
 
     counter = Counter(topic or CATEGORY_OTHER for topic in topics)
@@ -62,7 +64,9 @@ def get_user_question_summary(db: Session) -> dict:
 def get_daily_trend(db: Session, days: int = DEFAULT_TREND_DAYS) -> list[dict]:
     start_date = date.today() - timedelta(days=days - 1)
 
-    stmt = select(Chat.created_at).where(Chat.speaker == "user", Chat.created_at >= _window_start(days))
+    stmt = select(Chat.created_at).where(
+        Chat.speaker == "user", Chat.created_at >= _window_start(days)
+    )
     rows = db.scalars(stmt).all()
 
     counter = Counter(created_at.date() for created_at in rows if created_at)
@@ -77,7 +81,9 @@ def get_daily_trend(db: Session, days: int = DEFAULT_TREND_DAYS) -> list[dict]:
 
 
 def get_faq_top10(db: Session) -> list[dict]:
-    stmt = select(Chat.message, Chat.topic).where(Chat.speaker == "user", Chat.created_at >= _window_start())
+    stmt = select(Chat.message, Chat.topic).where(
+        Chat.speaker == "user", Chat.created_at >= _window_start()
+    )
     rows = db.execute(stmt).all()
 
     counter: Counter = Counter()

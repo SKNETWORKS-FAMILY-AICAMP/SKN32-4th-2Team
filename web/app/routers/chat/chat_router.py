@@ -22,7 +22,9 @@ router = APIRouter(
     tags=["Chat"],
 )
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 
@@ -36,7 +38,10 @@ def list_rooms_api(request: Request, db: Session = Depends(get_db)):
 def create_room_api(request: Request, db: Session = Depends(get_db)):
     user = require_login_api(request)
     chatroom = create_chatroom(db, user["user_id"])
-    return {"chatroom_id": chatroom.chatroom_id, "chatroom_name": chatroom.chatroom_name}
+    return {
+        "chatroom_id": chatroom.chatroom_id,
+        "chatroom_name": chatroom.chatroom_name,
+    }
 
 
 @router.get("/api/rooms/{chatroom_id}/messages")
@@ -88,7 +93,9 @@ def delete_room_api(request: Request, chatroom_id: str, db: Session = Depends(ge
 
 @router.get("", response_class=HTMLResponse)
 @router.get("/{chatroom_id}", response_class=HTMLResponse)
-def chat_page(request: Request, chatroom_id: str | None = None, db: Session = Depends(get_db)):
+def chat_page(
+    request: Request, chatroom_id: str | None = None, db: Session = Depends(get_db)
+):
     """방 ID가 없으면(=/chat) 새 대화를 시작할 수 있는 빈 상태로 렌더링하고,
     방 ID가 있으면(=/chat/{chatroom_id}) 그 대화 내용을 이어서 보여준다.
     실제 채팅방(chatroom row)은 이 페이지 진입 시점이 아니라, 첫 메시지를 보낼 때

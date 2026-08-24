@@ -21,8 +21,17 @@ from rag_pipeline import (
 )
 
 
-embedding_model = get_embedding_model()
-reranker_model = get_reranker_model()
+# Lazy initialization to avoid startup issues
+embedding_model = None
+reranker_model = None
+
+def get_models():
+    global embedding_model, reranker_model
+    if embedding_model is None:
+        embedding_model = get_embedding_model()
+    if reranker_model is None:
+        reranker_model = get_reranker_model()
+    return embedding_model, reranker_model
 
 
 app = FastAPI(title=Config.API_TITLE)
@@ -257,23 +266,28 @@ async def upload_document(file: UploadFile = File(...)):
         # ==========================
         # 자동 Vector DB 적재
         # ==========================
-        vector_path = os.path.join(Config.BASE_DIR, "vector_store", str(doc_id))
-        chunk_count = build_vector_store_from_file(
-            file_path,
-            vector_path,
-            doc_id=doc_id,
-            chunk_size=Config.CHUNK_SIZE,
-            chunk_overlap=Config.CHUNK_OVERLAP,
-        )
+        try:
+            vector_path = os.path.join(Config.BASE_DIR, "vector_store", str(doc_id))
+            chunk_count = build_vector_store_from_file(
+                file_path,
+                vector_path,
+                doc_id=doc_id,
+                chunk_size=Config.CHUNK_SIZE,
+                chunk_overlap=Config.CHUNK_OVERLAP,
+            )
 
-        cursor.execute("""
-        UPDATE document
-        SET is_loaded = TRUE,
-            loaded_at = %s
-        WHERE doc_id = %s
-        """, (datetime.now(), doc_id))
+            cursor.execute("""
+            UPDATE document
+            SET is_loaded = TRUE,
+                loaded_at = %s
+            WHERE doc_id = %s
+            """, (datetime.now(), doc_id))
 
-        connection.commit()
+            connection.commit()
+        except Exception as e:
+            # Vector DB 적재 실패해도 파일 업로드는 성공으로 처리
+            print(f"Vector store build failed (file still uploaded): {e}")
+            chunk_count = 0
 
 
 

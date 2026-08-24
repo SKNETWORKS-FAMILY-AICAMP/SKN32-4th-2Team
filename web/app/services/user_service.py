@@ -169,12 +169,7 @@ def get_user_list_by_params(
     total = db.scalar(count_stmt) or 0
 
     # 최신 가입자 순
-    stmt = (
-        stmt
-        .order_by(desc(User.created_at))
-        .offset((page - 1) * size)
-        .limit(size)
-    )
+    stmt = stmt.order_by(desc(User.created_at)).offset((page - 1) * size).limit(size)
 
     users = db.scalars(stmt).all()
 
@@ -186,7 +181,11 @@ def get_user_list_by_params(
                 "department": user.department,
                 "is_disabled": user.is_disabled,
                 "is_admin": user.is_admin,
-                "created_at": user.created_at.strftime("%Y-%m-%d %H:%M") if user.created_at else "",
+                "created_at": (
+                    user.created_at.strftime("%Y-%m-%d %H:%M")
+                    if user.created_at
+                    else ""
+                ),
             }
             for user in users
         ],

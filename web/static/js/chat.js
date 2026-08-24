@@ -1,3 +1,18 @@
+function getCookie(name) {
+  let cookieValue = null;
+  if (document.cookie && document.cookie !== '') {
+    const cookies = document.cookie.split(';');
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.substring(0, name.length + 1) === (name + '=')) {
+        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+        break;
+      }
+    }
+  }
+  return cookieValue;
+}
+
 document.addEventListener("DOMContentLoaded", function () {
   const page = document.querySelector(".chat-page");
   if (!page) return;
@@ -43,9 +58,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
       const typingEl = appendMessage("llm", "…", true);
 
-      const res = await fetch(`/chat/api/rooms/${chatroomId}/messages`, {
+      const res = await fetch(`/chat/api/rooms/${chatroomId}/messages/send`, {
         method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        headers: { 
+          "Content-Type": "application/x-www-form-urlencoded",
+          "X-CSRFToken": getCookie('csrftoken')
+        },
         body: new URLSearchParams({ message: text }),
       });
 
@@ -66,7 +84,12 @@ document.addEventListener("DOMContentLoaded", function () {
   });
 
   async function createChatroom() {
-    const res = await fetch("/chat/api/rooms", { method: "POST" });
+    const res = await fetch("/chat/api/rooms/create", { 
+      method: "POST",
+      headers: {
+        "X-CSRFToken": getCookie('csrftoken')
+      }
+    });
     if (!res.ok) return null;
     return res.json();
   }

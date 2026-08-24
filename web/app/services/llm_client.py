@@ -27,7 +27,9 @@ _DEFAULT_MESSAGE = "일시적인 오류입니다. 잠시 후 다시 시도해주
 class ChatAPIError(Exception):
     """Chat API 호출 실패. message는 프론트에 그대로 노출해도 되는 한국어 문구다."""
 
-    def __init__(self, message: str, status_code: int = 500, error_code: str = "INTERNAL_ERROR"):
+    def __init__(
+        self, message: str, status_code: int = 500, error_code: str = "INTERNAL_ERROR"
+    ):
         super().__init__(message)
         self.message = message
         self.status_code = status_code
@@ -51,11 +53,16 @@ def _client() -> httpx.Client:
 
     if _client_instance is None:
         with _client_lock:
-            if _client_instance is None:  # double-checked locking: 락 대기 중 이미 만들어졌을 수 있음
+            if (
+                _client_instance is None
+            ):  # double-checked locking: 락 대기 중 이미 만들어졌을 수 있음
                 _client_instance = httpx.Client(
                     base_url=CHAT_API_BASE_URL,
                     timeout=httpx.Timeout(
-                        connect=_CONNECT_TIMEOUT, read=_READ_TIMEOUT, write=_READ_TIMEOUT, pool=_READ_TIMEOUT
+                        connect=_CONNECT_TIMEOUT,
+                        read=_READ_TIMEOUT,
+                        write=_READ_TIMEOUT,
+                        pool=_READ_TIMEOUT,
                     ),
                     # 로컬/사내망의 지정된 서버만 호출하므로 OS 프록시 자동감지가 필요 없다.
                     # trust_env=True(기본값)로 두면 환경에 따라 초기화가 느려지는 경우가 있어 꺼둔다.
@@ -124,10 +131,14 @@ def _post(path: str, payload: dict) -> dict:
     try:
         return res.json()
     except ValueError:
-        raise ChatAPIError(_DEFAULT_MESSAGE, status_code=500, error_code="INTERNAL_ERROR")
+        raise ChatAPIError(
+            _DEFAULT_MESSAGE, status_code=500, error_code="INTERNAL_ERROR"
+        )
 
 
-def get_chat_completion(chatroom_id: str, message: str, history: list[dict] | None = None) -> dict:
+def get_chat_completion(
+    chatroom_id: str, message: str, history: list[dict] | None = None
+) -> dict:
     """POST /v1/chat 호출.
 
     반환: {"answer": str, "topic": str, "sources": list[dict], "rag_degraded": bool}
