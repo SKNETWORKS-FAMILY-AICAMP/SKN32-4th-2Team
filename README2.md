@@ -129,7 +129,14 @@ pip install -r requirements.txt
 ```bash
 cd web
 # .env 파일 생성 (.env.example 참조)
+
+# MySQL 사용 시:
 DATABASE_URL=mysql+pymysql://root:1234@localhost:3306/rag_chatbot?charset=utf8mb4
+
+# SQLite 사용 시 (개발용):
+DATABASE_URL=sqlite:///./db.sqlite3
+
+# 공통 설정:
 SESSION_SECRET_KEY=django-insecure-random-secret-key
 CHAT_API_BASE_URL=http://localhost:8002
 CHAT_API_TIMEOUT_SECONDS=15
