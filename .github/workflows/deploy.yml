@@ -22,4 +22,9 @@ jobs:
             docker --version
 
             cd ~/SKN32-4th-2Team
+
+            echo "Pull latest code"
             git pull origin deployment-test
+
+            echo "Build Docker image"
+            docker build -t deployment-test .
