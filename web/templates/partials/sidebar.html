@@ -1,0 +1,30 @@
+<aside class="app-sidebar">
+  {% if not user.is_admin %}
+  <div class="nav-group">
+    <div class="nav-group-label">챗봇</div>
+    <a class="nav-item {{ 'active' if active == 'chat_new' }}" href="/chat">
+      <span class="label">+ 새 대화</span>
+    </a>
+  </div>
+
+  <div class="nav-group">
+    <div class="nav-group-label">대화 목록</div>
+    <div id="chatroom-list" class="chatroom-list" data-active-id="{{ chatroom_id or '' }}"></div>
+  </div>
+  {% endif %}
+
+  {% if user.is_admin %}
+  <div class="nav-group">
+    <div class="nav-group-label">관리자</div>
+    <a class="nav-item {{ 'active' if active == 'admin_stats' }}" href="/admin/stats">
+      <span class="label">통계</span>
+    </a>
+    <a class="nav-item {{ 'active' if active == 'admin_docs' }}" href="/admin/documents">
+      <span class="label">RAG 문서관리</span>
+    </a>
+    <a class="nav-item {{ 'active' if active == 'admin_users' }}" href="/admin/users">
+      <span class="label">사용자 관리</span>
+    </a>
+  </div>
+  {% endif %}
+</aside>

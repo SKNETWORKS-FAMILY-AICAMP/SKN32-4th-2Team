@@ -1,0 +1,181 @@
+diff --git a/RAG/rag_pipeline.py b/RAG/rag_pipeline.py
+index be4609d..a55582f 100644
+--- a/RAG/rag_pipeline.py
++++ b/RAG/rag_pipeline.py
+@@ -8,6 +8,26 @@ _embedding_model = None
+ _reranker_model = None
+ 
+ 
++# [로컬 테스트 전용 수정 — LLM 파트]
++# 임베딩·리랭커를 GPU 로 올린다. 원본은 임베딩이 "cpu" 로 고정돼 있었고
++# 리랭커는 지정이 없었다.
++#
++# 환경변수로 끌 수 있게 둔 이유: GPU 가 없는 팀원 PC 에서도 그대로 돌아가야 한다.
++#   RAG_DEVICE=cpu   → 강제로 CPU
++#   RAG_DEVICE=cuda  → 강제로 GPU (없으면 에러가 나서 바로 알 수 있다)
++#   미지정           → 있으면 GPU, 없으면 CPU
++def _device() -> str:
++    forced = os.getenv("RAG_DEVICE", "").strip().lower()
++    if forced:
++        return forced
++    try:
++        import torch
++
++        return "cuda" if torch.cuda.is_available() else "cpu"
++    except ImportError:
++        return "cpu"
++
++
+ class DocumentLike:
+     def __init__(self, page_content: str, metadata: Optional[dict] = None):
+         self.page_content = page_content
+@@ -35,6 +55,41 @@ def _normalize_whitespace(text: str) -> str:
+     return text.strip()
+ 
+ 
++# [로컬 테스트 전용 수정 — LLM 파트] 청크에 조문 머리를 붙인다.
++#
++# 문제: 청킹이 길이(400자) 단위라 조문 중간에서 끊긴다. 그러면 두 번째 이후
++# 청크는 몇 조인지 알 수 없다.
++#
++#   법제처 14 국가법령정보센터 근로기준법 1. 8시간 이내의 휴일근로: 통상임금의
++#   100분의 50 2. 8시간을 초과한 휴일근로: 통상임금의 100분의 100 ③ 사용자는...
++#
++# 이게 LLM 답변 품질에 두 가지로 영향을 준다.
++#   1) 조문 인용이 틀린다 — 컨텍스트에 조 번호가 없으니 모델이 기억으로 붙인다
++#      (휴일근로 수당은 제56조인데 제55조·제57조를 댔다)
++#   2) 내용이 잘려 근거가 사라진다 — "유급휴가 15일" 은 제60조 ① 에 있는데
++#      청크가 그 뒤부터 시작해 "15일" 이 컨텍스트에 아예 없다
++#
++# 해결: 페이지 전체를 훑어 각 청크가 어느 조문에 속하는지 찾고, 조문 머리가
++# 청크 안에 안 보이면 앞에 붙여 준다. 조문 머리를 이미 갖고 있으면 그대로 둔다.
++_ARTICLE_HEAD = re.compile(r"제\s?\d+조(?:의\s?\d+)?\s*\([^)]{1,40}\)")
++
++
++def _article_heads(text: str) -> List[tuple]:
++    """본문에서 (위치, 조문 머리) 목록을 뽑는다."""
++    return [(m.start(), re.sub(r"\s+", " ", m.group(0)).strip()) for m in _ARTICLE_HEAD.finditer(text)]
++
++
++def _head_for(offset: int, heads: List[tuple]) -> Optional[str]:
++    """이 위치보다 앞에 있는 가장 가까운 조문 머리."""
++    found = None
++    for pos, head in heads:
++        if pos <= offset:
++            found = head
++        else:
++            break
++    return found
++
++
+ def _is_meaningful_chunk(content: str, *, min_length: int = 80) -> bool:
+     if not content:
+         return False
+@@ -164,6 +219,27 @@ def build_chunks_from_pages(
+                 if part.strip():
+                     chunks.append(LangchainDocument(page_content=part.strip(), metadata=doc.metadata.copy()))
+ 
++    # [로컬 테스트 전용 수정 — LLM 파트]
++    # 페이지마다 (조문 머리 목록, 이 페이지가 시작될 때 이어지던 조문) 을 만든다.
++    #
++    # 페이지 단위로만 보면 안 된다. 조문이 페이지를 넘어 이어지는 경우가 흔한데,
++    # 그 페이지에는 조문 머리가 하나도 없어 무엇에 속하는지 알 수 없다.
++    # 실제로 근로기준법 p.13(휴일근로 수당)이 그런 경우였다 — 제56조 머리는
++    # p.12 에 있다. 그래서 앞 페이지에서 이어지는 조문을 물려준다.
++    page_info: dict = {}
++    carry_by_source: dict = {}
++    for doc in documents:
++        key = (doc.metadata or {}).get("source_file", "")
++        text = getattr(doc, "page_content", "") or ""
++        # 공백을 지운 좌표로 통일한다. 청크는 정규화를 거쳐 공백이 달라지므로
++        # 원본 좌표로는 위치를 맞출 수 없다.
++        flat_heads = [
++            (len(re.sub(r"\s+", "", text[:pos])), head) for pos, head in _article_heads(text)
++        ]
++        page_info[id(doc)] = (flat_heads, carry_by_source.get(key))
++        if flat_heads:
++            carry_by_source[key] = flat_heads[-1][1]
++
+     cleaned_chunks: List[Any] = []
+     seen_signatures = set()
+ 
+@@ -173,6 +249,38 @@ def build_chunks_from_pages(
+             continue
+ 
+         metadata = dict(getattr(chunk, "metadata", {}) or {})
++
++        # [로컬 테스트 전용 수정 — LLM 파트] 조문 머리 보강
++        source_key = metadata.get("source_file", "")
++        article = None
++        probe = re.sub(r"\s+", "", content[:40])
++        for doc in documents:
++            if (doc.metadata or {}).get("source_file") != source_key:
++                continue
++            flat = re.sub(r"\s+", "", getattr(doc, "page_content", "") or "")
++            at = flat.find(probe)
++            if at < 0:
++                continue
++            flat_heads, carry_in = page_info[id(doc)]
++            # 이 청크 앞의 가장 가까운 조문 머리. 없으면 앞 페이지에서 이어진 조문.
++            article = _head_for(at, flat_heads) or carry_in
++            break
++
++        # 청크가 조문 머리로 **시작하지 않으면** 앞에 붙인다.
++        #
++        # 처음에는 "청크 안에 조문 머리가 하나라도 있으면 안 붙임" 으로 했는데
++        # 그게 바로 오인용의 원인이었다. 예를 들어 이런 청크가 있다.
++        #
++        #   "...1. 8시간 이내의 휴일근로: 통상임금의 100분의 50 ...
++        #    제57조(보상 휴가제) 사용자는 근로자대표와의 서면 합의에 따라..."
++        #
++        # 앞부분은 제56조인데 뒤에 제57조 머리가 보인다. 그러면 LLM 이 100분의 50 을
++        # 제57조 것으로 오해한다(실제로 그렇게 답했다). 시작 지점의 조문을 붙여야
++        # 앞부분이 어디 것인지 분명해진다. 뒤쪽 조문은 본문에 그대로 보이므로
++        # 헷갈리지 않는다.
++        if article and not _ARTICLE_HEAD.match(content):
++            content = f"[{article}] {content}"
++
+         metadata.update({
+             "chunk_id": idx,
+             "char_count": len(content),
+@@ -180,6 +288,8 @@ def build_chunks_from_pages(
+             "source_file": metadata.get("source_file", "unknown.pdf"),
+             "page_number": metadata.get("page_number", metadata.get("page", 1)),
+             "is_legal_text": True,
++            # LLM 쪽이 프롬프트 조립에 쓸 수 있게 따로도 넘긴다.
++            "article": article,
+         })
+ 
+         signature = re.sub(r"\s+", " ", content)
+@@ -198,9 +308,11 @@ def get_embedding_model():
+     if _embedding_model is None:
+         from langchain_community.embeddings import HuggingFaceEmbeddings
+ 
++        device = _device()
++        print(f"[rag_pipeline] 임베딩 모델 device={device}")
+         _embedding_model = HuggingFaceEmbeddings(
+             model_name="jhgan/ko-sroberta-multitask",
+-            model_kwargs={"device": "cpu"},
++            model_kwargs={"device": device},
+             encode_kwargs={"normalize_embeddings": True},
+         )
+ 
+@@ -213,7 +325,17 @@ def get_reranker_model():
+     if _reranker_model is None:
+         from sentence_transformers import CrossEncoder
+ 
+-        _reranker_model = CrossEncoder("BAAI/bge-reranker-v2-m3")
++        device = _device()
++        print(f"[rag_pipeline] 리랭커 device={device}")
++        # bge-reranker-v2-m3 은 568M 파라미터로 이 파이프라인에서 가장 무겁다.
++        # GPU 에서는 fp16 으로 올려 VRAM 을 절반만 쓴다(약 2.3GB → 1.2GB).
++        # 이 노트북은 8GB 인데 Ollama 가 상주하면 여유가 얼마 없다.
++        kwargs = {"device": device}
++        if device.startswith("cuda"):
++            import torch
++
++            kwargs["model_kwargs"] = {"torch_dtype": torch.float16}
++        _reranker_model = CrossEncoder("BAAI/bge-reranker-v2-m3", **kwargs)
+ 
+     return _reranker_model
+ 

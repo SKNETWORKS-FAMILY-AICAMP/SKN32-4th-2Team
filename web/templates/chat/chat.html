@@ -1,0 +1,14 @@
+{% extends "layout/app_base.html" %}
+
+{% block title %}{{ chatroom_name }}{% endblock %}
+
+{% block content %}
+<div class="chat-page" data-chatroom-id="{{ chatroom_id }}">
+  {% include "partials/chat_panel.html" %}
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="/static/js/sidebar.js"></script>
+<script src="/static/js/chat.js"></script>
+{% endblock %}

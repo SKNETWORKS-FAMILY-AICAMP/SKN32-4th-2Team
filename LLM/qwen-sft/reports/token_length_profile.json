@@ -1,0 +1,70 @@
+{
+  "rows": 100,
+  "max_length_setting": 2048,
+  "total_tokens": {
+    "min": 751,
+    "p50": 850,
+    "p95": 1056,
+    "max": 1371
+  },
+  "assistant_tokens": {
+    "min": 65,
+    "p50": 85,
+    "p95": 137,
+    "max": 182
+  },
+  "over_limit": [],
+  "top_10_longest": [
+    {
+      "id": "discipline-011",
+      "total_tokens": 1371,
+      "assistant_tokens": 174
+    },
+    {
+      "id": "lw-work-014",
+      "total_tokens": 1195,
+      "assistant_tokens": 182
+    },
+    {
+      "id": "discipline-013",
+      "total_tokens": 1132,
+      "assistant_tokens": 127
+    },
+    {
+      "id": "lw-work-013",
+      "total_tokens": 1115,
+      "assistant_tokens": 156
+    },
+    {
+      "id": "discipline-001",
+      "total_tokens": 1068,
+      "assistant_tokens": 103
+    },
+    {
+      "id": "discipline-010",
+      "total_tokens": 1056,
+      "assistant_tokens": 146
+    },
+    {
+      "id": "lw-leave-009",
+      "total_tokens": 1030,
+      "assistant_tokens": 143
+    },
+    {
+      "id": "hr-appraisal-appeal-009",
+      "total_tokens": 1022,
+      "assistant_tokens": 92
+    },
+    {
+      "id": "pay-skill-step-restriction-010",
+      "total_tokens": 1018,
+      "assistant_tokens": 137
+    },
+    {
+      "id": "hr-job-series-test-eligibility-004",
+      "total_tokens": 1002,
+      "assistant_tokens": 103
+    }
+  ],
+  "assistant_only_mask_verified": true
+}

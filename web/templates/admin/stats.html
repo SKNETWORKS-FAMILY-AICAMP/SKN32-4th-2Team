@@ -1,0 +1,54 @@
+{% extends "layout/app_base.html" %}
+
+{% block title %}통계{% endblock %}
+
+{% block content %}
+<div class="admin-panel stats-panel">
+  <div class="panel-head">
+    <h1 class="panel-title">통계</h1>
+  </div>
+
+  <div class="card">
+    <div class="stat-card-row" id="stat-cards"></div>
+  </div>
+
+  <div class="chart-row">
+    <div class="card chart-card">
+      <h2 class="chart-card-title">질문 카테고리별 문의 비율</h2>
+      <div class="donut-wrap">
+        <div class="donut-canvas-box">
+          <canvas id="category-donut"></canvas>
+        </div>
+        <ul class="chart-legend" id="category-legend"></ul>
+      </div>
+    </div>
+
+    <div class="card chart-card">
+      <h2 class="chart-card-title">일자별 질문 건수 추이</h2>
+      <div class="line-canvas-box">
+        <canvas id="daily-trend-line"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <h2 class="chart-card-title">FAQ TOP10</h2>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>순위</th>
+          <th>질문</th>
+          <th>카테고리</th>
+          <th>문의 건수</th>
+        </tr>
+      </thead>
+      <tbody id="faq-list"></tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_script %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script src="/static/js/admin_stats.js"></script>
+{% endblock %}

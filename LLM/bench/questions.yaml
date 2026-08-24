@@ -1,0 +1,276 @@
+# 성능 평가용 질문 세트
+#
+# 각 항목:
+#   id            고유 식별자. paraphrase 그룹은 접미사(-a/-b/-c)로 묶는다
+#   question      실제로 /v1/chat 에 보낼 질문
+#   category      정답 주제 (app/domain.py 의 TOPIC_CATEGORIES 8종 중 하나)
+#   sources       정답 근거 문서 파일명. RAG 검색 결과에 이 중 하나라도
+#                 들어오면 recall 성공으로 본다 (RAG/res/pdf 실제 파일명)
+#   group         같은 의도의 패러프레이즈 묶음. 분류 '일관성' 측정에 쓴다
+#   note          채점 시 참고할 메모 (선택)
+#
+# ── 왜 이렇게 만들었나 ────────────────────────────────────────────────
+# 1. sources 는 '문서명'까지만 정답으로 둔다. 조문/페이지까지 맞추라고 하면
+#    RAG 의 청킹 방식이 바뀔 때마다 정답을 다시 써야 한다.
+# 2. 법령은 법률/시행령/시행규칙이 따로 있어 어느 쪽이 걸릴지 모른다.
+#    같은 법의 여러 파일을 모두 정답으로 인정한다.
+# 3. paraphrase 그룹(같은 의도, 다른 문장)이 핵심이다. 대시보드 도넛 차트가
+#    믿을 만하려면 "휴가 며칠?"과 "연차 얼마나 남았어요?"가 같은 카테고리로
+#    가야 한다. 정확도보다 이 '일관성'이 더 중요한 지표다.
+# 4. out_of_scope 질문(HR 무관)을 넣어 '기타' 로 잘 빠지는지, 그리고
+#    없는 내용을 지어내지 않는지 본다.
+
+meta:
+  categories:
+    - 휴가/휴직
+    - 근태/근무형태
+    - 급여/보수
+    - 채용/임용
+    - 인사/승진
+    - 복리후생
+    - 징계/행동강령
+    - 기타
+  corpus: RAG/res/pdf   # 정답 문서명의 출처
+
+questions:
+
+  # ─────────────── 휴가/휴직 ───────────────
+  - id: leave-annual-a
+    group: annual-leave
+    question: 연차 며칠까지 쓸 수 있나요?
+    category: 휴가/휴직
+    sources: ["복무규정.pdf", "5.근로기준법(법률).pdf"]
+
+  - id: leave-annual-b
+    group: annual-leave
+    question: 유급휴가는 １년에 얼마나 주어지나요?
+    category: 휴가/휴직
+    sources: ["복무규정.pdf", "5.근로기준법(법률).pdf"]
+
+  - id: leave-annual-c
+    group: annual-leave
+    question: 제가 쓸 수 있는 휴가 일수가 궁금합니다
+    category: 휴가/휴직
+    sources: ["복무규정.pdf", "5.근로기준법(법률).pdf"]
+    note: 개인 잔여일수를 묻는 것처럼 보이지만 일반 기준을 먼저 답해야 한다
+
+  - id: leave-parental-a
+    group: parental-leave
+    question: 육아휴직은 얼마나 쓸 수 있나요?
+    category: 휴가/휴직
+    sources:
+      - "직원인사규정.pdf"
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(법률).pdf"
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행령).pdf"
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행규칙).pdf"
+
+  - id: leave-parental-b
+    group: parental-leave
+    question: 아이를 키우려고 쉬려는데 기간이 어떻게 되나요?
+    category: 휴가/휴직
+    sources:
+      - "직원인사규정.pdf"
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(법률).pdf"
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행령).pdf"
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행규칙).pdf"
+
+  - id: leave-parental-with-maternity
+    question: 육아휴직을 출산휴가와 함께 신청할 수 있나요?
+    category: 휴가/휴직
+    sources:
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행규칙).pdf"
+      - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(법률).pdf"
+    note: RAG 담당자 테스트에서 제14조의2 를 정확히 찾아낸 질문
+
+  - id: leave-suspension
+    question: 휴직 중인 직원의 복무 관리는 어떻게 되나요?
+    category: 휴가/휴직
+    sources: ["휴직자 복무관리 지침.pdf"]
+
+  # ─────────────── 근태/근무형태 ───────────────
+  - id: work-flexible-a
+    group: flexible-work
+    question: 유연근무제는 어떻게 신청하나요?
+    category: 근태/근무형태
+    sources: ["유연근무제 운영지침 .pdf"]
+
+  - id: work-flexible-b
+    group: flexible-work
+    question: 출퇴근 시간을 조정해서 근무할 수 있나요?
+    category: 근태/근무형태
+    sources: ["유연근무제 운영지침 .pdf", "복무규정.pdf"]
+
+  - id: work-parttime
+    question: 시간선택제로 전환하려면 어떤 절차를 밟나요?
+    category: 근태/근무형태
+    sources: ["시간선택제 직원에 관한 규칙.pdf"]
+
+  - id: work-overseas-trip
+    question: 국외 출장 갈 때 사전 승인이 필요한가요?
+    category: 근태/근무형태
+    sources: ["국외여행에관한규칙.pdf", "복무규정.pdf"]
+
+  - id: work-hours
+    question: 법정 근로시간은 주 몇 시간인가요?
+    category: 근태/근무형태
+    sources:
+      - "복무규정.pdf"
+      - "5.근로기준법(법률).pdf"
+      - "5.근로기준법(시행령).pdf"
+      - "5.근로기준법(시행규칙).pdf"
+
+  - id: work-duty-general
+    question: 직원 복무 관련 기본 규정이 어떻게 되나요?
+    category: 근태/근무형태
+    sources: ["복무규정.pdf"]
+
+  # ─────────────── 급여/보수 ───────────────
+  - id: pay-overtime-a
+    group: overtime-pay
+    question: 초과근무 수당은 어떻게 계산되나요?
+    category: 급여/보수
+    sources: ["복무규정.pdf", "공무직 직원 인사 및 보수에 관한 규칙.pdf", "5.근로기준법(법률).pdf"]
+
+  - id: pay-overtime-b
+    group: overtime-pay
+    question: 야근하면 수당을 얼마나 더 받나요?
+    category: 급여/보수
+    sources: ["복무규정.pdf", "공무직 직원 인사 및 보수에 관한 규칙.pdf", "5.근로기준법(법률).pdf"]
+
+  - id: pay-severance
+    question: 퇴직금은 어떤 기준으로 산정되나요?
+    category: 급여/보수
+    sources:
+      - "5.근로기준법(법률).pdf"
+      - "5.근로기준법(시행령).pdf"
+      - "5.근로기준법(시행규칙).pdf"
+
+  - id: pay-public-worker
+    question: 공무직 직원의 보수 기준이 어떻게 되나요?
+    category: 급여/보수
+    sources: ["공무직 직원 인사 및 보수에 관한 규칙.pdf"]
+
+  # 실제 사용 중에 잘못된 조문 인용이 나온 질문이라 문항으로 추가했다.
+  # 근로기준법 제56조(휴일근로 100분의 50 가산)가 정답인데, 검색된 청크가
+  # 조문 중간부터 시작해 "제56조" 라는 머리가 안 보인다. 그러면 모델이 기억으로
+  # 번호를 붙여 제55조·제57조 같은 무관한 조문을 대고, "1.5배" 처럼 문서에 없는
+  # 표현으로 바꿔 말하기도 했다.
+  # 사내 규정에는 공휴일 '급여' 규정이 없다(복무규정 제18조는 휴일 지정,
+  # 제25조는 휴가일수 계산, 유연근무제 지침 제26조는 근무시간 처리다).
+  # 따라서 정답 문서는 근로기준법 하나뿐이다.
+  - id: pay-holiday-work
+    question: 공휴일에 대한 급여는 어떻게 산정이돼?
+    category: 급여/보수
+    sources: ["5.근로기준법(법률).pdf"]
+
+  # ─────────────── 채용/임용 ───────────────
+  - id: hire-contract-a
+    group: contract-hire
+    question: 계약직 직원 임용 절차가 어떻게 되나요?
+    category: 채용/임용
+    sources: ["계약직직원임용지침.pdf"]
+
+  - id: hire-contract-b
+    group: contract-hire
+    question: 기간제로 사람을 뽑으려면 어떤 기준을 따라야 하나요?
+    category: 채용/임용
+    sources:
+      - "계약직직원임용지침.pdf"
+      - "6.기간제 및 단시간근로자 보호 등에 관한 법률(법률).pdf"
+
+  - id: hire-fixed-term-limit
+    question: 기간제 근로자를 몇 년까지 쓸 수 있나요?
+    category: 채용/임용
+    sources:
+      - "계약직직원임용지침.pdf"
+      - "6.기간제 및 단시간근로자 보호 등에 관한 법률(법률).pdf"
+      - "6.기간제 및 단시간근로자 보호 등에 관한 법률(시행령).pdf"
+      - "6.기간제 및 단시간근로자 보호 등에 관한 법률(시행규칙).pdf"
+
+  - id: hire-special-position
+    question: 별정직 직원은 어떻게 인사관리 하나요?
+    category: 채용/임용
+    sources: ["별정직직원인사관리지침.pdf"]
+
+  - id: hire-professor
+    question: 교육공무원 임용 기준이 궁금합니다
+    category: 채용/임용
+    sources: ["4.교육공무원임용령(시행령).pdf", "3.교육공무원법(법률).pdf"]
+
+  # ─────────────── 인사/승진 ───────────────
+  - id: promo-exam-a
+    group: promotion-exam
+    question: 승진 시험은 언제 시행되나요?
+    category: 인사/승진
+    sources: ["직원승진시험시행 지침.pdf"]
+
+  - id: promo-exam-b
+    group: promotion-exam
+    question: 진급하려면 시험을 봐야 하나요?
+    category: 인사/승진
+    sources: ["직원승진시험시행 지침.pdf", "직원인사규정.pdf"]
+
+  - id: promo-hr-rule
+    question: 직원 인사 규정의 기본 내용이 무엇인가요?
+    category: 인사/승진
+    sources: ["직원인사규정.pdf", "직원인사규정 시행규칙.pdf"]
+
+  # ─────────────── 복리후생 ───────────────
+  - id: benefit-medical
+    question: 특수병 치료비 지원을 받으려면 어떻게 해야 하나요?
+    category: 복리후생
+    sources: ["교직원특수병치료비지원지침.pdf"]
+
+  # ─────────────── 징계/행동강령 ───────────────
+  - id: disc-dui-a
+    group: dui
+    question: 음주운전을 하면 어떤 처분을 받나요?
+    category: 징계/행동강령
+    sources: ["교직원 음주운전 비위행위 확인에 관한 지침.pdf"]
+
+  - id: disc-dui-b
+    group: dui
+    question: 직원이 음주운전으로 적발되면 징계 기준이 어떻게 되나요?
+    category: 징계/행동강령
+    sources: ["교직원 음주운전 비위행위 확인에 관한 지침.pdf"]
+
+  - id: disc-code-of-conduct
+    question: 교직원 행동강령에서 금지하는 행위는 무엇인가요?
+    category: 징계/행동강령
+    sources: ["한국기술교육대학교 교직원행동강령.pdf"]
+
+  - id: disc-crime-report
+    question: 직무 관련 범죄를 알게 되면 어떻게 신고하나요?
+    category: 징계/행동강령
+    sources: ["한국기술교육대학교 직무범죄고발지침.pdf"]
+
+  # ─────────────── 기타 / 범위 밖 ───────────────
+  - id: other-public-institution
+    question: 공공기관 운영에 관한 법률은 무엇을 규정하나요?
+    category: 기타
+    sources:
+      - "2.공공기관의 운영에 관한 법률(법률).pdf"
+      - "2.공공기관의 운영에 관한 법률(시행령).pdf"
+
+  - id: oos-lunch
+    question: 점심 메뉴 추천해줘
+    category: 기타
+    sources: []
+    out_of_scope: true
+    note: 근거 문서 없이 지어내지 않고 안내로 빠지는지 확인
+
+  - id: oos-weather
+    question: 오늘 날씨 어때?
+    category: 기타
+    sources: []
+    out_of_scope: true
+
+  - id: oos-personal-balance
+    question: 제 연차가 지금 며칠 남았는지 알려주세요
+    category: 휴가/휴직
+    sources: ["복무규정.pdf", "5.근로기준법(법률).pdf"]
+    out_of_scope: true
+    note: |
+      개인 기록은 문서로 알 수 없다. 규정상 일반 기준을 답한 뒤
+      개인별 확인은 인사팀/사내 시스템으로 안내해야 한다.
+      숫자를 지어내면 실패로 본다.

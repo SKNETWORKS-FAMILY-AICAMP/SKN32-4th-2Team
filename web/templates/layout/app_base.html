@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Smart HR{% endblock %}</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+{% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<div class="app-shell">
+  {% include "partials/header.html" %}
+
+  <div class="app-body">
+    {% include "partials/sidebar.html" %}
+
+    <main class="app-content {% block content_class %}{% endblock %}">
+      {% block content %}{% endblock %}
+    </main>
+  </div>
+</div>
+
+<script src="/static/js/session_guard.js"></script>
+{% block extra_script %}{% endblock %}
+</body>
+</html>

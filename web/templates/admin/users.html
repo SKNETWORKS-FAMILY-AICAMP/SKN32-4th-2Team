@@ -1,0 +1,73 @@
+{% extends "layout/app_base.html" %}
+
+{% block title %}사용자 관리{% endblock %}
+
+{% block content %}
+<div class="admin-panel">
+  <div class="panel-head">
+    <h1 class="panel-title">사용자 관리</h1>
+  </div>
+
+  <div class="card">
+    <div class="filter-bar">
+      <div class="field-inline">
+        <label for="f-name">이름</label>
+        <input id="f-name" type="text" placeholder="이름 검색">
+      </div>
+      <div class="field-inline">
+        <label for="f-department">부서</label>
+        <input id="f-department" type="text" placeholder="부서 검색">
+      </div>
+      <div class="field-inline">
+        <label for="f-is-admin">권한</label>
+        <select id="f-is-admin">
+          <option value="">전체 권한</option>
+          <option value="true">관리자</option>
+          <option value="false">일반</option>
+        </select>
+      </div>
+      <div class="field-inline">
+        <label for="f-is-disabled">상태</label>
+        <select id="f-is-disabled">
+          <option value="">전체 상태</option>
+          <option value="false">활성</option>
+          <option value="true">비활성</option>
+        </select>
+      </div>
+      <button type="button" id="f-search" class="btn-secondary">검색</button>
+      <button type="button" class="btn-secondary outline" onclick="openUserModal('create')">사용자 추가</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>ID</th>
+          <th>이름</th>
+          <th>부서</th>
+          <th>상태</th>
+          <th>권한</th>
+          <th>가입일</th>
+        </tr>
+      </thead>
+      <tbody id="user-list"></tbody>
+    </table>
+
+    <div id="pagination" class="pagination"></div>
+  </div>
+</div>
+
+<!-- 회원가입/사용자추가/사용자수정 공용 모달 -->
+{% include "partials/user_modal.html" %}
+{% endblock %}
+
+{% block extra_script %}
+<script src="/static/js/user_modal.js"></script>
+<script src="/static/js/users.js"></script>
+<script>
+  document.addEventListener("user-modal:success", function () {
+    loadUsers(currentPage);
+  });
+</script>
+{% endblock %}

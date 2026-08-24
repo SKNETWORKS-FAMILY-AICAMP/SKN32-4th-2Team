@@ -1,0 +1,30 @@
+{
+  "approved_candidates": 100,
+  "train_count": 80,
+  "valid_count": 20,
+  "category_counts": {
+    "근태/근무형태": 14,
+    "급여/보수": 12,
+    "기타": 12,
+    "복리후생": 10,
+    "복무/징계": 14,
+    "인사/승진": 12,
+    "채용/임용": 12,
+    "휴가/휴직": 14
+  },
+  "case_type_counts": {
+    "grounded": 78,
+    "personal_data": 6,
+    "conflicting_documents": 6,
+    "no_context": 10
+  },
+  "train_intent_groups": 80,
+  "valid_intent_groups": 20,
+  "pii_findings": 0,
+  "holdout_similarity_threshold": 0.85,
+  "candidate_sha256": "4acd11cc518de7f3e279b87fdb60390638567b4c384de1d9cd8b848b35b53d9a",
+  "holdout_sha256": "93edb821f9df967c91834b824eb01df99c9a6e05600694022d1f54a436361bed",
+  "system_prompt_sha256": "26cf88d6910833a5233953eb76b097a9e700dd53ace5ee076e76323242d319df",
+  "train_sha256": "305df834ef2adfc14c76c5c02faecbc76ee7f1289eaf4ac2b753e0dbdec0279b",
+  "valid_sha256": "32983e0ee97ff068b47d3ea294fc4a4d470e40094b9d96bbb03d2c73b5051097"
+}

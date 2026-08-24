@@ -1,0 +1,40 @@
+target:
+  train: 80
+  valid: 20
+  total: 100
+
+rules:
+  - 기존 bench/questions.yaml 34문항과 그 패러프레이즈는 작성하지 않는다.
+  - 같은 intent_group은 train 또는 valid 한쪽에만 둔다.
+  - grounded 샘플은 PDF 원문 파일명, 페이지, 근거 문장을 반드시 기록한다.
+  - 답변은 한국어 존댓말 3~6문장으로 작성한다.
+  - 개인 잔액·급여·인사기록을 임의의 숫자로 답하지 않는다.
+  - 주민등록번호, 사번, 전화번호, 이메일 등 실제 개인정보를 넣지 않는다.
+  - 검수자 이름 또는 이니셜을 reviewer에 기록한 뒤 approved를 true로 바꾼다.
+  - 홀드아웃과 문자 유사도 0.60~0.85이면 의미 중복 여부와 검수자를 별도 기록한다.
+
+# 아래는 목표 비율이다. 각 주제 안에서도 서로 다른 intent_group을 사용한다.
+category_quota:
+  휴가/휴직: 14
+  근태/근무형태: 14
+  급여/보수: 12
+  채용/임용: 12
+  인사/승진: 12
+  복리후생: 10
+  복무/징계: 14
+  기타: 12
+
+case_type_quota:
+  grounded: 78
+  no_context: 10
+  personal_data: 6
+  conflicting_documents: 6
+
+avoid_holdout_intent_groups:
+  - annual-leave
+  - parental-leave
+  - flexible-work
+  - overtime-pay
+  - contract-hire
+  - promotion-exam
+  - dui

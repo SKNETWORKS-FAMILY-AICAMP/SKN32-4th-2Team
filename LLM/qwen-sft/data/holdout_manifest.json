@@ -1,0 +1,12 @@
+{
+  "purpose": "evaluation_only_do_not_train",
+  "question_count": 34,
+  "top_k": 5,
+  "questions_source": "C:\\Dev_Tools\\other_team_project\\SKN32-3rd-2Team\\LLM\\bench\\questions.yaml",
+  "pdf_source": "C:\\Dev_Tools\\other_team_project\\SKN32-3rd-2Team\\RAG\\res\\pdf",
+  "questions_sha256": "be591544beac59cc17f54216eba70198dfb8e69149e0ae8602647c75fb8ff919",
+  "prompts_py_sha256": "74131bbbe57335b6df8e59718980615212126c083ff3a8c3335aa7a02ed35ae8",
+  "holdout_sha256": "93edb821f9df967c91834b824eb01df99c9a6e05600694022d1f54a436361bed",
+  "system_prompt_sha256": "26cf88d6910833a5233953eb76b097a9e700dd53ace5ee076e76323242d319df",
+  "topic_system_prompt_sha256": "88f534049a7b0cc60d66100e246df743556ccf59147e7a2f4fa7a6e46a56fe6b"
+}

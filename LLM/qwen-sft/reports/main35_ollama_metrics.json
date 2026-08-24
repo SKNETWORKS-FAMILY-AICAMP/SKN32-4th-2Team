@@ -1,0 +1,122 @@
+{
+  "generated_at": "2026-08-03T19:15:00+09:00",
+  "comparison_scope": "Same-device, same-service-path, ideal labelled-corpus retrieval",
+  "conditions": {
+    "questions": 35,
+    "expected_source_questions": 33,
+    "retrieval": "corpus",
+    "top_k": 5,
+    "variant": "baseline",
+    "ollama_version": "0.32.5",
+    "gpu": "NVIDIA GeForce RTX 4070 Laptop GPU, 8188 MiB, driver 610.62",
+    "questions_sha256": "9CCFF6C9EBFD6FB793DFE22F16E694CA576EDD2CD70BDC7AF73572B18ABA2D1F",
+    "prompts_sha256": "51257CDDA375D4EA99950E3A559569C8F1A6E9D94D9C9EACAB24FB9BFA31A643",
+    "base_run_repo_commit": "d0173d07a1083e1c15a94ac5e4a4878564feeee1",
+    "sft_run_repo_commit": "df8c80c55e1d8a3eaba171a448b9f1729d128ef5",
+    "commit_difference": "LLM/README.md only; benchmark-critical files unchanged"
+  },
+  "runs": [
+    {
+      "label": "current_base",
+      "result_file": "20260803-185419_main35-base-qwen_qwen.jsonl",
+      "model": "qwen2.5:7b",
+      "model_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+      "quantization": "Q4_K_M",
+      "rows": 35,
+      "topic_correct": 33,
+      "topic_accuracy_pct": 94.3,
+      "group_consistency": "7/7",
+      "language_leaks_han_ratio": 6,
+      "japanese_script_leaks": 0,
+      "english_sentence_leaks": 0,
+      "errors": 0,
+      "strict_factual_correct": 15,
+      "strict_factual_accuracy_pct": 42.9,
+      "latency_seconds": {
+        "p50": 9.713,
+        "p95": 14.29,
+        "mean": 9.504,
+        "max": 20.68,
+        "sum": 332.645
+      },
+      "median_answer_chars": 331,
+      "source_recall": "33/33",
+      "bad_citation_rows": 0,
+      "topic_wrong": [
+        "work-duty-general -> 복무/징계",
+        "hire-special-position -> 인사/승진"
+      ]
+    },
+    {
+      "label": "hr_sft_v1",
+      "result_file": "20260803-190112_main35-sft-qwen_qwen.jsonl",
+      "model": "qwen2.5-hr-sft:bench",
+      "model_digest": "7f36ab5d645f73971096ed45d11ba7903c5b0fd6ce98385f3dab01f6d525ce8b",
+      "quantization": "Q4_K_M base plus F16 GGUF LoRA adapter",
+      "rows": 35,
+      "topic_correct": 35,
+      "topic_accuracy_pct": 100.0,
+      "group_consistency": "7/7",
+      "language_leaks_han_ratio": 0,
+      "japanese_script_leaks": 0,
+      "english_sentence_leaks": 0,
+      "errors": 0,
+      "strict_factual_correct": 17,
+      "strict_factual_accuracy_pct": 48.6,
+      "latency_seconds": {
+        "p50": 12.518,
+        "p95": 17.487,
+        "mean": 11.824,
+        "max": 18.414,
+        "sum": 413.835
+      },
+      "median_answer_chars": 369,
+      "source_recall": "33/33",
+      "bad_citation_rows": 0,
+      "topic_wrong": []
+    }
+  ],
+  "sft_delta_vs_base": {
+    "topic_correct_questions": 2,
+    "topic_accuracy_percentage_points": 5.7,
+    "language_leaks": -6,
+    "strict_factual_correct_questions": 2,
+    "strict_factual_accuracy_percentage_points": 5.7,
+    "strict_factual_improved_questions": 6,
+    "strict_factual_regressed_questions": 4,
+    "p50_seconds": 2.805,
+    "p50_pct": 28.9,
+    "p95_seconds": 3.197,
+    "p95_pct": 22.4,
+    "mean_seconds": 2.32,
+    "mean_pct": 24.4,
+    "median_answer_chars": 38,
+    "median_answer_chars_pct": 11.5
+  },
+  "manual_fact_review": {
+    "method": "Manual context comparison; any explicit factual error or material omission fails the strict item.",
+    "both_pass": 11,
+    "base_fail_to_sft_pass": [
+      "leave-annual-c",
+      "hire-contract-b",
+      "hire-special-position",
+      "promo-exam-a",
+      "promo-hr-rule",
+      "disc-dui-a"
+    ],
+    "base_pass_to_sft_fail": [
+      "leave-suspension",
+      "work-flexible-b",
+      "hire-contract-a",
+      "hire-professor"
+    ],
+    "both_fail": 14,
+    "promotion_gate": "REJECT"
+  },
+  "interpretation_limits": [
+    "The historical provider table uses 34 questions; these two new runs use the current 35-question suite.",
+    "Corpus retrieval is an upper-bound provider comparison and is not the live RAG end-to-end path.",
+    "Each condition was run once, so latency variance and stochastic quality are not estimated.",
+    "Source recall is 33/33 by construction under labelled-corpus retrieval and must not be reported as live RAG recall."
+  ]
+}

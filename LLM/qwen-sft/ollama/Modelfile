@@ -1,0 +1,2 @@
+FROM qwen2.5:7b
+ADAPTER ./qwen2.5-7b-hr-korean-lora-f16.gguf

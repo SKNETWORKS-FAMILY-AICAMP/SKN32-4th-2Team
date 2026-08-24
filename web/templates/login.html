@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>로그인 · Smart HR</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/css/style.css">
+</head>
+<body>
+
+<div class="login-page">
+  <div class="login-wrap">
+    <div class="brand">
+      <img src="/static/img/logo.png" alt="Smart HR" class="brand-logo-login">
+    </div>
+
+    <div class="login-card">
+      <span class="corner-bl"></span>
+      <span class="corner-br"></span>
+      <h1>로그인</h1>
+
+      {% if error %}
+      <div class="form-error">{{ error }}</div>
+      {% endif %}
+
+      <form method="post" action="/auth/login">
+        <div class="field">
+          <label for="login-user-id">아이디</label>
+          <input id="login-user-id" name="user_id" type="text" autocomplete="username" required>
+        </div>
+        <div class="field">
+          <label for="login-passwd">비밀번호</label>
+          <input id="login-passwd" name="passwd" type="password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" class="btn-primary">로그인</button>
+      </form>
+    </div>
+
+    <div class="login-footer">
+      계정이 없으신가요?
+      <button type="button" onclick="openUserModal('signup')">회원가입</button>
+    </div>
+  </div>
+</div>
+
+{% include "partials/user_modal.html" %}
+
+<script src="/static/js/user_modal.js"></script>
+<script>
+  document.addEventListener("user-modal:success", function (e) {
+    if (e.detail.mode !== "signup") return;
+    document.getElementById("login-user-id").value = e.detail.userId;
+    document.getElementById("login-passwd").focus();
+  });
+
+  // 메뉴 이동 등 페이지 전체 이동 중에 세션이 만료된 상태로 여기로 왔을 때만 알림을 띄운다.
+  // (원래 로그인한 적이 없어서 온 경우엔 안 뜸)
+  if (new URLSearchParams(window.location.search).get("expired") === "1") {
+    alert("세션이 만료되었습니다. 다시 로그인해주세요.");
+    // 새로고침해도 알림이 다시 뜨지 않도록 주소창의 ?expired=1을 지운다.
+    window.history.replaceState({}, "", "/login");
+  }
+</script>
+</body>
+</html>

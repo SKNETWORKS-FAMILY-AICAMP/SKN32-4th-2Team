@@ -1,0 +1,5 @@
+/venv/
+*/pdf/delete
+# */pdf/tmp
+__pycache__/
+/vector_store

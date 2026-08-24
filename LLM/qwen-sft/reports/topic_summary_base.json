@@ -1,0 +1,10 @@
+{
+  "variant": "base",
+  "questions": 34,
+  "correct": 32,
+  "accuracy": 0.9411764705882353,
+  "parse_failures": 1,
+  "canonical_run": true,
+  "precheck_gate_at_least_32_of_34": true,
+  "note": "이 검사는 Hugging Face 직접 생성 사전 점검입니다. 최종 채택은 Ollama JSON Schema enum 제약을 적용한 기존 팀 벤치로 다시 확인합니다."
+}

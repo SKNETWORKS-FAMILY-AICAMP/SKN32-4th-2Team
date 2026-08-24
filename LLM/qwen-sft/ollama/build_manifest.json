@@ -1,0 +1,32 @@
+{
+  "created_at": "2026-08-03T18:51:05+09:00",
+  "source": {
+    "hf_model": "Qwen/Qwen2.5-7B-Instruct",
+    "hf_revision": "a09a35458c702b33eeacc393d103063234e8bc28",
+    "base_config_sha256": "7463BB0EA78315365E6C6B74DE4E73BBCC8359DFB0C5A737584E077D42C0B03C",
+    "peft_adapter_sha256": "F9D3645E10A246E3D8F631DE0D7643DE5413F92FD647D19BE23DCEA9ACFA55E5"
+  },
+  "conversion": {
+    "tool": "ggml-org/llama.cpp convert_lora_to_gguf.py",
+    "tool_commit": "f2b52a87e82fa461191565a19d4ef9fd8b8fbd87",
+    "outtype": "f16",
+    "gguf_file": "qwen2.5-7b-hr-korean-lora-f16.gguf",
+    "gguf_size_bytes": 80767808,
+    "gguf_sha256": "AB129A51055768A79B9E1475533AA37AC112F673F538571B02C80416B44975D4"
+  },
+  "ollama": {
+    "version": "0.32.5",
+    "base_tag": "qwen2.5:7b",
+    "base_digest": "845dbda0ea48ed749caafd9e6037047aa19acfcfd82e704d7ca97d631a0b697e",
+    "derived_tag": "qwen2.5-hr-sft:bench",
+    "derived_digest": "7f36ab5d645f73971096ed45d11ba7903c5b0fd6ce98385f3dab01f6d525ce8b",
+    "family": "qwen2",
+    "parameter_size": "7.6B",
+    "base_quantization": "Q4_K_M",
+    "context_length": 32768
+  },
+  "notes": [
+    "Ollama does not directly import a Qwen Safetensors adapter, so the PEFT adapter was converted to a GGUF adapter first.",
+    "The adapter was trained with QLoRA NF4, while the operational Ollama base is Q4_K_M; service-path evaluation is therefore required before any promotion."
+  ]
+}

@@ -1,0 +1,43 @@
+# === 절대 커밋 금지: API 키 ===
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+env/
+
+# 계측/벤치마크 원본 로그 (집계된 보고서만 커밋)
+logs/
+bench/results/
+bench/.cache/
+*.jsonl
+
+# 로컬 전용 확인 도구 (git 에 올리지 않음)
+local/
+
+# IDE / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# === Qwen 파인튜닝 실험 (qwen-sft/) ===
+# 재생성 가능하거나 용량이 큰 산출물은 올리지 않는다.
+# 학습 스크립트·검수된 데이터·보고서만 커밋한다.
+qwen-sft/outputs/          # LoRA 어댑터 가중치 (170MB)
+qwen-sft/tools/            # llama.cpp 클론 (201MB)
+qwen-sft/venv_convert/     # 변환용 가상환경 (168MB)
+qwen-sft/ollama/*.gguf     # 변환된 GGUF (78MB)
+qwen-sft/data/corpus_cache.json
+qwen-sft/data/holdout.jsonl
+qwen-sft/data/train.jsonl
+qwen-sft/data/valid.jsonl
+qwen-sft/reports/*.csv
+qwen-sft/reports/predictions_*.jsonl
+qwen-sft/reports/topic_predictions_*.jsonl
+qwen-sft/reports/manual_review*.json

@@ -1,0 +1,177 @@
+{
+  "purpose": "approved_evidence_source_inventory",
+  "source_directory": "C:\\Dev_Tools\\other_team_project\\SKN32-3rd-2Team\\RAG\\res\\pdf",
+  "document_count": 28,
+  "total_pages": 380,
+  "total_bytes": 6856918,
+  "documents": [
+    {
+      "file": "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(법률).pdf",
+      "pages": 24,
+      "bytes": 197171,
+      "sha256": "bef0d99ed58f75b4799920e8a7daa264150efe2b96fc1e9e0d3e0041ae022027"
+    },
+    {
+      "file": "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행규칙).pdf",
+      "pages": 6,
+      "bytes": 123863,
+      "sha256": "d5b9cc7b202cf0bc56180a126bd73943dea78161b4c43e1e6a10fdc0c1950813"
+    },
+    {
+      "file": "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행령).pdf",
+      "pages": 11,
+      "bytes": 147069,
+      "sha256": "e695b8ad7e945fe712a3522cf3ecc9f8925e5c03b980319d72bc3a86adc4728e"
+    },
+    {
+      "file": "2.공공기관의 운영에 관한 법률(법률).pdf",
+      "pages": 23,
+      "bytes": 190150,
+      "sha256": "2e61f48f2de836df45fddd469fecd2d18d4b2fc3eaf05b592c31f42dfd0b7f22"
+    },
+    {
+      "file": "2.공공기관의 운영에 관한 법률(시행령).pdf",
+      "pages": 13,
+      "bytes": 158070,
+      "sha256": "84070ab313e1741764e6f4b53379aa11e3f45b4c2796a0bf3501c03cbe717137"
+    },
+    {
+      "file": "3.교육공무원법(법률).pdf",
+      "pages": 23,
+      "bytes": 198715,
+      "sha256": "185e5b67ca115a65ac2dc437ce0d2e17addf9c7da142b141acc6b1a4b45c5d55"
+    },
+    {
+      "file": "4.교육공무원임용령(시행령).pdf",
+      "pages": 23,
+      "bytes": 193956,
+      "sha256": "02ac5520575a9f60b98f9c480dac30481172ff3e52218886b4a25cf319e2db92"
+    },
+    {
+      "file": "5.근로기준법(법률).pdf",
+      "pages": 27,
+      "bytes": 232877,
+      "sha256": "6d18a09787a765208e550c41a3e24076c23688217c87101e203218f744932d47"
+    },
+    {
+      "file": "5.근로기준법(시행규칙).pdf",
+      "pages": 4,
+      "bytes": 113543,
+      "sha256": "167f0db9bc5a04179c27220c77251cae3a8ee2e5e451b9dd06191e2688c05e8d"
+    },
+    {
+      "file": "5.근로기준법(시행령).pdf",
+      "pages": 15,
+      "bytes": 169900,
+      "sha256": "e8edf56b9cb6b1f8e55867ce91d58bff791c0629e495a4bb7d108e3958075ed1"
+    },
+    {
+      "file": "6.기간제 및 단시간근로자 보호 등에 관한 법률(법률).pdf",
+      "pages": 5,
+      "bytes": 115493,
+      "sha256": "88c884f81bd9877798d0483de5c81d03572a0c244d387d0b7e97acae6d9dec84"
+    },
+    {
+      "file": "6.기간제 및 단시간근로자 보호 등에 관한 법률(시행규칙).pdf",
+      "pages": 1,
+      "bytes": 67035,
+      "sha256": "d68dbce8feb020a4499a6d40ec17842b0dc1330a9549accede39724507c67a76"
+    },
+    {
+      "file": "6.기간제 및 단시간근로자 보호 등에 관한 법률(시행령).pdf",
+      "pages": 3,
+      "bytes": 96275,
+      "sha256": "6702f91c8e154e9fe6f239f68fe678dcb055648613a0016d41b0e93ea3c14d20"
+    },
+    {
+      "file": "계약직직원임용지침.pdf",
+      "pages": 11,
+      "bytes": 307588,
+      "sha256": "d99609f2b0affe123a9d2206dfdf2db09f2c4ce73f4b4103f78989539057cb20"
+    },
+    {
+      "file": "공무직 직원 인사 및 보수에 관한 규칙.pdf",
+      "pages": 11,
+      "bytes": 277724,
+      "sha256": "ffe920b523adb05a90ca17b8b523a2c36b90fb39ac18e9e4f6d6a6c28dff8017"
+    },
+    {
+      "file": "교직원 음주운전 비위행위 확인에 관한 지침.pdf",
+      "pages": 3,
+      "bytes": 195311,
+      "sha256": "9c67ac56603ce106322e8f94300aeedb5dbb7d94d68b9c23593daca9845322f9"
+    },
+    {
+      "file": "교직원특수병치료비지원지침.pdf",
+      "pages": 2,
+      "bytes": 134537,
+      "sha256": "ac05aada4d831a7db32e86085852e082fe938e814d85a2f6608c9c98c779011f"
+    },
+    {
+      "file": "국외여행에관한규칙.pdf",
+      "pages": 12,
+      "bytes": 292186,
+      "sha256": "bd61cb2fbfa03a9b8e5cdada011d17f84b3b096e95930cc54df5b7338b3e3678"
+    },
+    {
+      "file": "별정직직원인사관리지침.pdf",
+      "pages": 3,
+      "bytes": 163312,
+      "sha256": "ad74c1885989f731a65f77f6765af61997adcc22e1532c910110ecdda58df664"
+    },
+    {
+      "file": "복무규정.pdf",
+      "pages": 14,
+      "bytes": 372537,
+      "sha256": "cca1cea04270bc9df720daf44d7972d33e62164f6d211e03372c62107fbdb957"
+    },
+    {
+      "file": "시간선택제 직원에 관한 규칙.pdf",
+      "pages": 3,
+      "bytes": 224565,
+      "sha256": "08dd46dbb82296bfbd8c804360b1080764749f9b9837d03bf02c9167e60c11ab"
+    },
+    {
+      "file": "유연근무제 운영지침 .pdf",
+      "pages": 12,
+      "bytes": 343002,
+      "sha256": "4fc5442bb06273ce11f0a10de3fd83b8776b86a8d915bc3fd7867ed5371962bf"
+    },
+    {
+      "file": "직원승진시험시행 지침.pdf",
+      "pages": 2,
+      "bytes": 164586,
+      "sha256": "7cbad860e67d622ca121c4460c84e92de0110e13166ba9bbe7f30670dd12d811"
+    },
+    {
+      "file": "직원인사규정 시행규칙.pdf",
+      "pages": 55,
+      "bytes": 830861,
+      "sha256": "79ebb0e7b97b8f670064f9c3fc047df07e04048d675704a43c95dec33047cffb"
+    },
+    {
+      "file": "직원인사규정.pdf",
+      "pages": 10,
+      "bytes": 419600,
+      "sha256": "fb1366f303972202e8e38e2696fc3fde4eaa715201a05fe68097d5cbcab4451a"
+    },
+    {
+      "file": "한국기술교육대학교 교직원행동강령.pdf",
+      "pages": 34,
+      "bytes": 595265,
+      "sha256": "9e730d27aa947a79dc7a4ef19b6bd13d466107f5f8b73225e8ee0650423da413"
+    },
+    {
+      "file": "한국기술교육대학교 직무범죄고발지침.pdf",
+      "pages": 4,
+      "bytes": 121852,
+      "sha256": "eb9663279642ee28a663a1883ecdf380248be184f9868a6834c824f054b4a381"
+    },
+    {
+      "file": "휴직자 복무관리 지침.pdf",
+      "pages": 26,
+      "bytes": 409875,
+      "sha256": "f9fd7d238d3fbd1aa35b80247a3606a068d44d395b181ba2242899ab61c78ed7"
+    }
+  ]
+}

@@ -1,0 +1,192 @@
+{% extends "layout/app_base.html" %}
+
+{% block title %}문서 관리{% endblock %}
+
+{% block content_class %}app-content-flush{% endblock %}
+
+{% block content %}
+<div class="doc-container">
+    <!-- 좌측 파일 탐색기 -->
+    <div class="file-explorer" id="fileExplorer">
+        <div class="explorer-content">
+            <div class="explorer-toolbar">
+                <div class="view-toggle-group" role="group" aria-label="파일 보기 방식">
+                    <button type="button" class="view-toggle-btn active" data-view="list">☰ 리스트</button>
+                    <button type="button" class="view-toggle-btn" data-view="grid">▦ 큐브</button>
+                </div>
+            </div>
+
+            <div class="section-header common-laws-header accordion-header" data-section="common">
+                <button type="button" class="section-toggle" data-section="common" aria-expanded="true">
+                    <span class="section-title">🇰🇷 대한민국 공통 법률</span>
+                    <span class="section-count" id="commonCount">0</span>
+                </button>
+            </div>
+            <div class="file-list accordion-content" id="commonFileList" data-section="common">
+                <!-- 공통 법률 파일들이 여기에 동적으로 추가됨 -->
+            </div>
+
+            <!-- 일반 문서 섹션 -->
+            <div class="section-header accordion-header" data-section="doc">
+                <button type="button" class="section-toggle" data-section="doc" aria-expanded="true">
+                    <span class="section-title">📄 일반 문서</span>
+                    <span class="section-count" id="docCount">0</span>
+                </button>
+            </div>
+            <div class="file-list accordion-content" id="docFileList" data-section="doc">
+                <!-- doc_* 파일들이 여기에 동적으로 추가됨 -->
+            </div>
+        </div>
+
+        <!-- 하단 업로드 영역 -->
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-area-header">
+                <button type="button" class="upload-toggle" id="uploadToggle" aria-expanded="true" aria-label="업로드 영역 접기">
+                    <span class="upload-toggle-icon">▾</span>
+                </button>
+            </div>
+            <div class="upload-content" id="uploadContent">
+                <div class="upload-icon">📄</div>
+                <p class="upload-text">문서 업로드</p>
+                <p class="upload-subtext">PDF 파일을 드래그 앤 드롭하세요</p>
+                <p class="upload-note">* 단일 파일만 업로드 가능</p>
+            </div>
+            <input type="file" id="fileInput" accept=".pdf" style="display: none;">
+        </div>
+    </div>
+
+    <!-- 리사이저 핸들 -->
+    <div class="resizer" id="resizer"></div>
+
+    <!-- 우측 파일 목록 테이블 패널 -->
+    <div class="file-detail-panel" id="fileDetailPanel">
+        <div class="panel-header">
+            <div class="panel-header-title-group">
+                <h2 class="panel-title" id="panelTitle">문서 목록</h2>
+                <span class="panel-subtitle" id="panelSubtitle">총 0개 문서</span>
+            </div>
+            <div class="panel-header-actions">
+                <button type="button" class="view-toggle-btn" id="backToListBtn" style="display: none;">← 목록으로</button>
+                <button type="button" class="load-all-btn" id="loadAllBtn">전체 적재</button>
+            </div>
+        </div>
+        <div class="bulk-loading-status" id="bulkLoadingStatus" aria-live="polite"></div>
+
+        <!-- 파일 목록 뷰 -->
+        <div class="panel-content" id="panelContent">
+            <!-- 대한민국 공통 법률 테이블 -->
+            <div class="table-section" id="commonTableSection">
+                <div class="table-section-header common-laws-header">
+                    <h3 class="table-section-title">🇰🇷 대한민국 공통 법률</h3>
+                </div>
+                <div class="file-table-wrapper">
+                    <table class="file-table" id="commonFileTable">
+                        <thead>
+                            <tr>
+                                <th class="col-icon"></th>
+                                <th class="col-name">파일명</th>
+                                <th class="col-size">크기</th>
+                                <th class="col-date">업로드일</th>
+                                <th class="col-status">벡터적재</th>
+                                <th class="col-date">적재일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="commonTableBody">
+                        </tbody>
+                    </table>
+                    <div class="empty-message" id="commonEmptyMsg">등록된 공통 법률 문서가 없습니다.</div>
+                </div>
+            </div>
+
+            <!-- 일반 문서 테이블 -->
+            <div class="table-section" id="docTableSection">
+                <div class="table-section-header">
+                    <h3 class="table-section-title">📄 일반 문서</h3>
+                </div>
+                <div class="file-table-wrapper">
+                    <table class="file-table" id="docFileTable">
+                        <thead>
+                            <tr>
+                                <th class="col-icon"></th>
+                                <th class="col-name">파일명</th>
+                                <th class="col-size">크기</th>
+                                <th class="col-date">업로드일</th>
+                                <th class="col-status">벡터적재</th>
+                                <th class="col-date">적재일</th>
+                            </tr>
+                        </thead>
+                        <tbody id="docTableBody">
+                        </tbody>
+                    </table>
+                    <div class="empty-message" id="docEmptyMsg">등록된 일반 문서가 없습니다.</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PDF 뷰어 -->
+        <div class="pdf-viewer-container" id="pdfViewerContainer" style="display: none;">
+            <div class="pdf-viewer-toolbar">
+                <button type="button" class="pdf-nav-btn" id="prevPageBtn">◀ 이전</button>
+                <span class="pdf-page-info" id="pageInfo">0 / 0</span>
+                <button type="button" class="pdf-nav-btn" id="nextPageBtn">다음 ▶</button>
+                <button type="button" class="pdf-zoom-btn" id="zoomOutBtn">-</button>
+                <span class="pdf-zoom-info" id="zoomInfo">100%</span>
+                <button type="button" class="pdf-zoom-btn" id="zoomInBtn">+</button>
+            </div>
+            <div class="pdf-viewer-content" id="pdfViewerContent">
+                <canvas id="pdfCanvas"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="bulk-load-modal" id="bulkLoadModal" aria-hidden="true">
+    <div class="bulk-load-modal-card">
+        <div class="bulk-load-modal-header">
+            <h3>전체 적재 진행</h3>
+            <button type="button" class="bulk-load-modal-close" id="bulkLoadModalClose">×</button>
+        </div>
+        <p class="bulk-load-modal-description">문서 적재는 시간이 걸릴 수 있습니다. 진행 중에는 다른 적재를 시작할 수 없으며, 이미 적재된 문서는 아래 방식으로 처리됩니다.</p>
+        <div class="bulk-load-mode-group">
+            <label class="bulk-load-mode-option">
+                <input type="radio" name="bulkLoadMode" value="skip" checked>
+                <span>건너뛰기</span>
+            </label>
+            <label class="bulk-load-mode-option">
+                <input type="radio" name="bulkLoadMode" value="overwrite">
+                <span>다시 적재</span>
+            </label>
+        </div>
+        <div class="bulk-load-progress-wrap">
+            <div class="bulk-load-progress-bar">
+                <div class="bulk-load-progress-fill" id="bulkLoadProgressFill"></div>
+            </div>
+            <div class="bulk-load-progress-meta">
+                <span id="bulkLoadProgressText">대기 중</span>
+                <span id="bulkLoadEstimateText">예상 시간: 약 1~3분</span>
+            </div>
+        </div>
+        <ul class="bulk-load-step-list" id="bulkLoadStepList">
+            <li>대기 중</li>
+        </ul>
+        <div class="bulk-load-actions">
+            <button type="button" class="secondary-btn" id="bulkLoadCancelBtn">취소</button>
+            <button type="button" class="primary-btn" id="bulkLoadStartBtn">적재 시작</button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_head %}
+<link rel="stylesheet" href="/static/css/rag.css">
+{% endblock %}
+
+{% block extra_script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+    // .env의 DOC_API_BASE_URL 값을 서버가 렌더링해서 심어준다. rag.js가 이 값을 최우선으로 사용한다.
+    window.DOC_API_BASE_URL = "{{ doc_api_base_url }}";
+</script>
+<script src="/static/js/rag.js"></script>
+{% endblock %}

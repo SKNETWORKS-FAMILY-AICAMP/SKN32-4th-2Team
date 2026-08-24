@@ -1,0 +1,23 @@
+# Python 캐시 파일 제외
+__pycache__/
+*.py[cod]
+*$py.class
+
+# 가상환경 제외
+.venv/
+venv/
+env/
+
+# 환경 변수 파일 제외
+.env
+
+# IDE 설정 제외
+.idea/
+.vscode/
+
+# OS 임시 파일 제외
+.DS_Store
+Thumbs.db
+
+# 로그 파일 제외
+*.log

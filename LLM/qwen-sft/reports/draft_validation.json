@@ -1,0 +1,27 @@
+{
+  "status": "structural_and_evidence_checks_passed_ai_drafts_not_human_approved",
+  "rows": 100,
+  "splits": {
+    "train": 80,
+    "valid": 20
+  },
+  "categories": {
+    "근태/근무형태": 14,
+    "급여/보수": 12,
+    "기타": 12,
+    "복리후생": 10,
+    "복무/징계": 14,
+    "인사/승진": 12,
+    "채용/임용": 12,
+    "휴가/휴직": 14
+  },
+  "case_types": {
+    "grounded": 78,
+    "personal_data": 6,
+    "conflicting_documents": 6,
+    "no_context": 10
+  },
+  "intent_groups": 100,
+  "verified_pdf_pages": 37,
+  "human_approval_required": true
+}

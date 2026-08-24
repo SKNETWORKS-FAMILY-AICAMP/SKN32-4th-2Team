@@ -1,0 +1,15 @@
+<header class="app-header">
+  <div class="brand">
+    <img src="/static/img/logo.png" alt="Smart HR" class="brand-logo">
+  </div>
+
+  <div class="header-user">
+    <div class="avatar">{{ user.name[:1] }}</div>
+    <div>
+      <div class="user-name">{{ user.name }}</div>
+    </div>
+    <form method="post" action="/auth/logout">
+      <button type="submit" class="logout-btn">로그아웃</button>
+    </form>
+  </div>
+</header>

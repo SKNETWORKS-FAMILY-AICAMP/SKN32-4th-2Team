@@ -1,0 +1,13 @@
+# RunPod PyTorch 템플릿에 포함된 CUDA 호환 torch를 그대로 사용합니다.
+# torch를 여기서 다시 설치하면 CUDA 조합이 깨질 수 있습니다.
+transformers>=4.48,<5.0
+datasets>=3.2,<5.0
+peft>=0.14,<1.0
+accelerate>=1.2,<2.0
+bitsandbytes>=0.45,<1.0
+numpy>=1.26,<3.0
+python-dotenv>=1.0,<2.0
+PyYAML>=6.0,<7.0
+pypdf>=6.0,<7.0
+tensorboard>=2.18,<3.0
+pytest>=8.3,<9.0
