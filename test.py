@@ -8,5 +8,5 @@ class Handler(BaseHTTPRequestHandler):
 
 server = HTTPServer(("0.0.0.0", 8000), Handler)
 
-print("Server started on port 8000")
+print("Hello from deployment-test v2!")
 server.serve_forever()
