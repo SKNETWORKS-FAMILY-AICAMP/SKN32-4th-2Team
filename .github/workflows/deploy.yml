@@ -3,7 +3,7 @@ name: Deploy Test
 on:
   push:
     branches:
-      - main
+      - deployment-test
 
 jobs:
   deploy:
