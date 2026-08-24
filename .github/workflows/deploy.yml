@@ -21,5 +21,5 @@ jobs:
             hostname
             docker --version
 
-            cd ~/deployment-test
+            cd ~/SKN32-4th-2Team
             git pull origin deployment-test
