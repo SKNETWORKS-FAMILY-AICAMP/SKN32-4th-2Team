@@ -38,5 +38,5 @@ jobs:
             echo "Run new container"
             docker run -d \
               --name deployment-test \
-              -p 8000:8000 \
+              -p 80:8000 \
               deployment-test
