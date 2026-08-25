@@ -8,6 +8,17 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
+function getCookie(name) {
+  const cookies = document.cookie ? document.cookie.split(";") : [];
+  for (const cookie of cookies) {
+    const trimmed = cookie.trim();
+    if (trimmed.startsWith(`${name}=`)) {
+      return decodeURIComponent(trimmed.slice(name.length + 1));
+    }
+  }
+  return null;
+}
+
 async function loadChatroomList() {
   const container = document.getElementById("chatroom-list");
   if (!container) return;
@@ -39,8 +50,24 @@ document.addEventListener("click", async function (e) {
   if (!confirm("이 대화를 삭제할까요?")) return;
 
   const chatroomId = delBtn.dataset.chatroomId;
-  const res = await fetch(`/chat/api/rooms/${chatroomId}/delete`, { method: "DELETE" });
-  if (!res.ok) return;
+
+  try {
+    const res = await fetch(`/chat/api/rooms/${encodeURIComponent(chatroomId)}/delete`, {
+      method: "DELETE",
+      headers: { "X-CSRFToken": getCookie("csrftoken") },
+      credentials: "same-origin",
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({}));
+      alert(data.detail || "대화 삭제에 실패했습니다. 잠시 후 다시 시도해주세요.");
+      return;
+    }
+  } catch (error) {
+    console.error("Chatroom deletion failed:", error);
+    alert("대화 삭제에 실패했습니다. 네트워크 상태를 확인해주세요.");
+    return;
+  }
 
   if (window.location.pathname === `/chat/${chatroomId}`) {
     window.location.href = "/chat";

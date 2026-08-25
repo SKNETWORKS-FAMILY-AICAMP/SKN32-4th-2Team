@@ -213,10 +213,14 @@
       formData.set("is_disabled", isDisabledInput.checked ? "true" : "false");
     }
 
+    // Django는 PATCH 요청의 multipart FormData를 request.POST에 넣지 않는다.
+    // 수정 요청만 URL 인코딩으로 보내고 서버에서 QueryDict로 파싱한다.
+    const body = mode === "edit" ? new URLSearchParams(formData) : formData;
+
     try {
       const res = await fetch(form.dataset.action, { 
         method: form.dataset.method, 
-        body: formData,
+        body: body,
         headers: {
           'X-CSRFToken': getCookie('csrftoken')
         }
