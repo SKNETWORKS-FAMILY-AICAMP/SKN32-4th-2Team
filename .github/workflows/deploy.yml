@@ -20,23 +20,3 @@ jobs:
             whoami
             hostname
             docker --version
-
-            cd ~/SKN32-4th-2Team
-
-            echo "Pull latest code"
-            git pull origin deployment-test
-
-            echo "Build Docker image"
-            docker build -t deployment-test .
-          
-            echo "Stop old container"
-            docker stop deployment-test || true
-          
-            echo "Remove old container"
-            docker rm deployment-test || true
-          
-            echo "Run new container"
-            docker run -d \
-              --name deployment-test \
-              -p 80:8000 \
-              deployment-test
