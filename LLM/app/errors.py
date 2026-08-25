@@ -18,7 +18,7 @@ class LLMServiceError(Exception):
 
 
 class ProviderTimeout(LLMServiceError):
-    """스토리보드 13p: '5초 -> 일시적인 오류입니다 잠시후 다시 시도해주세요.'"""
+    """15초 안에 응답하지 못하면 재시도 가능한 안내를 반환한다."""
 
     error_code = "LLM_TIMEOUT"
     status_code = 504
@@ -39,7 +39,7 @@ class ProviderRateLimited(LLMServiceError):
     (Gemini 무료 티어는 분당 20회)
 
     서비스 자체는 재시도하지 않는다. 벤더가 알려주는 대기 시간이 보통 30초 이상이라
-    요청 타임아웃(기본 5초) 안에 처리할 수 없다. 바로 429 를 돌려주고 판단은
+    요청 타임아웃(기본 15초) 안에 처리할 수 없다. 바로 429 를 돌려주고 판단은
     호출자에게 맡긴다.
     """
 

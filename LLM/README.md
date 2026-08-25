@@ -36,6 +36,7 @@ Copy-Item .env.example .env
 | `LLM_SERVICE_PORT` | `8002` |
 | `LLM_MODE` | 실제 API는 `live`, 화면 흐름만 확인할 때는 `mock` |
 | `DEFAULT_PROVIDER` | `openai` 또는 `gemini` |
+| `LLM_TIMEOUT_SEC` | 답변·주제·채팅방 이름 프로바이더 호출 제한 `15초` |
 | `OPENAI_API_KEY` / `GEMINI_API_KEY` | 실제 프로바이더 키 |
 | `RAG_MODE` | RAG를 쓸 때 `live` |
 | `RAG_BASE_URL` | `http://127.0.0.1:8001` |

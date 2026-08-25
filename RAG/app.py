@@ -17,6 +17,7 @@ from rag_pipeline import (
     build_vector_store_from_file,
     get_embedding_model,
     get_reranker_model,
+    get_runtime_device,
     search_across_vector_stores,
     warm_vector_store_cache,
     select_documents_for_bulk_load,
@@ -49,6 +50,13 @@ async def lifespan(_: FastAPI):
 
     logger.info("RAG 모델 워밍업을 시작합니다.")
     try:
+        runtime_device = get_runtime_device()
+        logger.info(
+            "RAG 런타임 설정: backend=faiss, device=%s, candidates=%s, top_k=%s",
+            runtime_device,
+            Config.SEARCH_INITIAL_CANDIDATES,
+            Config.SEARCH_TOP_K,
+        )
         active_embedding_model, _ = get_models()
         vector_root = os.path.join(Config.BASE_DIR, "vector_store")
         if Config.WARM_VECTOR_STORES:
@@ -173,6 +181,10 @@ async def health():
     return {
         "status": "ok" if rag_ready else "warming",
         "models_ready": embedding_model is not None and reranker_model is not None,
+        "backend": "faiss",
+        "device": get_runtime_device(),
+        "search_initial_candidates": Config.SEARCH_INITIAL_CANDIDATES,
+        "search_top_k": Config.SEARCH_TOP_K,
         "vector_store_exists": os.path.isdir(os.path.join(Config.BASE_DIR, "vector_store")),
         "warmed_vector_stores": warmed_vector_stores,
         "vector_store_warmup_failures": vector_store_warmup_failures,

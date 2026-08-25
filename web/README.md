@@ -36,7 +36,7 @@ web/
 | `SESSION_SECRET_KEY` | Django 세션 서명 키 |
 | `SESSION_MAX_AGE_SECONDS` | 로그인 세션 유효 시간(기본 3시간) |
 | `CHAT_API_BASE_URL` | LLM 서비스 주소, 기본 통합값 `http://127.0.0.1:8002` |
-| `CHAT_API_TIMEOUT_SECONDS` | LLM 응답 대기 시간(초). RAG CPU 검색과 답변 생성을 고려한 팀 기본값은 `60` |
+| `CHAT_API_TIMEOUT_SECONDS` | LLM 응답 대기 시간(초). RAG 45초 + LLM 15초와 통신 여유를 고려한 기본값은 `70` |
 | `DOC_API_BASE_URL` | RAG 문서 API 주소, 기본 통합값 `http://127.0.0.1:8001` |
 
 팀 통합 환경에서는 MySQL을 사용합니다. `DATABASE_URL`이 비어 있으면 Django 설정은 로컬 SQLite로 폴백할 수 있지만, RAG와 함께 쓰는 표준 환경에서는 사용하지 않습니다.

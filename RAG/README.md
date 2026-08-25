@@ -98,15 +98,15 @@ rag_pipeline.py의 청킹·조문 머리·임베딩 모델이 바뀌어도 기�
 
 ## CPU/GPU 성능 테스트
 
-RAG_DEVICE를 지정하지 않으면 PyTorch CUDA 가능 여부에 따라 cuda 또는 cpu를 자동 선택합니다.
+기본 `RAG_DEVICE=auto`는 PyTorch CUDA 가능 여부에 따라 cuda 또는 cpu를 자동 선택합니다.
 
 | 값 | 동작 |
 | --- | --- |
-| 비움 | CUDA 가능 시 cuda, 아니면 cpu |
+| `auto` 또는 비움 | CUDA 가능 시 cuda, 아니면 cpu |
 | cpu | CPU 강제 |
 | cuda | CUDA 강제; CUDA PyTorch가 없으면 오류로 설정 문제를 드러냄 |
 
-로그에 embedding model device=...와 reranker device=...가 표시되는지 확인합니다. GPU가 장착되어 있어도 CPU 전용 PyTorch가 설치되어 있으면 GPU는 사용되지 않습니다.
+로그와 `/health`의 `backend=faiss`, `device`, `search_initial_candidates=20`을 확인합니다. GPU가 장착되어 있어도 CPU 전용 PyTorch가 설치되어 있으면 GPU는 사용되지 않습니다.
 
 성능 비교는 같은 문서 인덱스와 같은 질문 세트에서 CPU와 GPU를 각각 콜드 1회·웜 캐시 여러 회 측정해 검색 시간과 전체 LLM 응답 시간을 분리해 기록합니다.
 
