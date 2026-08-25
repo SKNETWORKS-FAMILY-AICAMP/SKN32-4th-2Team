@@ -15,6 +15,17 @@ LLM API 비용과 응답 변동을 배제하고 검색 지연과 정답 문서 �
 - `/health`가 `status=ok`, `models_ready=true`가 된 뒤 실행합니다.
 - 이 테스트는 순차 요청의 사용자 체감 지연을 측정합니다. 동시 부하 테스트가 아닙니다.
 
+GPU 실험에는 CUDA 지원 PyTorch가 같은 가상환경에 설치돼 있어야 합니다. 이 저장소의
+2026-08-26 측정 환경은 `torch 2.13.0+cu130`이었습니다. 다른 PC에서는 PyTorch의
+공식 설치 선택기에서 드라이버에 맞는 CUDA wheel을 고른 뒤 실제 연산까지 확인합니다.
+
+```powershell
+RAG\.venv\Scripts\python.exe -m pip install --upgrade torch `
+  --index-url https://download.pytorch.org/whl/cu130
+
+RAG\.venv\Scripts\python.exe -c "import torch; print(torch.__version__, torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+```
+
 저장 없이 흐름만 빨리 확인하고 싶다면 결과 경로를 임시 위치로 지정합니다.
 
 ```powershell
@@ -50,8 +61,21 @@ RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
   --backend qdrant-tuned --device cuda --label controlled
 ```
 
-리랭커 후보 20개와 10개의 속도·품질 차이는 동일 명령에 다음 옵션만 바꿔
-측정합니다. `top_k=5`는 유지됩니다.
+최종 통제 비교는 각 명령을 clean Git 상태의 새 프로세스에서 실행하고 다음 8개 셀을
+모두 채웁니다.
+
+| 축 | 값 |
+|---|---|
+| backend | `faiss-cached`, `qdrant-tuned` |
+| device | `cpu`, `cuda` |
+| initial candidates | `20`, `10` |
+
+각 셀은 워밍업 1회 후 35문항을 3회씩, 총 105회 측정합니다. CPU와 CUDA 실행을
+동시에 돌리면 자원 경합으로 비교가 오염되므로 순차 실행합니다.
+
+초기 후보 20개와 10개의 속도·품질 차이는 동일 명령에 다음 옵션만 바꿔
+측정합니다. `top_k=5`는 유지됩니다. 이 값은 BM25 정규화 대상과 CrossEncoder
+리랭커 입력을 함께 바꾸므로 최종 순위가 달라질 수 있습니다.
 
 ```powershell
 RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
@@ -69,7 +93,28 @@ RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
 `qdrant-*`는 독립 Qdrant 서버나 HNSW 성능이 아니라 로컬 exact 모드입니다.
 GPU 비교는 CUDA 지원 PyTorch가 설치된 동일 `RAG/.venv`에서 실행해야 합니다.
 FAISS와 embedded Qdrant 검색은 CPU에서 수행되며 GPU는 질문 임베딩과 CrossEncoder
-리랭커를 가속합니다.
+리랭커를 가속합니다. 현재 운영 코드는 CPU 리랭커를 FP32, CUDA 리랭커를 FP16으로
+실행하므로 결과는 순수 장치만의 차이가 아닌 `CPU FP32 ↔ GPU FP16` 운영 구성
+비교입니다.
+
+8개 raw 결과를 검증하고 보고서용 JSON/CSV를 만드는 명령은 다음과 같습니다.
+
+```powershell
+RAG\.venv\Scripts\python.exe RAG\bench\summarize_backend_results.py `
+  --manifest RAG\bench\results\20260826_corpus-manifest.json `
+  --supplemental RAG\bench\results\20260826_controlled-qdrant-naive-gpu-c20.json `
+  RAG\bench\results\20260826_controlled-faiss-cached-cpu.json `
+  RAG\bench\results\20260826_controlled-faiss-cached-cpu-c10.json `
+  RAG\bench\results\20260826_controlled-faiss-cached-gpu-c20.json `
+  RAG\bench\results\20260826_controlled-faiss-cached-gpu-c10.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-cpu.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-cpu-c10.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-gpu-c20.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-gpu-c10.json
+```
+
+집계기는 8개 셀의 Git 커밋/clean 상태, 질문 해시, 반복 수, top-k, 코퍼스 수량과
+manifest 해시가 일치하지 않으면 결과 결합을 중단합니다.
 
 다른 서버를 측정할 때는 `--base-url`을 지정합니다. 결과는 기본적으로
 `RAG/bench/results/<시각>_<label>.json`에 저장됩니다.

@@ -1,85 +1,137 @@
-# RAG 성능 비교 보고서
+# RAG 성능 비교 최종 보고서
 
-상태: **초안 — 현재 통제 비교 실험 진행 전**
+상태: **완료**
 
-이 보고서는 세 시점의 기록을 한곳에서 추적하기 위한 문서다.
+측정일: **2026-08-26**
 
-1. 실험용 변경 전 upstream `f685d76`
-2. `D:/Dev_Tools/rag_test`에서 수행한 26문서 FAISS/Qdrant 실험
-3. 현재 `rag-runtime`의 93문서 FAISS 및 앞으로 수행할 CPU/GPU·Qdrant 비교
+주 결과 기준: `RAG/bench/results/20260826_controlled-summary.json`
 
-과거 실험과 현재 실험은 문서 수, 질문 세트, 실행 환경, 집계 방식이 다르다. 따라서
-두 시점의 절대 지연이나 품질 수치로 직접 증감률을 계산하지 않는다. 현재 백엔드와
-장치의 우열은 아래의 통제 비교가 모두 끝난 뒤에 판단한다.
+이 보고서는 실험 전 upstream, `D:/Dev_Tools/rag_test`의 과거 26 PDF 실험,
+현재 `rag-runtime`의 93 PDF 실험을 한 문서에 정리한다. 과거와 현재는 코퍼스,
+질문 수, 코드 및 측정 경로가 다르므로 서로의 절대 지연을 직접 비교하지 않는다.
+현재 의사결정은 동일 조건으로 다시 실행한 8개 통제 실험을 기준으로 한다.
 
-## 1. 목적
+## 1. 결론 및 권장 구성
 
-- 기존 수정 전 상태, FAISS 최적화, Qdrant 실험의 근거와 한계를 보존한다.
-- 실제 PDF가 93개로 증가한 현재 코퍼스에서 FAISS와 Qdrant를 다시 측정한다.
-- 같은 코드·인덱스·질문·검색 설정에서 CPU와 GPU의 차이를 측정한다.
-- CrossEncoder 후보 20개와 10개의 지연 감소와 검색 품질 손실을 비교한다.
-- 지연만 줄고 검색 품질이 나빠지는 변경을 피하기 위해 지연과 source hit를 함께 본다.
+현재 93 PDF·3,681 청크 규모의 권장 구성은 **문서별 캐시 FAISS + CUDA
+CrossEncoder FP16 + 초기 후보 20개 + 최종 top-k 5**다.
 
-## 2. 비교 방법
+- FAISS 후보 20의 통제 실험에서 CUDA p50은 **177.524ms**, CPU p50은
+  **5,222.854ms**로 CUDA 실행 모드가 **29.42배** 빨랐다.
+- 같은 후보 20에서 tuned Qdrant와 FAISS의 최종 top-5 순서는 35/35 문항에서
+  완전히 같았다. 그러나 벡터 검색 p50은 CUDA 기준 FAISS **3.392ms**, Qdrant
+  **17.450ms**였고, 전체 p50도 FAISS **177.524ms**, Qdrant **191.860ms**였다.
+  현재 규모에서는 Qdrant로 바꿀 성능상 근거가 확인되지 않았다.
+- 후보 10은 FAISS CUDA p50을 **97.318ms**까지 낮췄지만, 후보 20과 완전히 같은
+  순위는 7/35뿐이었다. top-5 원소 집합까지 같은 문항도 12/35였고 전체 top-5
+  원소 겹침은 80%였다. hit@5는 29/32에서 30/32로 늘었지만 hit@1은 17/32에서
+  16/32로, MRR은 0.683333에서 0.674479로 낮아졌다.
+- 따라서 후보 10은 **저지연 실험 옵션**으로 보존하되, 기대 문서 라벨을 도메인
+  검수하고 실제 답변 품질까지 확인하기 전에는 기본값 20을 유지한다.
 
-### 2.1 과거 26문서 실험
+CPU와 CUDA 수치는 장치만 바꾼 동일 정밀도 비교가 아니다. 현재 코드는 CPU
+CrossEncoder를 기본 FP32로, CUDA CrossEncoder를 FP16으로 적재한다. 따라서 이
+보고서의 CPU/GPU 배율은 **CPU FP32 대비 CUDA FP16의 실제 배포 모드 차이**이며,
+순수 하드웨어만의 가속 배율로 해석하지 않는다.
 
-과거 지연 스냅샷은 2026-08-19 기준 26문서, 1,414청크, CUDA 환경에서
-측정됐다. 고정 질의 12개를 한 번 워밍업한 뒤 질의마다 3회 호출했고, 각 질의의
-중앙값 12개를 대상으로 min/p50/max/mean을 집계했다. 확장 실험은 실제 신규
-문서가 아니라 기존 26개 스토어와 포인트를 반복해 26~832문서 규모를 모사했다.
+## 2. 비교 범위와 측정 방법
 
-답변 품질 표는 35문항, `gpt-4o-mini`, live RAG로 실행한 기존 수기 요약이다.
-완전한 raw 실행 결과가 남아 있지 않은 항목은 수기 판정으로 명시한다.
+### 2.1 비교한 세 시점
 
-### 2.2 현재 93문서 실험
+1. 실험용 변경 전 upstream `f685d76`: 커밋만 식별되며 측정 산출물은 없다.
+2. 과거 `rag_test`: 26 PDF, 1,414 청크, 2026-08-19 CUDA 실험이다.
+3. 현재 `rag-runtime`: 실제 93 PDF, 3,681 청크를 사용한 2026-08-26 실험이다.
 
-현재 기준선은 LLM 호출을 제외하고 FastAPI `/api/search`만 측정한다. 질문과 정답
-문서 라벨은 `LLM/bench/questions.yaml`을 사용한다. 범위 안 32문항에 대해 정답
-문서가 top-k에 포함되는지와 MRR을 계산하고, 전체 35문항을 각각 3회 호출해 지연을
-집계한다.
+과거 26 PDF 결과는 이력 보존과 변경 방향 확인에만 사용한다. 현재 백엔드·장치·후보
+수 선택은 93 PDF 통제 행렬 안에서만 비교한다.
 
-통제 비교에서는 다음 조건을 고정한다.
+### 2.2 현재 통제 실험
 
-- 동일 Git 커밋과 동일 93문서 코퍼스
-- 동일 질문 파일 SHA-256, top-k, 초기 후보 수, 워밍업 횟수, 반복 횟수
-- FAISS↔Qdrant 비교 시 동일 임베딩 벡터와 동일 후처리·리랭커
-- CPU↔GPU 비교 시 검색 백엔드를 고정하고 모델 장치만 변경
-- 후보 수 비교 시 최종 top-k=5와 Qdrant fetch=80을 유지하고 리랭커 입력만 20↔10으로 변경
-- warm 지연, 서버 startup-to-ready, no-warm 첫 요청을 서로 다른 지표로 기록
+- 질문: `LLM/bench/questions.yaml`의 35문항
+- 질문 SHA-256:
+  `fa0355bfa69cf173acf03e70380b82e3a6d653b3a327ceaced6fcab372cbff53`
+- 실행: 조건마다 새 Python 프로세스, 워밍업 1회, 문항당 3회, 총 105회
+- 순서: round-major로 35문항을 한 번씩 순회한 뒤 다음 반복 수행
+- 검색: 최종 top-k 5, 문서당 최대 3청크, Qdrant 선조회 80개
+- 후보 비교: CrossEncoder/BM25 입력만 20개와 10개로 변경
+- 모델: `jhgan/ko-sroberta-multitask`, `BAAI/bge-reranker-v2-m3`
+- 벡터: 기존 FAISS 벡터를 그대로 사용하며 코퍼스를 다시 임베딩하지 않음
+- 범위: HTTP와 LLM 호출을 제외한 직접 검색 파이프라인
+- 타이밍: CUDA 실행 전후를 동기화하고 embed, vector search, BM25, rerank,
+  finalize를 각각 기록
+- 코드: `e17217c1592a32eaacb1fc183cd69c2c25585319`, 모든 8개 행 측정 시
+  `git_dirty=false`
 
-## 3. 실험용 변경 전 기준
+`qdrant-tuned`는 독립 서버나 HNSW가 아니다. 동일 벡터를 로컬 embedded
+in-memory **exact** Qdrant에 적재하고 80개를 조회한 뒤 문서당 3개 제한과 전체
+후보 제한을 적용한 비교용 구현이다. FAISS와 Qdrant 검색 자체는 CPU에서 수행되고,
+CUDA는 질문 임베딩과 CrossEncoder 리랭킹에 사용된다.
 
-upstream 커밋 `f685d76`은 변경 전 버전으로 식별됐지만, 이 커밋에서 생성한 지연
-또는 품질 측정 산출물은 없다. 따라서 **원본 upstream의 측정값은 없음**이 정확한
-기록이며, 이후 baseline `c0fb7f7`의 수치를 원본 측정값으로 대체하지 않는다.
+검색 품질은 범위 안 32문항에서 기대 PDF 이름이 결과에 들어오는지를 hit@1/3/5와
+MRR로 계산했다. 이는 검색 source hit이지 답변 사실성이나 LLM 답변 품질 점수가
+아니다.
 
-## 4. 과거 26문서 결과
+## 3. 현재 코퍼스 및 실행 환경
+
+| 항목 | 값 |
+|---|---|
+| PDF | 93개 |
+| FAISS 스토어 | 93개 |
+| 청크/벡터 | 3,681개 |
+| 인덱스 | 768차원 `IndexFlatL2`, `METRIC_L2` |
+| 청킹 | size 400, overlap 80, 최소 80, 조문 머리말 사용 |
+| 기본 검색 설정 | 후보 20, top-k 5 |
+| Python | 3.11.9 |
+| PyTorch | 2.13.0+cu130 |
+| CUDA build | 13.0 |
+| GPU | NVIDIA GeForce RTX 4070 Laptop GPU |
+| 브랜치/커밋 | `rag-runtime` / `e17217c` |
+
+코퍼스 고정 여부는 다음 해시로 확인한다.
+
+| 대상 | SHA-256 |
+|---|---|
+| PDF 집합 | `ff94c6ed20a596825baa3c8bc70e4cfc13116df5bb372b7e93a85ca77abe103c` |
+| FAISS 스토어 집합 | `9c6b242931c57a616771ca07afdc41c28aa00ce475f226d57b11cc7b6387c1f2` |
+| PDF + 인덱스 + 질문 전체 | `88be510fd2d0c6e590cc2104ebf8ff51295f360627943bff2b9c60c7730a1722` |
+| manifest 파일 | `ef090e64bb74321156fcbb3d25751023a6bc53215d3ac0e5cd9c486a12c7b43c` |
+
+Manifest는 `2026-08-25T18:18:29.028697+00:00`에 생성됐으며 Git 상태는 clean이다.
+
+## 4. 과거 26 PDF 실험
 
 ### 4.1 버전과 검색 지연
+
+과거 고정 검색 실험은 12질의를 한 번 워밍업한 뒤 질의마다 3회 호출했다. 각 질의의
+중앙값 12개를 대상으로 아래 통계를 냈다.
 
 | 버전 | 커밋 | min (ms) | p50 (ms) | max (ms) | mean (ms) |
 |---|---:|---:|---:|---:|---:|
 | baseline: 스토어마다 질문 재임베딩 | `c0fb7f7` | 725.7 | 935.8 | 1,378.3 | 969.4 |
 | opt1: 질문 임베딩 1회 | `f9d2a0a` | 363.7 | 407.6 | 1,088.9 | 514.5 |
-| Qdrant naive (embedded) | `bfa6204` | 307.8 | 359.2 | 401.2 | 360.8 |
-| Qdrant tuned (문서당 상한) | `117fbb7` | 324.5 | 360.6 | 1,027.9 | 461.9 |
+| Qdrant naive, embedded exact | `bfa6204` | 307.8 | 359.2 | 401.2 | 360.8 |
+| Qdrant tuned, embedded exact | `117fbb7` | 324.5 | 360.6 | 1,027.9 | 461.9 |
 
-opt1.5 `e2aecd6`은 opt1에 FAISS 메모리 캐시와 mtime 무효화를 추가한 버전이다.
-이 버전에는 같은 12질의 retrieval snapshot이 없으므로 위 표의 min/p50/max/mean
-행을 만들 수 없다.
+opt1.5 `e2aecd6`은 질문 임베딩 1회에 FAISS 메모리 캐시와 mtime 무효화를
+추가했지만 동일 12질의 raw snapshot이 없어 위 표에 넣지 않았다.
 
-원본 retrieval JSON을 다시 계산하면 opt1은 baseline과 top-5의 내용과 순서가
-60/60 완전 동일했다. Qdrant naive는 top-1 문서 ID 10/12, 정확 청크 top-1 8/12,
-동일 순위 일치 23/60, 순서 무시 top-5 겹침 38/60이었다. tuned는 정확 청크
-top-1 12/12와 top-5 내용·순서 60/60으로 완전 동일했다.
+원본 retrieval JSON 재계산 결과는 다음과 같다.
 
-기존 `RESULTS.md`에는 naive가 top1 9/12·겹침 38%, tuned가 top1 12/12·겹침
-63%로 적혀 있어 원본 JSON 재계산과 다르다. 이는 top1과 overlap의 정의가 섞였거나
-중간 결과가 수기 보고서에 남은 것으로 보이며, 이 보고서는 원본 JSON 재계산값을
-주 결과로 사용한다.
+- opt1 대 baseline: 정확 top-1 청크 12/12, 동일 순위 60/60, 순서 무시 top-5
+  겹침 60/60
+- Qdrant naive 대 baseline: top-1 문서 ID 10/12, 정확 top-1 청크 8/12,
+  동일 순위 23/60, 순서 무시 top-5 겹침 38/60
+- Qdrant tuned 대 baseline: 정확 top-1 청크 12/12, 동일 순위 60/60,
+  순서 무시 top-5 겹침 60/60
 
-### 4.2 답변 품질 수기 요약
+즉 과거에도 단순 전역 Qdrant 후보는 특정 문서의 여러 청크가 후보를 점유할 수
+있었고, 문서당 상한을 둔 tuned 방식에서 FAISS 결과가 복원됐다.
+
+### 4.2 과거 답변 품질 수기 요약
+
+다음 값은 35문항과 `gpt-4o-mini` live RAG를 사용한 기존 `RESULTS.md`의 수기
+요약이다. 완전한 raw 답변 실행 파일이 모두 남아 있지 않으므로 현재 자동 통제
+결과와 같은 증거 수준으로 취급하지 않는다.
 
 | 지표 | baseline | Qdrant naive | Qdrant tuned |
 |---|---:|---:|---:|
@@ -90,13 +142,12 @@ top-1 12/12와 top-5 내용·순서 60/60으로 완전 동일했다.
 | 범위 밖 처리 | 3/3 | 3/3 | 3/3 |
 | 에러 | 0 | 0 | 0 |
 
-opt1 답변 bench는 다시 실행하지 않았다. 기존 보고서는 검색 결과가 baseline과
-12/12 동일하다는 사실을 근거로 답변 품질도 동일하다고 판단했다. 이는 별도 측정값이
-아닌 기존 보고서의 추론이다.
+opt1 답변 bench는 재실행하지 않았고, 기존 보고서는 retrieval이 baseline과 같다는
+이유로 답변 품질도 같을 것이라고 추론했다. 이는 독립 측정값이 아니다.
 
-### 4.3 문서 수 확장 시뮬레이션
+### 4.3 과거 문서 수 확장 시뮬레이션
 
-| 모사 문서 수 | FAISS 매 요청 로드 (ms) | FAISS 캐시 (ms) | Qdrant embedded (ms) |
+| 모사 문서 수 | FAISS 매 요청 로드 (ms) | FAISS 캐시 (ms) | Qdrant embedded exact (ms) |
 |---:|---:|---:|---:|
 | 26 | 405 | 382 | 395 |
 | 104 | 430 | 358 | 448 |
@@ -104,123 +155,309 @@ opt1 답변 bench는 다시 실행하지 않았다. 기존 보고서는 검색 �
 | 416 | 851 | 323 | 567 |
 | 832 | 1,468 | 516 | 717 |
 
-이 시뮬레이션에서는 매 요청 디스크 재로딩이 큰 병목으로 나타났고 FAISS 캐시가
-효과적이었다. 다만 같은 데이터를 반복한 embedded/in-memory Qdrant 비교이므로,
-실제 서로 다른 PDF 93개와 독립 Qdrant 서버의 HNSW 성능을 대신하지 않는다.
+이 표는 실제 서로 다른 PDF를 늘린 결과가 아니다. 기존 26개 스토어와 포인트를
+반복해 규모만 모사했으므로, 실제 93 PDF 결과나 운영형 Qdrant 성능을 대신할 수
+없다. 다만 매 요청 FAISS 재로딩을 제거하고 캐시해야 한다는 방향은 확인됐다.
 
-### 4.4 서로 일치하지 않는 과거 기록
+### 4.4 과거 기록 불일치
 
-- opt1.5 실서버 지연은 `RESULTS.md`에 cold 1,175ms / warm 429ms로 적혀 있지만,
-  `history.csv`의 `opt1.5-26docs` 행은 cold 465ms / warm 중앙값 464ms다. 실행 조건을
-  복원할 정보가 부족하므로 어느 하나를 정답으로 선택하지 않는다.
-- 범위 밖 처리도 `RESULTS.md`는 3/3, `baseline_bench_summary.json`의 자동 집계는
-  1/3이다. 수기 판정과 자동 판정이 일치하지 않으므로 이 항목을 단독 결론 근거로
-  사용하지 않는다.
-- Qdrant 검색 동일성도 `RESULTS.md`의 수기 수치와 raw retrieval JSON 재계산값이
-  다르다. 원본 JSON과 SHA-256이 남아 있는 재계산값을 우선한다.
+- 기존 `RESULTS.md`는 Qdrant naive를 top1 9/12·overlap 38%, tuned를 top1
+  12/12·overlap 63%로 적었다. raw JSON 재계산은 각각 exact top-1 청크 8/12·
+  top-5 38/60, exact top-1 12/12·top-5 60/60이다. 이 보고서는 raw 재계산값을
+  우선한다.
+- opt1.5 지연은 `RESULTS.md`에 1,175ms/429ms, `history.csv`에
+  465ms/464ms로 기록돼 있다. 실행 조건을 복원할 수 없어 어느 한쪽을 정답으로
+  선택하지 않는다.
+- baseline 범위 밖 처리는 수기 보고서가 3/3, 자동 summary가 1/3이다. 판정 기준이
+  달라 이 항목을 결론의 단독 근거로 사용하지 않는다.
 
-과거 수치와 출처는 `RAG/bench/history/legacy_results.json`에 구조화했다. 기존
-`rag_test` 파일 자체는 복사하지 않았다.
+과거 원본 경로와 각 SHA-256은 `RAG/bench/history/legacy_results.json`에 보존했다.
+기존 `D:/Dev_Tools/rag_test` 작업 폴더는 수정하지 않았다.
 
-## 5. 현재 93문서 live FAISS CPU 결과
+## 5. 현재 live FAISS 참고 결과
 
-측정 커밋은 `eee905d`이며 워크트리는 측정 당시 clean 상태였다. Python 3.11.9,
-`torch 2.13.0+cpu`, CUDA unavailable, 워밍업된 FAISS 스토어 93개 조건이다. 질문
-35개를 각 3회 호출한 성공 표본은 105개이고 실패는 0건이었다.
+다음 표는 실제 `/api/search` HTTP 경로에서 실행한 warm 기준선이다. 통제 행렬과 달리
+서버, HTTP 직렬화 및 해당 시점의 프로세스 상태를 포함하므로 통제 행렬에 섞지 않는다.
 
-측정 호스트는 Intel Core i9-13900HX(24코어/32스레드), 메모리
-34,158,272,512바이트, NVIDIA GeForce RTX 4070 Laptop GPU(8,188MiB,
-드라이버 610.62)다. GPU 하드웨어는 있으나 이 CPU 기준선의 PyTorch가 CPU 빌드라
-CUDA를 사용하지 않았다.
+| live 경로 | Torch/장치 | 커밋·상태 | 표본 | p50 (ms) | p95 (ms) | mean (ms) | 실패 |
+|---|---|---|---:|---:|---:|---:|---:|
+| FAISS CPU | 2.13.0+cpu / CPU | `eee905d`, clean | 105 | 9,046.2 | 9,809.9 | 9,028.0 | 0 |
+| FAISS CUDA, 후보 20 | 2.13.0+cu130 / CUDA | `e17217c`, clean | 105 | 186.3 | 208.5 | 185.9 | 0 |
 
-| 지표 | 결과 |
-|---|---:|
-| 지연 min | 7,904.9ms |
-| 지연 p50 | 9,046.2ms |
-| 지연 p95 | 9,809.9ms |
-| 지연 max | 9,946.7ms |
-| 지연 mean | 9,028.0ms |
-| source hit@1 | 0.5312 |
-| source hit@3 | 0.8125 |
-| source hit@5 | 0.9062 |
-| MRR | 0.6833 |
-| 실패 요청 | 0 |
+| live 경로 | hit@1 | hit@3 | hit@5 | MRR | 반복 순위 불안정 |
+|---|---:|---:|---:|---:|---:|
+| FAISS CPU | 17/32 (0.5312) | 26/32 (0.8125) | 29/32 (0.9062) | 0.6833 | 0 |
+| FAISS CUDA, 후보 20 | 17/32 (0.5312) | 26/32 (0.8125) | 29/32 (0.9062) | 0.6833 | 0 |
 
-Raw 결과: `RAG/bench/results/20260826_current-faiss-cpu-warm.json`
+두 실행 모두 35문항을 3회씩 성공했고 같은 질문 SHA-256과 93개 스토어를 사용했다.
+GPU 실행 전 health는 `models_ready=true`, warmed store 93, warmup failure 0이었다.
+서버는 `RAG_DEVICE=cuda`로 명시 실행했고 시작 로그로 CUDA 모델 적재를 확인했다.
+다만 API 결과 JSON의 `runtime`은 벤치 클라이언트 프로세스 정보이므로 그것만으로
+원격 서버 장치를 증명하지는 못한다. 이 로컬 실행은 서버 시작 로그가 이를 보강한다.
 
-이 수치는 현재 live CPU warm 기준선이다. 과거 26문서 GPU 실험과 조건이 다르므로
-과거 표와의 직접 증감률은 산출하지 않는다.
+GPU live 측정도 clean 상태에서 수행했다. 다만 CPU와 GPU live 실행은 PyTorch
+빌드와 커밋이 달라 이 둘의 비율을 주된 CPU/GPU 결론으로 사용하지 않고, 아래
+동일 커밋의 clean 통제 행렬을 사용한다.
 
-source hit@5에서 라벨상 실패한 3문항은 `work-duty-general`, `pay-overtime-a`,
-`pay-holiday-work`다. 이 중 `pay-overtime-a`는 검색 결과에
-`시간외근무수당지급지침.pdf`가 포함됐지만 기대 문서 목록에는 이 문서가 없다.
-따라서 현재 source hit은 백엔드 간 상대 비교에는 쓸 수 있지만, 라벨을 도메인
-검수하기 전에는 절대적인 정답률로 해석하지 않는다.
+source hit@5에서 후보 20의 라벨상 실패는 `work-duty-general`, `pay-overtime-a`,
+`pay-holiday-work`다. `pay-overtime-a`에는 실제 결과에
+`시간외근무수당지급지침.pdf`가 포함됐지만 기대 문서 목록에는 그 파일이 없다.
+따라서 source hit은 백엔드 간 상대 비교에는 유용하지만 도메인 라벨 검수 전 절대
+정답률로 해석하지 않는다.
 
-## 6. 현재 93문서 통제 비교
+## 6. 현재 93 PDF 통제 결과
 
-아래 표의 TODO는 측정 전 자리표시자다. 값이 채워지기 전에는 FAISS/Qdrant 또는
-CPU/GPU의 최종 우열을 결론 내리지 않는다.
+### 6.1 8개 조건 전체 행렬
 
-| 백엔드 | 장치 | startup-to-ready | no-warm first | warm p50 | warm p95 | hit@1 | hit@3 | hit@5 | MRR | 실패 |
-|---|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|
-| FAISS cache | CPU | **TODO: FAISS_CPU_STARTUP** | **TODO: FAISS_CPU_COLD** | 9,046.2ms | 9,809.9ms | 0.5312 | 0.8125 | 0.9062 | 0.6833 | 0 |
-| FAISS cache | GPU | **TODO: FAISS_GPU_STARTUP** | **TODO: FAISS_GPU_COLD** | **TODO: FAISS_GPU_P50** | **TODO: FAISS_GPU_P95** | **TODO: FAISS_GPU_HIT1** | **TODO: FAISS_GPU_HIT3** | **TODO: FAISS_GPU_HIT5** | **TODO: FAISS_GPU_MRR** | **TODO: FAISS_GPU_FAILURES** |
-| Qdrant | CPU | **TODO: QDRANT_CPU_STARTUP** | **TODO: QDRANT_CPU_COLD** | **TODO: QDRANT_CPU_P50** | **TODO: QDRANT_CPU_P95** | **TODO: QDRANT_CPU_HIT1** | **TODO: QDRANT_CPU_HIT3** | **TODO: QDRANT_CPU_HIT5** | **TODO: QDRANT_CPU_MRR** | **TODO: QDRANT_CPU_FAILURES** |
-| Qdrant | GPU | **TODO: QDRANT_GPU_STARTUP** | **TODO: QDRANT_GPU_COLD** | **TODO: QDRANT_GPU_P50** | **TODO: QDRANT_GPU_P95** | **TODO: QDRANT_GPU_HIT1** | **TODO: QDRANT_GPU_HIT3** | **TODO: QDRANT_GPU_HIT5** | **TODO: QDRANT_GPU_MRR** | **TODO: QDRANT_GPU_FAILURES** |
+아래 값은 최신 재실행 raw 파일로 다시 생성한 summary의 값이다. 모든 행은 105개
+timed call을 포함하고, 행 내부 반복 순위 불안정은 0건이었다.
 
-추가로 결정하고 기록해야 할 항목:
+| 백엔드 | 실행 모드 | 후보 | p50 (ms) | p95 (ms) | mean (ms) | hit@1 | hit@3 | hit@5 | MRR |
+|---|---|---:|---:|---:|---:|---:|---:|---:|---:|
+| FAISS cached | CPU FP32 | 10 | 2,617.286 | 2,943.974 | 2,640.686 | 16/32 | 27/32 | 30/32 | 0.674479 |
+| FAISS cached | CPU FP32 | 20 | 5,222.854 | 5,840.997 | 5,233.395 | 17/32 | 26/32 | 29/32 | 0.683333 |
+| FAISS cached | CUDA FP16 | 10 | 97.318 | 110.417 | 97.437 | 16/32 | 27/32 | 30/32 | 0.674479 |
+| FAISS cached | CUDA FP16 | 20 | 177.524 | 209.245 | 180.004 | 17/32 | 26/32 | 29/32 | 0.683333 |
+| Qdrant tuned exact | CPU FP32 | 10 | 2,705.826 | 2,998.251 | 2,697.747 | 16/32 | 27/32 | 30/32 | 0.674479 |
+| Qdrant tuned exact | CPU FP32 | 20 | 5,217.141 | 5,872.236 | 5,294.154 | 17/32 | 26/32 | 29/32 | 0.683333 |
+| Qdrant tuned exact | CUDA FP16 | 10 | 105.421 | 117.312 | 106.608 | 16/32 | 27/32 | 30/32 | 0.674479 |
+| Qdrant tuned exact | CUDA FP16 | 20 | 191.860 | 229.762 | 193.545 | 17/32 | 26/32 | 29/32 | 0.683333 |
 
-- **TODO: QDRANT_MODE** — 과거 embedded exact 재현과 독립 Qdrant 서버 HNSW 중
-  어떤 결과를 본 비교표에 넣는지 명시
-- **TODO: CONTROLLED_RUN_COMMIT** — 네 조건을 모두 실행할 고정 커밋
-- **TODO: QUESTIONS_SHA256** — 네 조건이 동일 질문 파일을 사용했는지 확인
-- **TODO: SEARCH_CONFIG** — top-k, 초기 후보 수, 문서당 후보 상한을 확정
-- **TODO: CUDA_RUNTIME** — GPU 빌드 PyTorch, CUDA 버전, GPU 모델을 기록
+CPU 대비 CUDA의 total p50 배율은 다음과 같다.
 
-## 7. 한계
+| 백엔드 | 후보 10 | 후보 20 |
+|---|---:|---:|
+| FAISS cached | 26.89배 | 29.42배 |
+| Qdrant tuned exact | 25.67배 | 27.19배 |
 
-- upstream `f685d76`은 측정 산출물이 없어서 숫자 비교가 불가능하다.
-- 과거와 현재는 26문서/93문서, 12질의/35질의, GPU/CPU가 서로 다르다.
-- 과거 확장 표는 실제 신규 문서가 아니라 기존 스토어 반복 시뮬레이션이다.
-- 과거 Qdrant는 embedded in-memory exact 방식이라 운영형 Qdrant 서버 HNSW와 다르다.
-- 현재 source hit는 기대 문서명의 포함 여부이며 답변의 사실성 전체를 뜻하지 않는다.
-- 현재 CPU warm 측정만 완료됐고 CPU/GPU·FAISS/Qdrant 통제 비교는 미완료다.
-- 현재 RAG 가상환경의 PyTorch는 CPU 빌드다. GPU 측정 전 환경 변경과 검증이 필요하며,
-  환경을 변경하지 않은 상태에서 `RAG_DEVICE=cuda`만 지정해서는 GPU 비교가 되지 않는다.
+### 6.2 단계별 p50
 
-## 8. 재현 명령
+| 백엔드 | 모드 | 후보 | embed | vector | BM25 | rerank | finalize | total |
+|---|---|---:|---:|---:|---:|---:|---:|---:|
+| FAISS cached | CPU | 10 | 20.712 | 6.027 | 3.425 | 2,588.316 | 0.446 | 2,617.286 |
+| FAISS cached | CPU | 20 | 20.649 | 6.045 | 6.651 | 5,192.141 | 0.832 | 5,222.854 |
+| FAISS cached | CUDA | 10 | 7.949 | 3.442 | 1.779 | 83.354 | 0.248 | 97.318 |
+| FAISS cached | CUDA | 20 | 7.262 | 3.392 | 3.377 | 161.478 | 0.423 | 177.524 |
+| Qdrant tuned exact | CPU | 10 | 20.612 | 20.232 | 3.440 | 2,644.476 | 0.443 | 2,705.826 |
+| Qdrant tuned exact | CPU | 20 | 20.961 | 21.272 | 6.571 | 5,168.595 | 0.802 | 5,217.141 |
+| Qdrant tuned exact | CUDA | 10 | 7.396 | 13.452 | 1.802 | 82.355 | 0.252 | 105.421 |
+| Qdrant tuned exact | CUDA | 20 | 7.642 | 17.450 | 3.413 | 163.191 | 0.443 | 191.860 |
 
-현재 서버가 `/health`에서 `models_ready=true`가 된 뒤 live RAG 기준선을 실행한다.
+단위는 ms다. 각 열의 p50은 단계별로 독립 계산했기 때문에 열의 합이 total p50과
+정확히 같을 필요는 없다. CPU에서는 리랭킹이 약 2.6초 또는 5.2초로 병목을
+지배했다. CUDA FP16에서는 리랭킹 p50이 후보 20 기준 약 161~163ms로 줄었다.
+반면 벡터 검색은 두 장치 모두 CPU에서 실행되며, 현 코퍼스에서 tuned Qdrant의
+벡터 단계는 FAISS보다 일관되게 길었다.
+
+### 6.3 후보 20 대 10
+
+| 백엔드 | 모드 | p50 20→10 (ms) | 감소율 | 완전 동일 순위 | 동일 top-5 집합 | 원소 겹침 |
+|---|---|---:|---:|---:|---:|---:|
+| FAISS cached | CPU | 5,222.854 → 2,617.286 | 49.89% | 7/35 | 12/35 | 140/175 (80%) |
+| FAISS cached | CUDA | 177.524 → 97.318 | 45.18% | 7/35 | 12/35 | 140/175 (80%) |
+| Qdrant tuned exact | CPU | 5,217.141 → 2,705.826 | 48.14% | 7/35 | 12/35 | 140/175 (80%) |
+| Qdrant tuned exact | CUDA | 191.860 → 105.421 | 45.05% | 7/35 | 12/35 | 140/175 (80%) |
+
+후보 수 변경의 검색 결과 차이는 백엔드와 장치에 관계없이 같았다. 35문항 중
+28문항에서 최종 순서가 하나 이상 달라졌고, 6문항은 top-1 청크도 달라졌다.
+
+| 품질 지표 | 후보 20 | 후보 10 | 변화 |
+|---|---:|---:|---:|
+| hit@1 | 17/32 (53.125%) | 16/32 (50.000%) | -1문항 |
+| hit@3 | 26/32 (81.250%) | 27/32 (84.375%) | +1문항 |
+| hit@5 | 29/32 (90.625%) | 30/32 (93.750%) | +1문항 |
+| MRR | 0.683333 | 0.674479 | -0.008854 |
+
+후보 10이 hit@5를 한 건 늘렸지만 top-1과 MRR은 낮아졌고 top-5 구성도 20%가
+바뀌었다. 32개의 기대 문서 라벨만으로 어느 쪽이 실질 답변 품질이 더 좋다고
+단정할 수 없다. 그래서 지연 절반이라는 이득은 명확하지만, 기본값 변경은 보류한다.
+
+CPU와 CUDA의 후보 20 결과는 각 백엔드에서 35/35 완전 동일했다. 후보 10은
+top-5 집합과 top-1은 35/35 같았으나 `pay-severance`의 내부 순서만 달라져 정확
+순서 일치는 34/35였다. 이는 FP32와 FP16의 근소한 점수 차이 가능성을 보여준다.
+
+### 6.4 FAISS 대 tuned Qdrant
+
+| 장치 | 후보 | 완전 동일 최종 순위 | 동일 top-5 집합 | 원소 겹침 |
+|---|---:|---:|---:|---:|
+| CPU | 10 | 35/35 | 35/35 | 100% |
+| CPU | 20 | 35/35 | 35/35 | 100% |
+| CUDA | 10 | 35/35 | 35/35 | 100% |
+| CUDA | 20 | 35/35 | 35/35 | 100% |
+
+tuned Qdrant는 검색 결과 동일성을 달성했지만 현재 3,681벡터에서는 지연 이점이
+없었다. 예를 들어 CUDA 후보 20에서 전체 p50은 FAISS보다 14.336ms 길었고,
+벡터 단계 자체는 14.058ms 길었다. Qdrant의 운영 기능이 필요하거나 벡터 규모가
+크게 증가할 때 독립 서버 구성을 별도 설계해 다시 측정할 수 있지만, 이 exact
+실험으로 그런 구성의 성능을 예측할 수는 없다.
+
+### 6.5 Qdrant naive 보충 실험
+
+Qdrant naive는 주 8개 행렬 밖에서 CUDA·후보 20으로 clean 상태(`e17217c`)에서
+35문항×3회를 실행했다.
+
+| p50 | p95 | hit@1 | hit@3 | hit@5 | MRR |
+|---:|---:|---:|---:|---:|---:|
+| 184.629ms | 205.221ms | 18/32 | 27/32 | 29/32 | 0.701562 |
+
+naive 후보의 문서 다양성은 평균 7.6571개 문서였고 한 문서가 최대 15/20청크를
+차지했다. tuned는 평균 11.1429개 문서, 문서당 최대 3청크였다. naive와 tuned의
+최종 순서가 완전히 같은 문항은 6/35, top-5 원소 겹침은 121/175(69.14%)였다.
+
+naive의 제한된 source hit 수치가 일부 높더라도 더 좋은 검색이라고 결론 내리지
+않는다. 라벨 수가 적고 일부 기대 문서 라벨에 결함이 있으며, 한 문서의 중복 청크가
+후보를 과점하는 현상이 확인됐기 때문이다. 이 결과는 문서 다양성 제한의 필요성을
+확인하는 보충 자료로만 사용한다.
+
+## 7. 최종 판단
+
+1. **장치:** CUDA FP16을 사용한다. 현재 가장 큰 병목인 CrossEncoder 리랭킹을
+   CPU 대비 약 26~29배 빠르게 줄였다.
+2. **백엔드:** 현재 규모에서는 캐시된 문서별 FAISS를 유지한다. tuned Qdrant와
+   최종 결과가 완전히 같고 FAISS의 벡터 단계가 더 짧으며, 별도 백엔드 운영을
+   추가할 성능상 이득이 없다.
+3. **후보 수:** 운영 기본값은 20을 유지한다. 후보 10은 약 45~50% 더 빠르지만
+   순위 변화가 크고 top-1/MRR이 소폭 하락했다.
+4. **후속 검증:** 후보 10을 적용하려면 기대 문서 라벨을 먼저 고치고, 현재
+   검색 결과를 이용한 실제 LLM 답변의 사실성·인용·거절 품질을 별도 평가한다.
+5. **Qdrant 재검토 조건:** 벡터가 크게 증가하거나 필터링·분산·영속 서비스 등
+   운영 요구가 생겼을 때, 독립 서버 구성을 별도의 실험 계획으로 평가한다.
+
+## 8. 한계
+
+- upstream `f685d76`에는 측정 산출물이 없어 수정 전 절대 수치가 없다.
+- 과거와 현재 결과는 26/93 PDF, 12/35질의 및 코드가 달라 직접 증감률을 계산할
+  수 없다.
+- 통제 행렬은 직접 backend warm 검색이며 HTTP, Django, LLM 호출을 포함하지 않는다.
+- live CPU/GPU 결과는 별도 참고값이다. 서로 다른 PyTorch 빌드·커밋·프로세스
+  상태이므로 clean 통제 행렬과 같은 수준의 인과 비교가 아니다.
+- CPU는 FP32, CUDA CrossEncoder는 FP16이므로 CPU/GPU 배율에 정밀도 변화도
+  포함된다.
+- 현재 Qdrant는 로컬 embedded in-memory exact 비교뿐이다. 독립 Qdrant 서버나
+  HNSW의 성능을 측정하지 않았다.
+- 순차 단일 요청만 측정했다. 동시 부하에서의 처리량과 지연 분포는 측정하지 않았다.
+- warm 요청만 비교했다. 서버 시작 시간과 캐시 없는 첫 요청은 측정하지 않았다.
+- 프로세스 RSS는 raw에 남아 있지만 GPU VRAM 사용량은 측정하지 않았다.
+- 현재 자동 평가는 기대 PDF 포함 여부만 본다. LLM 답변 품질과 사실성은 측정하지
+  않았다.
+- 35문항과 단일 PC·단일 측정일 결과이므로 더 큰 질의 세트와 반복 일자 검증이
+  필요하다.
+
+## 9. 재현 방법
+
+새 가상환경을 만들지 않고 저장소의 `RAG/.venv`를 사용한다.
+
+### 9.1 환경 및 manifest 확인
+
+```powershell
+RAG\.venv\Scripts\python.exe -m pip check
+RAG\.venv\Scripts\python.exe RAG\bench\capture_manifest.py `
+  --output "$env:TEMP\rag-corpus-manifest.json"
+```
+
+생성한 manifest의 PDF·스토어·질문 해시가 3절과 같을 때만 같은 코퍼스 비교로
+취급한다.
+
+### 9.2 직접 backend 통제 행렬
+
+다음 명령은 2개 백엔드×2개 장치×2개 후보 수를 각각 새 프로세스에서 실행한다.
+기본 timestamp 파일명을 사용하므로 보존된 결과를 덮어쓰지 않는다.
+
+```powershell
+foreach ($backend in @('faiss-cached', 'qdrant-tuned')) {
+  foreach ($device in @('cpu', 'cuda')) {
+    foreach ($candidates in @(10, 20)) {
+      RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
+        --backend $backend --device $device `
+        --initial-candidates $candidates --qdrant-fetch 80 `
+        --warmups 1 --repeats 3 `
+        --label "repro-c$candidates"
+    }
+  }
+}
+```
+
+Qdrant naive 보충 실험:
+
+```powershell
+RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
+  --backend qdrant-naive --device cuda `
+  --initial-candidates 20 --warmups 1 --repeats 3 `
+  --label repro-naive-c20
+```
+
+보존된 8개 raw 파일로 summary 로직을 다시 검증할 때는 결과를 임시 파일에 쓴다.
+
+```powershell
+RAG\.venv\Scripts\python.exe RAG\bench\summarize_backend_results.py `
+  RAG\bench\results\20260826_controlled-faiss-cached-cpu-c10.json `
+  RAG\bench\results\20260826_controlled-faiss-cached-cpu.json `
+  RAG\bench\results\20260826_controlled-faiss-cached-gpu-c10.json `
+  RAG\bench\results\20260826_controlled-faiss-cached-gpu-c20.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-cpu-c10.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-cpu.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-gpu-c10.json `
+  RAG\bench\results\20260826_controlled-qdrant-tuned-gpu-c20.json `
+  --manifest RAG\bench\results\20260826_corpus-manifest.json `
+  --supplemental RAG\bench\results\20260826_controlled-qdrant-naive-gpu-c20.json `
+  --json-output "$env:TEMP\rag-controlled-summary.json" `
+  --csv-output "$env:TEMP\rag-controlled-summary.csv"
+```
+
+### 9.3 live API 참고 측정
+
+서버를 후보 20과 명시 장치로 실행한 뒤 `/health`에서 `models_ready=true`, warmed
+store 93, failure 0을 확인한다. 다음 환경 변수는 서버 프로세스에 적용해야 한다.
+
+```powershell
+$env:RAG_DEVICE = 'cuda'
+$env:RAG_SEARCH_INITIAL_CANDIDATES = '20'
+$env:RAG_SEARCH_TOP_K = '5'
+RAG\.venv\Scripts\python.exe RAG\app.py
+```
+
+다른 터미널에서 실행한다.
 
 ```powershell
 RAG\.venv\Scripts\python.exe RAG\bench\run_api_bench.py `
-  --label current-faiss-cpu-warm --repeats 3
+  --label repro-faiss-gpu-warm-c20 --warmups 1 --repeats 3
 ```
 
-벤치마크 집계 로직 회귀 테스트:
+### 9.4 회귀 테스트
 
 ```powershell
-RAG\.venv\Scripts\python.exe -m unittest RAG.bench.test_run_api_bench
+RAG\.venv\Scripts\python.exe -m unittest `
+  RAG.bench.test_capture_manifest `
+  RAG.bench.test_run_api_bench `
+  RAG.bench.test_run_backend_bench `
+  RAG.bench.test_summarize_backend_results
 ```
 
-GPU와 Qdrant 재현 명령은 구현 및 환경 확정 후 아래 자리에 추가한다.
+## 10. 결과 산출물 색인
 
-```text
-TODO: FAISS_GPU_REPRO_COMMAND
-TODO: QDRANT_CPU_REPRO_COMMAND
-TODO: QDRANT_GPU_REPRO_COMMAND
-TODO: STARTUP_AND_NO_WARM_REPRO_COMMANDS
-```
+| 산출물 | 역할 | SHA-256 |
+|---|---|---|
+| `RAG/bench/history/legacy_results.json` | 과거 결과·출처·불일치 기록 | `82b75c4f9536b226e7db137d956c16f15b45afd555be87d16025ef0895a2d3d6` |
+| `RAG/bench/results/20260826_corpus-manifest.json` | 현재 코퍼스·인덱스·환경 manifest | `ef090e64bb74321156fcbb3d25751023a6bc53215d3ac0e5cd9c486a12c7b43c` |
+| `RAG/bench/results/20260826_current-faiss-cpu-warm.json` | live FAISS CPU 참고 결과 | `86c58ccc379b96b37c7779a81d45e428afa6912ae62e4dedb8e2c410f066bb12` |
+| `RAG/bench/results/20260826_current-faiss-gpu-warm-c20.json` | live FAISS CUDA 후보 20 참고 결과 | `19b1a3d4844d5fe83c24b8fd815105a55a8f639b8c51498e5fd828a298e66716` |
+| `RAG/bench/results/20260826_controlled-summary.json` | 주 결과와 비교 상세, raw 해시 포함 | `38877ad0499002fa0253a966ed0d082d5e26e003afff4d6ea8440f87485345e8` |
+| `RAG/bench/results/20260826_controlled-summary.csv` | 8개 행 표 형식 요약 | `c69c6ddd6b0d8b2ea88db7d4c913779686fb166eecc109dd62d23688e8f6ca82` |
 
-과거 실험의 원본 산출물은 `D:/Dev_Tools/rag_test/eval`에 보존한다. 기존 폴더는
-재현 실행 소스로 수정하지 않고 현재 저장소의 벤치 도구로 새 결과를 생성한다.
+통제 raw 파일:
 
-## 9. 결론
+| 조건 | 파일 | SHA-256 |
+|---|---|---|
+| FAISS CPU c10 | `20260826_controlled-faiss-cached-cpu-c10.json` | `58f8c2cd00e5a7e8fcf921514a3f3dcb0e3c7d177766c2cd8ff56fbfdb3cce62` |
+| FAISS CPU c20 | `20260826_controlled-faiss-cached-cpu.json` | `b9aba6f5560f3235f138249d077fb5858b51142beaeea41de514b9e3b76c2f6c` |
+| FAISS CUDA c10 | `20260826_controlled-faiss-cached-gpu-c10.json` | `557b5f9d7ab0bf87d5b52482da4bf7b89044e9309afc04bcfd3d466a06bec7fc` |
+| FAISS CUDA c20 | `20260826_controlled-faiss-cached-gpu-c20.json` | `4951056d6d47f23989dbdc2a3cf9d718af8eef1d2e488ab70eddc211ebb55886` |
+| Qdrant tuned CPU c10 | `20260826_controlled-qdrant-tuned-cpu-c10.json` | `1e2b1fa98d9bf1b2d9a7d199eae60e5c3afab4b145f6a6dc933bf56f8696b9ba` |
+| Qdrant tuned CPU c20 | `20260826_controlled-qdrant-tuned-cpu.json` | `5081dac348bc69f5ec2c25c641e29102700461a7d45af609f47f9635459b1012` |
+| Qdrant tuned CUDA c10 | `20260826_controlled-qdrant-tuned-gpu-c10.json` | `99ab07e7577b9a0f492ef0b9d74b7d58c98b03fd929f85a2cd6afa83091a6027` |
+| Qdrant tuned CUDA c20 | `20260826_controlled-qdrant-tuned-gpu-c20.json` | `a604a8957fb5eb7ada592da7021d5cd18d1fa9a6a64f5e1e6c10234336fc79e9` |
+| Qdrant naive CUDA c20 | `20260826_controlled-qdrant-naive-gpu-c20.json` | `91612acd39d7a05bce2f747e8add3bde5493f18f2c397356d7085664453548de` |
 
-과거 26문서 실험에서는 질문 임베딩 1회와 FAISS 캐시가 병목을 줄였고, 당시
-Qdrant naive는 검색 결과 겹침과 recall이 낮아 tuned 보정이 필요했다. 현재 93문서
-live CPU warm 기준선은 확보했다.
-
-**최종 결론은 보류한다.** 동일 93문서·동일 질문·동일 설정에서 FAISS/Qdrant와
-CPU/GPU의 통제 비교, startup/no-warm 측정이 끝난 뒤 백엔드와 운영 장치를 결정한다.
+각 raw JSON에는 질문별 3회 타이밍, 단계별 타이밍, vector/final ranking과 signature,
+quality 판정, Git·런타임 메타데이터가 들어 있다. 요약 JSON은 입력 raw 전체의
+SHA-256을 다시 기록하므로 표의 값에서 원시 결과까지 추적할 수 있다.

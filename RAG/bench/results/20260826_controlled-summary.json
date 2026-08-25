@@ -1,0 +1,1705 @@
+{
+  "schema_version": 1,
+  "title": "2026-08-26 controlled RAG backend benchmark summary",
+  "invariants": {
+    "questions_sha256": "fa0355bfa69cf173acf03e70380b82e3a6d653b3a327ceaced6fcab372cbff53",
+    "question_count": 35,
+    "repeats": 3,
+    "warmups": 1,
+    "top_k": 5,
+    "per_document": 3,
+    "qdrant_fetch": 80,
+    "vector_store_count": 93,
+    "point_count": 3681,
+    "torch": "2.13.0+cu130",
+    "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+    "git_dirty": false
+  },
+  "corpus_manifest": {
+    "source_file": "RAG/bench/results/20260826_corpus-manifest.json",
+    "source_sha256": "ef090e64bb74321156fcbb3d25751023a6bc53215d3ac0e5cd9c486a12c7b43c",
+    "captured_at_utc": "2026-08-25T18:18:29.028697+00:00",
+    "git": {
+      "commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "branch": "rag-runtime",
+      "dirty": false
+    },
+    "pdf_count": 93,
+    "pdf_aggregate_sha256": "ff94c6ed20a596825baa3c8bc70e4cfc13116df5bb372b7e93a85ca77abe103c",
+    "vector_store_count": 93,
+    "chunk_count": 3681,
+    "vector_store_aggregate_sha256": "9c6b242931c57a616771ca07afdc41c28aa00ce475f226d57b11cc7b6387c1f2",
+    "experiment_assets_aggregate_sha256": "88be510fd2d0c6e590cc2104ebf8ff51295f360627943bff2b9c60c7730a1722",
+    "configuration": {
+      "chunking": {
+        "chunk_size": 400,
+        "chunk_overlap": 80,
+        "min_chunk_length": 80,
+        "article_head_enabled": true
+      },
+      "search": {
+        "top_k": 5,
+        "initial_candidates": 20
+      },
+      "models": {
+        "embedding": "jhgan/ko-sroberta-multitask",
+        "reranker": "BAAI/bge-reranker-v2-m3"
+      },
+      "execution": {
+        "device_requested": "auto",
+        "device_effective": "cuda",
+        "warm_vector_stores": true
+      }
+    },
+    "runtime": {
+      "python": {
+        "version": "3.11.9",
+        "implementation": "CPython"
+      },
+      "platform": {
+        "system": "Windows",
+        "release": "10",
+        "version": "10.0.26200",
+        "machine": "AMD64"
+      },
+      "torch": {
+        "version": "2.13.0+cu130",
+        "cuda_build": "13.0",
+        "cuda_available": true,
+        "cudnn_version": 92000,
+        "num_threads": 24,
+        "num_interop_threads": 24,
+        "devices": [
+          {
+            "index": 0,
+            "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+            "compute_capability": [
+              8,
+              9
+            ],
+            "total_memory_bytes": 8585216000
+          }
+        ]
+      }
+    }
+  },
+  "matrix": [
+    {
+      "backend": "faiss-cached",
+      "device": "cpu",
+      "initial_candidates": 10,
+      "source_file": "RAG/bench/results/20260826_controlled-faiss-cached-cpu-c10.json",
+      "source_sha256": "58f8c2cd00e5a7e8fcf921514a3f3dcb0e3c7d177766c2cd8ff56fbfdb3cce62",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 294.252,
+      "initialization_total_ms": 12932.149,
+      "backend_build_ms": 64.04,
+      "rss_after_init_bytes": 1133539328,
+      "rss_at_end_bytes": 2939019264,
+      "total_min_ms": 2054.336,
+      "total_p50_ms": 2617.286,
+      "total_p95_ms": 2943.974,
+      "total_max_ms": 3195.949,
+      "total_mean_ms": 2640.686,
+      "embed_p50_ms": 20.712,
+      "vector_search_p50_ms": 6.027,
+      "bm25_p50_ms": 3.425,
+      "rerank_p50_ms": 2588.316,
+      "finalize_p50_ms": 0.446,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.5,
+      "source_hit_at_3": 0.84375,
+      "source_hit_at_5": 0.9375,
+      "mean_reciprocal_rank": 0.674479,
+      "unstable_rankings": 0
+    },
+    {
+      "backend": "faiss-cached",
+      "device": "cpu",
+      "initial_candidates": 20,
+      "source_file": "RAG/bench/results/20260826_controlled-faiss-cached-cpu.json",
+      "source_sha256": "b9aba6f5560f3235f138249d077fb5858b51142beaeea41de514b9e3b76c2f6c",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 569.093,
+      "initialization_total_ms": 12850.099,
+      "backend_build_ms": 58.71,
+      "rss_after_init_bytes": 1134321664,
+      "rss_at_end_bytes": 3097305088,
+      "total_min_ms": 4275.165,
+      "total_p50_ms": 5222.854,
+      "total_p95_ms": 5840.997,
+      "total_max_ms": 5917.232,
+      "total_mean_ms": 5233.395,
+      "embed_p50_ms": 20.649,
+      "vector_search_p50_ms": 6.045,
+      "bm25_p50_ms": 6.651,
+      "rerank_p50_ms": 5192.141,
+      "finalize_p50_ms": 0.832,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.53125,
+      "source_hit_at_3": 0.8125,
+      "source_hit_at_5": 0.90625,
+      "mean_reciprocal_rank": 0.683333,
+      "unstable_rankings": 0
+    },
+    {
+      "backend": "faiss-cached",
+      "device": "cuda",
+      "initial_candidates": 10,
+      "source_file": "RAG/bench/results/20260826_controlled-faiss-cached-gpu-c10.json",
+      "source_sha256": "557b5f9d7ab0bf87d5b52482da4bf7b89044e9309afc04bcfd3d466a06bec7fc",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 26.509,
+      "initialization_total_ms": 14004.659,
+      "backend_build_ms": 76.561,
+      "rss_after_init_bytes": 2418688000,
+      "rss_at_end_bytes": 3285413888,
+      "total_min_ms": 82.535,
+      "total_p50_ms": 97.318,
+      "total_p95_ms": 110.417,
+      "total_max_ms": 127.679,
+      "total_mean_ms": 97.437,
+      "embed_p50_ms": 7.949,
+      "vector_search_p50_ms": 3.442,
+      "bm25_p50_ms": 1.779,
+      "rerank_p50_ms": 83.354,
+      "finalize_p50_ms": 0.248,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.5,
+      "source_hit_at_3": 0.84375,
+      "source_hit_at_5": 0.9375,
+      "mean_reciprocal_rank": 0.674479,
+      "unstable_rankings": 0
+    },
+    {
+      "backend": "faiss-cached",
+      "device": "cuda",
+      "initial_candidates": 20,
+      "source_file": "RAG/bench/results/20260826_controlled-faiss-cached-gpu-c20.json",
+      "source_sha256": "4951056d6d47f23989dbdc2a3cf9d718af8eef1d2e488ab70eddc211ebb55886",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 35.156,
+      "initialization_total_ms": 13787.038,
+      "backend_build_ms": 63.942,
+      "rss_after_init_bytes": 2418683904,
+      "rss_at_end_bytes": 3296325632,
+      "total_min_ms": 155.103,
+      "total_p50_ms": 177.524,
+      "total_p95_ms": 209.245,
+      "total_max_ms": 248.352,
+      "total_mean_ms": 180.004,
+      "embed_p50_ms": 7.262,
+      "vector_search_p50_ms": 3.392,
+      "bm25_p50_ms": 3.377,
+      "rerank_p50_ms": 161.478,
+      "finalize_p50_ms": 0.423,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.53125,
+      "source_hit_at_3": 0.8125,
+      "source_hit_at_5": 0.90625,
+      "mean_reciprocal_rank": 0.683333,
+      "unstable_rankings": 0
+    },
+    {
+      "backend": "qdrant-tuned",
+      "device": "cpu",
+      "initial_candidates": 10,
+      "source_file": "RAG/bench/results/20260826_controlled-qdrant-tuned-cpu-c10.json",
+      "source_sha256": "1e2b1fa98d9bf1b2d9a7d199eae60e5c3afab4b145f6a6dc933bf56f8696b9ba",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 301.568,
+      "initialization_total_ms": 14226.945,
+      "backend_build_ms": 1535.583,
+      "rss_after_init_bytes": 1173024768,
+      "rss_at_end_bytes": 2974007296,
+      "total_min_ms": 2091.882,
+      "total_p50_ms": 2705.826,
+      "total_p95_ms": 2998.251,
+      "total_max_ms": 3104.18,
+      "total_mean_ms": 2697.747,
+      "embed_p50_ms": 20.612,
+      "vector_search_p50_ms": 20.232,
+      "bm25_p50_ms": 3.44,
+      "rerank_p50_ms": 2644.476,
+      "finalize_p50_ms": 0.443,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.5,
+      "source_hit_at_3": 0.84375,
+      "source_hit_at_5": 0.9375,
+      "mean_reciprocal_rank": 0.674479,
+      "unstable_rankings": 0
+    },
+    {
+      "backend": "qdrant-tuned",
+      "device": "cpu",
+      "initial_candidates": 20,
+      "source_file": "RAG/bench/results/20260826_controlled-qdrant-tuned-cpu.json",
+      "source_sha256": "5081dac348bc69f5ec2c25c641e29102700461a7d45af609f47f9635459b1012",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 576.876,
+      "initialization_total_ms": 14219.116,
+      "backend_build_ms": 1619.803,
+      "rss_after_init_bytes": 1172934656,
+      "rss_at_end_bytes": 3133415424,
+      "total_min_ms": 4369.664,
+      "total_p50_ms": 5217.141,
+      "total_p95_ms": 5872.236,
+      "total_max_ms": 5956.873,
+      "total_mean_ms": 5294.154,
+      "embed_p50_ms": 20.961,
+      "vector_search_p50_ms": 21.272,
+      "bm25_p50_ms": 6.571,
+      "rerank_p50_ms": 5168.595,
+      "finalize_p50_ms": 0.802,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.53125,
+      "source_hit_at_3": 0.8125,
+      "source_hit_at_5": 0.90625,
+      "mean_reciprocal_rank": 0.683333,
+      "unstable_rankings": 0
+    },
+    {
+      "backend": "qdrant-tuned",
+      "device": "cuda",
+      "initial_candidates": 10,
+      "source_file": "RAG/bench/results/20260826_controlled-qdrant-tuned-gpu-c10.json",
+      "source_sha256": "99ab07e7577b9a0f492ef0b9d74b7d58c98b03fd929f85a2cd6afa83091a6027",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 28.656,
+      "initialization_total_ms": 15221.368,
+      "backend_build_ms": 1577.258,
+      "rss_after_init_bytes": 2460205056,
+      "rss_at_end_bytes": 3325771776,
+      "total_min_ms": 96.217,
+      "total_p50_ms": 105.421,
+      "total_p95_ms": 117.312,
+      "total_max_ms": 123.428,
+      "total_mean_ms": 106.608,
+      "embed_p50_ms": 7.396,
+      "vector_search_p50_ms": 13.452,
+      "bm25_p50_ms": 1.802,
+      "rerank_p50_ms": 82.355,
+      "finalize_p50_ms": 0.252,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.5,
+      "source_hit_at_3": 0.84375,
+      "source_hit_at_5": 0.9375,
+      "mean_reciprocal_rank": 0.674479,
+      "unstable_rankings": 0
+    },
+    {
+      "backend": "qdrant-tuned",
+      "device": "cuda",
+      "initial_candidates": 20,
+      "source_file": "RAG/bench/results/20260826_controlled-qdrant-tuned-gpu-c20.json",
+      "source_sha256": "a604a8957fb5eb7ada592da7021d5cd18d1fa9a6a64f5e1e6c10234336fc79e9",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 38.039,
+      "initialization_total_ms": 15289.698,
+      "backend_build_ms": 1595.958,
+      "rss_after_init_bytes": 2459791360,
+      "rss_at_end_bytes": 3330822144,
+      "total_min_ms": 170.517,
+      "total_p50_ms": 191.86,
+      "total_p95_ms": 229.762,
+      "total_max_ms": 258.178,
+      "total_mean_ms": 193.545,
+      "embed_p50_ms": 7.642,
+      "vector_search_p50_ms": 17.45,
+      "bm25_p50_ms": 3.413,
+      "rerank_p50_ms": 163.191,
+      "finalize_p50_ms": 0.443,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.53125,
+      "source_hit_at_3": 0.8125,
+      "source_hit_at_5": 0.90625,
+      "mean_reciprocal_rank": 0.683333,
+      "unstable_rankings": 0
+    }
+  ],
+  "supplemental": [
+    {
+      "backend": "qdrant-naive",
+      "device": "cuda",
+      "initial_candidates": 20,
+      "source_file": "RAG/bench/results/20260826_controlled-qdrant-naive-gpu-c20.json",
+      "source_sha256": "91612acd39d7a05bce2f747e8add3bde5493f18f2c397356d7085664453548de",
+      "git_commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
+      "git_dirty": false,
+      "duration_seconds": 37.071,
+      "initialization_total_ms": 15179.766,
+      "backend_build_ms": 1534.969,
+      "rss_after_init_bytes": 2460254208,
+      "rss_at_end_bytes": 3337175040,
+      "total_min_ms": 167.191,
+      "total_p50_ms": 184.629,
+      "total_p95_ms": 205.221,
+      "total_max_ms": 213.362,
+      "total_mean_ms": 186.02,
+      "embed_p50_ms": 7.275,
+      "vector_search_p50_ms": 16.157,
+      "bm25_p50_ms": 3.435,
+      "rerank_p50_ms": 157.689,
+      "finalize_p50_ms": 0.432,
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.5625,
+      "source_hit_at_3": 0.84375,
+      "source_hit_at_5": 0.90625,
+      "mean_reciprocal_rank": 0.701562,
+      "unstable_rankings": 0,
+      "candidate_diversity": {
+        "candidate_count_min": 20,
+        "candidate_count_max": 20,
+        "unique_documents_mean": 7.6571,
+        "unique_documents_min": 3,
+        "unique_documents_max": 13,
+        "max_chunks_from_one_document": 15
+      },
+      "vs_qdrant_tuned": {
+        "identical_ordered_rankings": 6,
+        "identical_unordered_top_k_sets": 6,
+        "question_count": 35,
+        "top_1_changed_questions": [
+          "leave-annual-a",
+          "leave-annual-b",
+          "pay-overtime-a",
+          "pay-public-worker",
+          "pay-holiday-work",
+          "hire-special-position",
+          "promo-hr-rule",
+          "benefit-medical"
+        ],
+        "changed_questions": [
+          "leave-annual-a",
+          "leave-annual-b",
+          "leave-annual-c",
+          "leave-parental-a",
+          "leave-parental-b",
+          "leave-parental-with-maternity",
+          "leave-suspension",
+          "work-flexible-a",
+          "work-flexible-b",
+          "work-parttime",
+          "work-overseas-trip",
+          "work-hours",
+          "pay-overtime-a",
+          "pay-severance",
+          "pay-public-worker",
+          "pay-holiday-work",
+          "hire-fixed-term-limit",
+          "hire-special-position",
+          "hire-professor",
+          "promo-exam-a",
+          "promo-exam-b",
+          "promo-hr-rule",
+          "benefit-medical",
+          "disc-dui-b",
+          "disc-code-of-conduct",
+          "disc-crime-report",
+          "other-public-institution",
+          "oos-weather",
+          "oos-personal-balance"
+        ],
+        "top_k_overlap_items": 121,
+        "top_k_total_items": 175,
+        "top_k_overlap_ratio": 0.6914
+      },
+      "qdrant_tuned_candidate_diversity": {
+        "candidate_count_min": 20,
+        "candidate_count_max": 20,
+        "unique_documents_mean": 11.1429,
+        "unique_documents_min": 9,
+        "unique_documents_max": 14,
+        "max_chunks_from_one_document": 3
+      }
+    }
+  ],
+  "comparisons": {
+    "cpu_vs_gpu": [
+      {
+        "backend": "faiss-cached",
+        "initial_candidates": 10,
+        "cpu_p50_ms": 2617.286,
+        "gpu_p50_ms": 97.318,
+        "gpu_speedup_x": 26.8942,
+        "identical_final_rankings": 34,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 34,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [
+            "pay-severance"
+          ],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      },
+      {
+        "backend": "faiss-cached",
+        "initial_candidates": 20,
+        "cpu_p50_ms": 5222.854,
+        "gpu_p50_ms": 177.524,
+        "gpu_speedup_x": 29.4206,
+        "identical_final_rankings": 35,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 35,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      },
+      {
+        "backend": "qdrant-tuned",
+        "initial_candidates": 10,
+        "cpu_p50_ms": 2705.826,
+        "gpu_p50_ms": 105.421,
+        "gpu_speedup_x": 25.6669,
+        "identical_final_rankings": 34,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 34,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [
+            "pay-severance"
+          ],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      },
+      {
+        "backend": "qdrant-tuned",
+        "initial_candidates": 20,
+        "cpu_p50_ms": 5217.141,
+        "gpu_p50_ms": 191.86,
+        "gpu_speedup_x": 27.1924,
+        "identical_final_rankings": 35,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 35,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      }
+    ],
+    "candidates_20_vs_10": [
+      {
+        "backend": "faiss-cached",
+        "device": "cpu",
+        "p50_candidates_20_ms": 5222.854,
+        "p50_candidates_10_ms": 2617.286,
+        "p50_reduction_percent": 49.8878,
+        "speedup_x": 1.9955,
+        "identical_final_rankings": 7,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 7,
+          "identical_unordered_top_k_sets": 12,
+          "question_count": 35,
+          "top_1_changed_questions": [
+            "leave-annual-a",
+            "leave-parental-b",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "promo-hr-rule",
+            "disc-dui-a"
+          ],
+          "changed_questions": [
+            "leave-annual-a",
+            "leave-annual-b",
+            "leave-annual-c",
+            "leave-parental-a",
+            "leave-parental-b",
+            "leave-parental-with-maternity",
+            "leave-suspension",
+            "work-flexible-b",
+            "work-overseas-trip",
+            "work-hours",
+            "work-duty-general",
+            "pay-overtime-a",
+            "pay-overtime-b",
+            "pay-severance",
+            "pay-holiday-work",
+            "hire-contract-a",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "hire-special-position",
+            "hire-professor",
+            "promo-exam-a",
+            "promo-hr-rule",
+            "disc-dui-a",
+            "disc-dui-b",
+            "disc-code-of-conduct",
+            "disc-crime-report",
+            "oos-lunch",
+            "oos-weather"
+          ],
+          "top_k_overlap_items": 140,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 0.8
+        },
+        "changed_questions": [
+          {
+            "question_id": "leave-annual-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-c",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-with-maternity",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-suspension",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-flexible-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-overseas-trip",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-hours",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-duty-general",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 5,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-severance",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-holiday-work",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 3,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-fixed-term-limit",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-special-position",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-professor",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-exam-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-hr-rule",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-code-of-conduct",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-crime-report",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "oos-lunch",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          },
+          {
+            "question_id": "oos-weather",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          }
+        ]
+      },
+      {
+        "backend": "faiss-cached",
+        "device": "cuda",
+        "p50_candidates_20_ms": 177.524,
+        "p50_candidates_10_ms": 97.318,
+        "p50_reduction_percent": 45.1804,
+        "speedup_x": 1.8242,
+        "identical_final_rankings": 7,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 7,
+          "identical_unordered_top_k_sets": 12,
+          "question_count": 35,
+          "top_1_changed_questions": [
+            "leave-annual-a",
+            "leave-parental-b",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "promo-hr-rule",
+            "disc-dui-a"
+          ],
+          "changed_questions": [
+            "leave-annual-a",
+            "leave-annual-b",
+            "leave-annual-c",
+            "leave-parental-a",
+            "leave-parental-b",
+            "leave-parental-with-maternity",
+            "leave-suspension",
+            "work-flexible-b",
+            "work-overseas-trip",
+            "work-hours",
+            "work-duty-general",
+            "pay-overtime-a",
+            "pay-overtime-b",
+            "pay-severance",
+            "pay-holiday-work",
+            "hire-contract-a",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "hire-special-position",
+            "hire-professor",
+            "promo-exam-a",
+            "promo-hr-rule",
+            "disc-dui-a",
+            "disc-dui-b",
+            "disc-code-of-conduct",
+            "disc-crime-report",
+            "oos-lunch",
+            "oos-weather"
+          ],
+          "top_k_overlap_items": 140,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 0.8
+        },
+        "changed_questions": [
+          {
+            "question_id": "leave-annual-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-c",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-with-maternity",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-suspension",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-flexible-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-overseas-trip",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-hours",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-duty-general",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 5,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-severance",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-holiday-work",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 3,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-fixed-term-limit",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-special-position",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-professor",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-exam-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-hr-rule",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-code-of-conduct",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-crime-report",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "oos-lunch",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          },
+          {
+            "question_id": "oos-weather",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          }
+        ]
+      },
+      {
+        "backend": "qdrant-tuned",
+        "device": "cpu",
+        "p50_candidates_20_ms": 5217.141,
+        "p50_candidates_10_ms": 2705.826,
+        "p50_reduction_percent": 48.1358,
+        "speedup_x": 1.9281,
+        "identical_final_rankings": 7,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 7,
+          "identical_unordered_top_k_sets": 12,
+          "question_count": 35,
+          "top_1_changed_questions": [
+            "leave-annual-a",
+            "leave-parental-b",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "promo-hr-rule",
+            "disc-dui-a"
+          ],
+          "changed_questions": [
+            "leave-annual-a",
+            "leave-annual-b",
+            "leave-annual-c",
+            "leave-parental-a",
+            "leave-parental-b",
+            "leave-parental-with-maternity",
+            "leave-suspension",
+            "work-flexible-b",
+            "work-overseas-trip",
+            "work-hours",
+            "work-duty-general",
+            "pay-overtime-a",
+            "pay-overtime-b",
+            "pay-severance",
+            "pay-holiday-work",
+            "hire-contract-a",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "hire-special-position",
+            "hire-professor",
+            "promo-exam-a",
+            "promo-hr-rule",
+            "disc-dui-a",
+            "disc-dui-b",
+            "disc-code-of-conduct",
+            "disc-crime-report",
+            "oos-lunch",
+            "oos-weather"
+          ],
+          "top_k_overlap_items": 140,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 0.8
+        },
+        "changed_questions": [
+          {
+            "question_id": "leave-annual-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-c",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-with-maternity",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-suspension",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-flexible-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-overseas-trip",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-hours",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-duty-general",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 5,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-severance",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-holiday-work",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 3,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-fixed-term-limit",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-special-position",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-professor",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-exam-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-hr-rule",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-code-of-conduct",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-crime-report",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "oos-lunch",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          },
+          {
+            "question_id": "oos-weather",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          }
+        ]
+      },
+      {
+        "backend": "qdrant-tuned",
+        "device": "cuda",
+        "p50_candidates_20_ms": 191.86,
+        "p50_candidates_10_ms": 105.421,
+        "p50_reduction_percent": 45.0532,
+        "speedup_x": 1.8199,
+        "identical_final_rankings": 7,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 7,
+          "identical_unordered_top_k_sets": 12,
+          "question_count": 35,
+          "top_1_changed_questions": [
+            "leave-annual-a",
+            "leave-parental-b",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "promo-hr-rule",
+            "disc-dui-a"
+          ],
+          "changed_questions": [
+            "leave-annual-a",
+            "leave-annual-b",
+            "leave-annual-c",
+            "leave-parental-a",
+            "leave-parental-b",
+            "leave-parental-with-maternity",
+            "leave-suspension",
+            "work-flexible-b",
+            "work-overseas-trip",
+            "work-hours",
+            "work-duty-general",
+            "pay-overtime-a",
+            "pay-overtime-b",
+            "pay-severance",
+            "pay-holiday-work",
+            "hire-contract-a",
+            "hire-contract-b",
+            "hire-fixed-term-limit",
+            "hire-special-position",
+            "hire-professor",
+            "promo-exam-a",
+            "promo-hr-rule",
+            "disc-dui-a",
+            "disc-dui-b",
+            "disc-code-of-conduct",
+            "disc-crime-report",
+            "oos-lunch",
+            "oos-weather"
+          ],
+          "top_k_overlap_items": 140,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 0.8
+        },
+        "changed_questions": [
+          {
+            "question_id": "leave-annual-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-annual-c",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-parental-with-maternity",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "leave-suspension",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-flexible-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-overseas-trip",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-hours",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "work-duty-general",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": false
+          },
+          {
+            "question_id": "pay-overtime-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 5,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-severance",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "pay-holiday-work",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": false,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-contract-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 3,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-fixed-term-limit",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-special-position",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "hire-professor",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-exam-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 2,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "promo-hr-rule",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 2,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-a",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 4,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-dui-b",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 4,
+            "hit_rank_candidates_10": 3,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-code-of-conduct",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "disc-crime-report",
+            "out_of_scope": false,
+            "hit_rank_candidates_20": 1,
+            "hit_rank_candidates_10": 1,
+            "hit_at_5_candidates_20": true,
+            "hit_at_5_candidates_10": true
+          },
+          {
+            "question_id": "oos-lunch",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          },
+          {
+            "question_id": "oos-weather",
+            "out_of_scope": true,
+            "hit_rank_candidates_20": null,
+            "hit_rank_candidates_10": null,
+            "hit_at_5_candidates_20": null,
+            "hit_at_5_candidates_10": null
+          }
+        ]
+      }
+    ],
+    "faiss_vs_qdrant_final_ranking_equivalence": [
+      {
+        "device": "cpu",
+        "initial_candidates": 10,
+        "identical_final_rankings": 35,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 35,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      },
+      {
+        "device": "cpu",
+        "initial_candidates": 20,
+        "identical_final_rankings": 35,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 35,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      },
+      {
+        "device": "cuda",
+        "initial_candidates": 10,
+        "identical_final_rankings": 35,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 35,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      },
+      {
+        "device": "cuda",
+        "initial_candidates": 20,
+        "identical_final_rankings": 35,
+        "question_count": 35,
+        "ranking_comparison": {
+          "identical_ordered_rankings": 35,
+          "identical_unordered_top_k_sets": 35,
+          "question_count": 35,
+          "top_1_changed_questions": [],
+          "changed_questions": [],
+          "top_k_overlap_items": 175,
+          "top_k_total_items": 175,
+          "top_k_overlap_ratio": 1.0
+        }
+      }
+    ]
+  }
+}

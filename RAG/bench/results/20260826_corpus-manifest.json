@@ -1,16 +1,16 @@
 {
   "schema_version": 1,
-  "created_at_utc": "2026-08-25T17:09:03.102971+00:00",
+  "created_at_utc": "2026-08-25T18:18:29.028697+00:00",
   "command": {
     "script": "RAG/bench/capture_manifest.py",
     "argv": [
       "--output",
-      "RAG\\bench\\results\\20260826_corpus-manifest.json"
+      "D:\\Dev_Tools\\SKN32-4th-2Team\\RAG\\bench\\results\\20260826_corpus-manifest.json"
     ],
     "output": "RAG/bench/results/20260826_corpus-manifest.json"
   },
   "git": {
-    "commit": "00441a6b3deefd8afe49ac4876bce357b35d6b78",
+    "commit": "e17217c1592a32eaacb1fc183cd69c2c25585319",
     "branch": "rag-runtime",
     "dirty": false
   },
@@ -26,13 +26,23 @@
       "machine": "AMD64"
     },
     "torch": {
-      "version": "2.13.0+cpu",
-      "cuda_build": null,
-      "cuda_available": false,
-      "cudnn_version": null,
+      "version": "2.13.0+cu130",
+      "cuda_build": "13.0",
+      "cuda_available": true,
+      "cudnn_version": 92000,
       "num_threads": 24,
       "num_interop_threads": 24,
-      "devices": []
+      "devices": [
+        {
+          "index": 0,
+          "name": "NVIDIA GeForce RTX 4070 Laptop GPU",
+          "compute_capability": [
+            8,
+            9
+          ],
+          "total_memory_bytes": 8585216000
+        }
+      ]
     }
   },
   "configuration": {
@@ -52,7 +62,7 @@
     },
     "execution": {
       "device_requested": "auto",
-      "device_effective": "cpu",
+      "device_effective": "cuda",
       "warm_vector_stores": true
     }
   },
