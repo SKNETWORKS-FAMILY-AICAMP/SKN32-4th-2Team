@@ -1,0 +1,365 @@
+{
+  "schema_version": 1,
+  "title": "2026-08-19 legacy RAG experiment record",
+  "record_type": "transcribed_legacy_artifacts",
+  "scope": {
+    "source_workspace": "D:/Dev_Tools/rag_test",
+    "source_repository": "D:/Dev_Tools/rag_test/rag_only",
+    "source_files_copied": false,
+    "note": "이 파일은 기존 결과 파일을 현재 저장소로 복사하지 않고, 비교에 필요한 수치와 출처만 구조화한 기록이다."
+  },
+  "experiment_context": {
+    "measured_date": "2026-08-19",
+    "document_count": 26,
+    "chunk_count": 1414,
+    "device": "cuda",
+    "embedding_model": "jhgan/ko-sroberta-multitask",
+    "embedding_dimension": 768,
+    "reranker_model": "BAAI/bge-reranker-v2-m3"
+  },
+  "versions": [
+    {
+      "name": "upstream_before_experiments",
+      "commit": "f685d76",
+      "measurement_status": "not_measured",
+      "description": "실험용 변경을 적용하기 전 upstream 기준점",
+      "evidence": "커밋은 식별되지만 이 커밋에서 생성한 지연 또는 품질 측정 산출물은 없다."
+    },
+    {
+      "name": "baseline",
+      "branch": "exp/baseline",
+      "commit": "c0fb7f7",
+      "measurement_status": "measured",
+      "description": "문서별 FAISS 폴더를 순회하고 질문을 스토어마다 다시 임베딩"
+    },
+    {
+      "name": "opt1_embed_once",
+      "branch": "exp/opt1-embed-once",
+      "commit": "f9d2a0a",
+      "measurement_status": "measured",
+      "description": "질문 임베딩을 한 번만 계산하고 similarity_search_with_score_by_vector 사용"
+    },
+    {
+      "name": "opt1_5_faiss_cache",
+      "branch": "exp/opt1.5-cache",
+      "commit": "e2aecd6",
+      "measurement_status": "partially_measured",
+      "description": "opt1에 로드된 FAISS 스토어 메모리 캐시와 mtime 무효화를 추가",
+      "note": "12질의 retrieval snapshot은 없고 실서버 cold/warm 기록과 확장 실험 기록만 있다."
+    },
+    {
+      "name": "qdrant_naive",
+      "branch": "exp/opt2-qdrant",
+      "commit": "bfa6204",
+      "measurement_status": "measured",
+      "description": "단일 embedded Qdrant 컬렉션을 사용한 naive 검색"
+    },
+    {
+      "name": "qdrant_tuned",
+      "branch": "exp/opt2-qdrant-tuned",
+      "commit": "117fbb7",
+      "measurement_status": "measured",
+      "description": "Qdrant 결과에 문서당 후보 상한을 적용해 문서 다양성을 복원"
+    }
+  ],
+  "fixed_query_retrieval": {
+    "method": {
+      "endpoint": "http://127.0.0.1:8001/api/search",
+      "query_count": 12,
+      "warmup_requests": 1,
+      "repeats_per_query": 3,
+      "per_query_statistic": "median",
+      "summary_population": "12 per-query medians",
+      "timeout_seconds": 60
+    },
+    "latency_summary_ms": [
+      {
+        "version": "baseline",
+        "commit": "c0fb7f7",
+        "min_ms": 725.7,
+        "p50_ms": 935.8,
+        "max_ms": 1378.3,
+        "mean_ms": 969.4,
+        "source_artifact": "D:/Dev_Tools/rag_test/eval/baseline_retrieval.json"
+      },
+      {
+        "version": "opt1_embed_once",
+        "commit": "f9d2a0a",
+        "min_ms": 363.7,
+        "p50_ms": 407.6,
+        "max_ms": 1088.9,
+        "mean_ms": 514.5,
+        "source_artifact": "D:/Dev_Tools/rag_test/eval/opt1_retrieval.json"
+      },
+      {
+        "version": "qdrant_naive",
+        "commit": "bfa6204",
+        "min_ms": 307.8,
+        "p50_ms": 359.2,
+        "max_ms": 401.2,
+        "mean_ms": 360.8,
+        "source_artifact": "D:/Dev_Tools/rag_test/eval/opt2_retrieval.json"
+      },
+      {
+        "version": "qdrant_tuned",
+        "commit": "117fbb7",
+        "min_ms": 324.5,
+        "p50_ms": 360.6,
+        "max_ms": 1027.9,
+        "mean_ms": 461.9,
+        "source_artifact": "D:/Dev_Tools/rag_test/eval/opt2tuned_retrieval.json"
+      }
+    ],
+    "retrieval_equivalence_as_written_in_results_md": [
+      {
+        "comparison": "opt1_embed_once vs baseline",
+        "top_result_exact_matches": "12/12",
+        "result_overlap": 1.0
+      },
+      {
+        "comparison": "qdrant_naive vs baseline",
+        "top1_matches": "9/12",
+        "result_overlap": 0.38
+      },
+      {
+        "comparison": "qdrant_tuned vs baseline",
+        "top1_matches": "12/12",
+        "result_overlap": 0.63
+      }
+    ],
+    "retrieval_equivalence_recalculated_from_raw_json": [
+      {
+        "comparison": "opt1_embed_once vs baseline",
+        "exact_top1_chunks": "12/12",
+        "same_rank_slots": "60/60",
+        "unordered_top5_overlap": "60/60"
+      },
+      {
+        "comparison": "qdrant_naive vs baseline",
+        "same_top1_document_ids": "10/12",
+        "exact_top1_chunks": "8/12",
+        "same_rank_slots": "23/60",
+        "unordered_top5_overlap": "38/60"
+      },
+      {
+        "comparison": "qdrant_tuned vs baseline",
+        "exact_top1_chunks": "12/12",
+        "same_rank_slots": "60/60",
+        "unordered_top5_overlap": "60/60"
+      }
+    ]
+  },
+  "answer_quality_manual_summary": {
+    "method": {
+      "question_count": 35,
+      "llm": "gpt-4o-mini",
+      "mode": "live RAG",
+      "source": "D:/Dev_Tools/rag_test/eval/RESULTS.md",
+      "classification": "human-curated summary; not a complete raw run artifact"
+    },
+    "variants": [
+      {
+        "version": "baseline",
+        "topic_classification_accuracy": 0.943,
+        "group_consistency": "7/8",
+        "retrieval_recall": 0.875,
+        "citation_count": 11,
+        "bad_citation_count": 0,
+        "out_of_scope_correct": "3/3",
+        "error_count": 0
+      },
+      {
+        "version": "opt1_embed_once",
+        "measurement_status": "not_rerun",
+        "reported_inference": "baseline과 검색 결과가 12/12 동일하므로 답변 품질도 동일하다고 기존 RESULTS.md가 판단했다."
+      },
+      {
+        "version": "qdrant_naive",
+        "topic_classification_accuracy": 0.943,
+        "group_consistency": "7/8",
+        "retrieval_recall": 0.844,
+        "citation_count": 11,
+        "bad_citation_count": 0,
+        "out_of_scope_correct": "3/3",
+        "error_count": 0
+      },
+      {
+        "version": "qdrant_tuned",
+        "topic_classification_accuracy": 0.943,
+        "group_consistency": "7/8",
+        "retrieval_recall": 0.875,
+        "citation_count": 11,
+        "bad_citation_count": 0,
+        "out_of_scope_correct": "3/3",
+        "error_count": 0
+      }
+    ]
+  },
+  "scale_benchmark": {
+    "method": {
+      "base_document_count": 26,
+      "base_chunk_count": 1414,
+      "simulation": "기존 26개 FAISS 스토어와 포인트를 반복해 문서 수 증가를 모사",
+      "queries": 4,
+      "repeats_per_query": 2,
+      "statistic": "median of all timed calls",
+      "device": "cuda",
+      "qdrant_mode": "embedded in-memory exact collection",
+      "note": "실제 서로 다른 문서가 증가한 실험이 아니라 기존 데이터를 반복한 확장 지연 실험이다."
+    },
+    "rows": [
+      {
+        "documents": 26,
+        "faiss_reload_ms": 405,
+        "faiss_cached_ms": 382,
+        "qdrant_embedded_ms": 395
+      },
+      {
+        "documents": 104,
+        "faiss_reload_ms": 430,
+        "faiss_cached_ms": 358,
+        "qdrant_embedded_ms": 448
+      },
+      {
+        "documents": 208,
+        "faiss_reload_ms": 441,
+        "faiss_cached_ms": 321,
+        "qdrant_embedded_ms": 467
+      },
+      {
+        "documents": 416,
+        "faiss_reload_ms": 851,
+        "faiss_cached_ms": 323,
+        "qdrant_embedded_ms": 567
+      },
+      {
+        "documents": 832,
+        "faiss_reload_ms": 1468,
+        "faiss_cached_ms": 516,
+        "qdrant_embedded_ms": 717
+      }
+    ],
+    "source_artifact": "D:/Dev_Tools/rag_test/eval/scale_result.json"
+  },
+  "raw_vs_results_inconsistencies": [
+    {
+      "subject": "FAISS baseline 대비 Qdrant 검색 결과 동일성",
+      "results_md": {
+        "qdrant_naive": "top1 9/12, overlap 38%",
+        "qdrant_tuned": "top1 12/12, overlap 63%"
+      },
+      "raw_json_recalculation": {
+        "qdrant_naive": "top1 doc_id 10/12, exact top1 chunk 8/12, same-rank 23/60, unordered overlap 38/60",
+        "qdrant_tuned": "exact top1 12/12, same-rank 60/60, unordered overlap 60/60"
+      },
+      "resolution": "raw_json_is_primary",
+      "reporting_rule": "overlap 정의가 혼용된 수기 값 대신 원본 JSON 재계산값을 주 결과로 사용한다."
+    },
+    {
+      "subject": "opt1.5 live server cold/warm latency",
+      "results_md": {
+        "cold_ms": 1175,
+        "warm_ms": 429,
+        "source": "D:/Dev_Tools/rag_test/eval/RESULTS.md"
+      },
+      "history_csv": {
+        "timestamp": "2026-08-19 18:30",
+        "label": "opt1.5-26docs",
+        "document_count": 26,
+        "cold_ms": 465,
+        "warm_median_ms": 464,
+        "source": "D:/Dev_Tools/rag_test/eval/history.csv"
+      },
+      "resolution": "unresolved",
+      "reporting_rule": "둘 중 하나를 정답으로 선택하지 않고 양쪽 기록을 모두 보존한다."
+    },
+    {
+      "subject": "baseline out-of-scope correct refusal count",
+      "results_md": {
+        "correct": "3/3",
+        "source": "D:/Dev_Tools/rag_test/eval/RESULTS.md"
+      },
+      "baseline_bench_summary_json": {
+        "out_of_scope_questions": 3,
+        "correct_refusals": 1,
+        "source": "D:/Dev_Tools/rag_test/eval/baseline_bench_summary.json"
+      },
+      "resolution": "unresolved",
+      "reporting_rule": "수기 판정과 자동 집계가 일치하지 않으므로 최종 결론의 근거로 단독 사용하지 않는다."
+    }
+  ],
+  "artifact_provenance": [
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/RESULTS.md",
+      "kind": "human-curated report",
+      "sha256": "BC4A1438FD94894C17F327F74F9BB6A5E186DC02F8E756916F10552E30D7087F",
+      "provides": [
+        "branch and commit map",
+        "manual answer-quality comparison",
+        "retrieval-equivalence interpretation",
+        "opt1.5 server latency narrative"
+      ]
+    },
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/baseline_retrieval.json",
+      "kind": "raw retrieval snapshot",
+      "sha256": "419F6CED3D33E6EC8244674F5F191AE1EE84854A239C0967D8B71463EF9EA003",
+      "provides": [
+        "baseline per-query results",
+        "baseline latency summary"
+      ]
+    },
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/opt1_retrieval.json",
+      "kind": "raw retrieval snapshot",
+      "sha256": "E19E4A6D90FEA63223DAD6772BD237769DD70B9F70B5AD4AC18E23618504F314",
+      "provides": [
+        "opt1 per-query results",
+        "opt1 latency summary"
+      ]
+    },
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/opt2_retrieval.json",
+      "kind": "raw retrieval snapshot",
+      "sha256": "A9D7B32A9973959CCEA4FCF46733F4CFBAC74595E080C630231CD43D479AAE65",
+      "provides": [
+        "Qdrant naive per-query results",
+        "Qdrant naive latency summary"
+      ]
+    },
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/opt2tuned_retrieval.json",
+      "kind": "raw retrieval snapshot",
+      "sha256": "BC8EE9C84752DD2DEA495E04409B95F1034530D2954860D1920A9E0884DB0AD4",
+      "provides": [
+        "Qdrant tuned per-query results",
+        "Qdrant tuned latency summary"
+      ]
+    },
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/scale_result.json",
+      "kind": "raw scale summary",
+      "sha256": "7C32ACF4476656B2947CC3852609738FCF0714A612BC0BFB0F0C0D2250092B00",
+      "provides": [
+        "simulated 26 to 832 document latency table"
+      ]
+    },
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/history.csv",
+      "kind": "measurement log",
+      "sha256": "4A504F1A3BF1DB8EF92C57369254FA294827E278ED760B5DD0AA8CD47FF21B0B",
+      "provides": [
+        "opt1.5 26-document cold and warm record"
+      ]
+    },
+    {
+      "path": "D:/Dev_Tools/rag_test/eval/baseline_bench_summary.json",
+      "kind": "raw answer benchmark summary",
+      "sha256": "5A835A6A0E0F2DAF63905A5ADDC4D3B8B274A0CC3412B89E79B604D08811218E",
+      "provides": [
+        "baseline 35-question aggregate",
+        "out-of-scope automatic flags"
+      ]
+    }
+  ]
+}
