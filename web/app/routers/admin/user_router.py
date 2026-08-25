@@ -21,21 +21,22 @@ router = APIRouter(
 )
 
 # main.py와 동일한 절대경로 기준으로 템플릿을 로드한다.
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+BASE_DIR = os.path.dirname(
+    os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+)
 templates = Jinja2Templates(directory=os.path.join(BASE_DIR, "templates"))
 
 
 @router.get("", response_class=HTMLResponse)
-def users_page(
-    request: Request
-):
+def users_page(request: Request):
     user, redirect = require_admin(request)
     if redirect:
         return redirect
 
     return templates.TemplateResponse(
         request,
-        "admin/users.html", {"user": user,"active": "admin_users"},
+        "admin/users.html",
+        {"user": user, "active": "admin_users"},
     )
 
 
@@ -80,7 +81,9 @@ def create_user_api(
     require_admin_api(request)
 
     try:
-        create_user_by_admin(db, user_id, passwd, passwd_confirm, name, department, is_admin, is_disabled)
+        create_user_by_admin(
+            db, user_id, passwd, passwd_confirm, name, department, is_admin, is_disabled
+        )
     except UserServiceError as e:
         return JSONResponse(status_code=e.status_code, content={"detail": e.message})
 

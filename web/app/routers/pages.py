@@ -15,4 +15,6 @@ def root(request: Request):
     if redirect:
         return redirect
 
-    return RedirectResponse(url=post_login_redirect_url(user.get("is_admin")), status_code=303)
+    return RedirectResponse(
+        url=post_login_redirect_url(user.get("is_admin")), status_code=303
+    )

@@ -4,11 +4,12 @@
   </div>
 
   <div class="header-user">
-    <div class="avatar">{{ user.name[:1] }}</div>
+    <div class="avatar">{{ user.name|slice:":1" }}</div>
     <div>
       <div class="user-name">{{ user.name }}</div>
     </div>
-    <form method="post" action="/auth/logout">
+    <form method="post" action="{% url 'logout_submit' %}">
+      {% csrf_token %}
       <button type="submit" class="logout-btn">로그아웃</button>
     </form>
   </div>

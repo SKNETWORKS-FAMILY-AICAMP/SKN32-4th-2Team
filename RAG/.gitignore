@@ -1,5 +1,41 @@
-/venv/
-*/pdf/delete
-# */pdf/tmp
+# Secrets and local configuration
+.env
+.env.*
+!.env.example
+
+# Python environments and generated caches
+.venv/
+venv/
+env/
 __pycache__/
-/vector_store
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Runtime data and generated vector indexes
+vector_store/
+vector_store_backup*/
+qdrant_data/
+res/pdf/delete/
+res/pdf/tmp/
+logs/
+*.log
+검색 랭킹테스트 History/
+*.zip
+
+# Do not ignore res/pdf/*.pdf here: the reviewed baseline corpus is tracked.
+# Uploaded operational PDFs must be reviewed before explicitly adding them.
+
+# FastAPI-to-Django comparison experiments (not the production RAG runtime)
+django_rag/
+run_django_rag.py
+
+# IDE and OS files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

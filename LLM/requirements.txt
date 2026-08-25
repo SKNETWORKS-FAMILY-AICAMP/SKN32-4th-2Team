@@ -1,4 +1,4 @@
-# 반드시 가상환경에서 설치하세요 (전역 환경의 다른 패키지를 깨뜨릴 수 있습니다):
+# Install inside a virtual environment.
 #   python -m venv .venv
 #   .venv\Scripts\activate        (Windows)
 #   source .venv/bin/activate     (macOS/Linux)
@@ -10,13 +10,13 @@ uvicorn[standard]>=0.34.0
 pydantic>=2.11.0
 pydantic-settings>=2.10.1
 
-# --- HTTP client (RAG 서비스 호출용) ---
+# --- HTTP client for the RAG service ---
 httpx>=0.28.0
 
 # --- LLM providers ---
 openai>=2.45.0
 google-genai>=1.65.0
 
-# --- 성능 벤치마크 (bench/ 전용, 서비스 실행에는 불필요) ---
+# --- Benchmark-only dependencies; not required by the running service ---
 pyyaml>=6.0.0
 pypdf>=6.0.0

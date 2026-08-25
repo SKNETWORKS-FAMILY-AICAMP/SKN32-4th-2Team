@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
+import logging
 import mysql.connector
 from mysql.connector import Error
 import os
@@ -16,16 +18,67 @@ from rag_pipeline import (
     get_embedding_model,
     get_reranker_model,
     search_across_vector_stores,
+    warm_vector_store_cache,
     select_documents_for_bulk_load,
     select_pending_documents,
 )
 
 
-embedding_model = get_embedding_model()
-reranker_model = get_reranker_model()
+# 모델과 FAISS 인덱스는 lifespan에서 미리 준비한다. 첫 사용자 질문이 모델 다운로드와
+# 캐시 적재를 떠안지 않도록 서버가 준비 완료되기 전에 이 작업을 끝낸다.
+embedding_model = None
+reranker_model = None
+rag_ready = False
+warmed_vector_stores = 0
+vector_store_warmup_failures = 0
+logger = logging.getLogger("rag.startup")
+
+def get_models():
+    global embedding_model, reranker_model
+    if embedding_model is None:
+        embedding_model = get_embedding_model()
+    if reranker_model is None:
+        reranker_model = get_reranker_model()
+    return embedding_model, reranker_model
 
 
-app = FastAPI(title=Config.API_TITLE)
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """모델과 로컬 FAISS 캐시를 적재한 뒤에만 RAG 요청을 받는다."""
+    global rag_ready, warmed_vector_stores, vector_store_warmup_failures
+
+    logger.info("RAG 모델 워밍업을 시작합니다.")
+    try:
+        active_embedding_model, _ = get_models()
+        vector_root = os.path.join(Config.BASE_DIR, "vector_store")
+        if Config.WARM_VECTOR_STORES:
+            warmed_vector_stores, failed_stores = warm_vector_store_cache(
+                vector_root,
+                active_embedding_model,
+            )
+            vector_store_warmup_failures = len(failed_stores)
+            if failed_stores:
+                failed_ids = ", ".join(doc_id for doc_id, _ in failed_stores)
+                logger.warning("워밍업에서 읽지 못한 FAISS 인덱스: %s", failed_ids)
+        else:
+            warmed_vector_stores = 0
+            vector_store_warmup_failures = 0
+            logger.info("FAISS 캐시 워밍업을 생략했습니다 (RAG_WARM_VECTOR_STORES=0).")
+
+        rag_ready = True
+        logger.info(
+            "RAG 워밍업 완료: 모델 준비, FAISS %s개 캐시, 실패 %s개",
+            warmed_vector_stores,
+            vector_store_warmup_failures,
+        )
+    except Exception:
+        logger.exception("RAG 워밍업 실패: 서버를 시작하지 않습니다.")
+        raise
+
+    yield
+
+
+app = FastAPI(title=Config.API_TITLE, lifespan=lifespan)
 
 # CORS 설정
 app.add_middleware(
@@ -53,45 +106,9 @@ DELETE_DIR = Config.DELETE_DIR
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(DELETE_DIR, exist_ok=True)
 
-# 데이터베이스 초기화 함수
-def initialize_database():
-    """서버 시작 시 데이터베이스 초기화 (SQL 파일 자동 실행)"""
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        
-        # SQL 파일 경로
-        base_dir = os.path.dirname(os.path.dirname(__file__))
-        schema_file = os.path.join(base_dir, 'sql', 'rag_chatbot_schema.sql')
-        
-        # 스키마 파일 실행
-        if os.path.exists(schema_file):
-            with open(schema_file, 'r', encoding='utf-8') as f:
-                sql_script = f.read()
-                # 여러 SQL 문을 분리해서 실행
-                statements = sql_script.split(';')
-                for statement in statements:
-                    statement = statement.strip()
-                    if statement and not statement.startswith('--'):
-                        cursor.execute(statement)
-            connection.commit()
-            print("Database schema initialized successfully")
-
-        # 초기 샘플 문서는 별도 SQL 파일을 한 번 실행해 주세요.
-        # 예: mysql -u <사용자> -p < RAG/sql/rag_document.sql
-        
-        cursor.close()
-        connection.close()
-        
-    except Error as e:
-        print(f"Database initialization error: {e}")
-        # 초기화 실패해도 서버는 계속 실행
-
-# 서버 시작 시 데이터베이스 초기화
-@app.on_event("startup")
-def startup_event():
-    print("Initializing database...")
-    initialize_database()
+# The shared MySQL schema is owned by Django migrations.  RAG must never run
+# the legacy full-schema script because it conflicts with Django's user and
+# auth tables.
 
 # 데이터베이스 연결
 def get_db_connection():
@@ -150,6 +167,18 @@ def serialize_document(doc: dict) -> dict:
 async def root():
     return {"message": "RAG Document Management API", "port": Config.API_PORT}
 
+@app.get("/health")
+async def health():
+    """LLM 서비스가 RAG 프로세스의 가용성을 확인할 때 쓰는 경량 엔드포인트."""
+    return {
+        "status": "ok" if rag_ready else "warming",
+        "models_ready": embedding_model is not None and reranker_model is not None,
+        "vector_store_exists": os.path.isdir(os.path.join(Config.BASE_DIR, "vector_store")),
+        "warmed_vector_stores": warmed_vector_stores,
+        "vector_store_warmup_failures": vector_store_warmup_failures,
+        "vector_store_cache_warmed": Config.WARM_VECTOR_STORES,
+    }
+
 @app.get("/api/documents", response_model=List[DocumentResponse])
 async def get_documents():
     """삭제되지 않은 모든 문서 목록 조회"""
@@ -190,12 +219,6 @@ async def get_document(doc_id: int):
         """
         cursor.execute(query, (doc_id,))
         document = cursor.fetchone()
-        if document["is_loaded"]:
-            return {
-                "message": "Already loaded",
-                "doc_id": doc_id
-            }
-        
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
@@ -257,23 +280,28 @@ async def upload_document(file: UploadFile = File(...)):
         # ==========================
         # 자동 Vector DB 적재
         # ==========================
-        vector_path = os.path.join(Config.BASE_DIR, "vector_store", str(doc_id))
-        chunk_count = build_vector_store_from_file(
-            file_path,
-            vector_path,
-            doc_id=doc_id,
-            chunk_size=Config.CHUNK_SIZE,
-            chunk_overlap=Config.CHUNK_OVERLAP,
-        )
+        try:
+            vector_path = os.path.join(Config.BASE_DIR, "vector_store", str(doc_id))
+            chunk_count = build_vector_store_from_file(
+                file_path,
+                vector_path,
+                doc_id=doc_id,
+                chunk_size=Config.CHUNK_SIZE,
+                chunk_overlap=Config.CHUNK_OVERLAP,
+            )
 
-        cursor.execute("""
-        UPDATE document
-        SET is_loaded = TRUE,
-            loaded_at = %s
-        WHERE doc_id = %s
-        """, (datetime.now(), doc_id))
+            cursor.execute("""
+            UPDATE document
+            SET is_loaded = TRUE,
+                loaded_at = %s
+            WHERE doc_id = %s
+            """, (datetime.now(), doc_id))
 
-        connection.commit()
+            connection.commit()
+        except Exception as e:
+            # Vector DB 적재 실패해도 파일 업로드는 성공으로 처리
+            print(f"Vector store build failed (file still uploaded): {e}")
+            chunk_count = 0
 
 
 
@@ -560,11 +588,14 @@ async def search_vector(request: SearchRequest):
         if not os.path.exists(vector_root):
             raise HTTPException(status_code=404, detail="No vector store found")
 
+        # startup에서 워밍업된 인스턴스를 재사용한다.
+        active_embedding_model, active_reranker_model = get_models()
+
         results = search_across_vector_stores(
             query,
             vector_root,
-            embedding_model,
-            reranker_model,
+            active_embedding_model,
+            active_reranker_model,
             top_k=Config.SEARCH_TOP_K,
             initial_candidates=Config.SEARCH_INITIAL_CANDIDATES,
         )

@@ -187,7 +187,7 @@ function setupLoadAllButton() {
         bulkLoadAbortController = new AbortController();
 
         try {
-            const response = await fetch(`${API_BASE_URL}/documents/load-all?mode=${selectedMode}`, {
+            const response = await fetch(`${API_BASE_URL}/api/documents/load-all?mode=${selectedMode}`, {
                 method: 'POST',
                 signal: bulkLoadAbortController.signal
             });
@@ -306,7 +306,7 @@ function getDocFiles() {
 // 파일 목록 로드 (백엔드 API 호출)
 async function loadFiles() {
     try {
-        const response = await fetch(`${API_BASE_URL}/documents`);
+        const response = await fetch(`${API_BASE_URL}/api/documents`);
         if (response.ok) {
             const data = await response.json();
 
@@ -550,7 +550,7 @@ function selectFile(fileId) {
 async function deleteFile(fileId) {
     if (confirm('파일을 삭제하시겠습니까?')) {
         try {
-            const response = await fetch(`${API_BASE_URL}/documents/${fileId}`, {
+            const response = await fetch(`${API_BASE_URL}/api/documents/${fileId}`, {
                 method: 'DELETE'
             });
 
@@ -653,7 +653,7 @@ async function handleFileUpload(file) {
     formData.append('file', file);
 
     try {
-        const response = await fetch(`${API_BASE_URL}/documents/upload`, {
+        const response = await fetch(`${API_BASE_URL}/api/documents/upload`, {
             method: 'POST',
             body: formData
         });
@@ -866,7 +866,7 @@ async function openPdfViewer(docId) {
 
     try {
         // PDF 파일을 Blob으로 가져오기
-        const response = await fetch(`${API_BASE_URL}/documents/${docId}/file`);
+        const response = await fetch(`${API_BASE_URL}/api/documents/${docId}/file`);
         if (!response.ok) {
             const errorData = await response.json().catch(() => ({}));
             throw new Error(errorData.detail || `PDF 파일을 불러오는데 실패했습니다. (Status: ${response.status})`);

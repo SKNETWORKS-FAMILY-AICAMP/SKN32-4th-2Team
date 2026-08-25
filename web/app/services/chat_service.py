@@ -41,7 +41,9 @@ def list_chatrooms(db: Session, user_id: str) -> list[dict]:
         {
             "chatroom_id": room.chatroom_id,
             "chatroom_name": room.chatroom_name,
-            "created_at": room.created_at.strftime("%Y-%m-%d %H:%M") if room.created_at else "",
+            "created_at": (
+                room.created_at.strftime("%Y-%m-%d %H:%M") if room.created_at else ""
+            ),
         }
         for room in rooms
     ]
@@ -71,24 +73,30 @@ def get_messages(db: Session, chatroom_id: str, user_id: str) -> list[dict]:
             .order_by(ChatSource.source_id)
         )
         for source in db.scalars(src_stmt).all():
-            sources_by_chat_id.setdefault(source.chat_id, []).append({
-                "doc_id": source.doc_id,
-                "original_file_name": source.file_name,
-                "page": source.page,
-            })
+            sources_by_chat_id.setdefault(source.chat_id, []).append(
+                {
+                    "doc_id": source.doc_id,
+                    "original_file_name": source.file_name,
+                    "page": source.page,
+                }
+            )
 
     return [
         {
             "speaker": chat.speaker,
             "message": chat.message,
-            "created_at": chat.created_at.strftime("%Y-%m-%d %H:%M") if chat.created_at else "",
+            "created_at": (
+                chat.created_at.strftime("%Y-%m-%d %H:%M") if chat.created_at else ""
+            ),
             "sources": sources_by_chat_id.get(chat.chat_id, []),
         }
         for chat in chats
     ]
 
 
-def _recent_history(db: Session, chatroom_id: str, pairs: int = HISTORY_PAIRS) -> list[dict]:
+def _recent_history(
+    db: Session, chatroom_id: str, pairs: int = HISTORY_PAIRS
+) -> list[dict]:
     """이 채팅방의 가장 최근 질문-응답 N쌍을 시간순(오래된 것 -> 최신)으로 반환한다.
     지금 막 들어온 사용자 질문을 저장하기 '전'에 호출해야 한다."""
 
@@ -100,10 +108,14 @@ def _recent_history(db: Session, chatroom_id: str, pairs: int = HISTORY_PAIRS) -
     )
     recent = db.scalars(stmt).all()
 
-    return [{"speaker": chat.speaker, "message": chat.message} for chat in reversed(recent)]
+    return [
+        {"speaker": chat.speaker, "message": chat.message} for chat in reversed(recent)
+    ]
 
 
-def _save_error_turn(db: Session, chatroom_id: str, message: str, error: ChatAPIError) -> None:
+def _save_error_turn(
+    db: Session, chatroom_id: str, message: str, error: ChatAPIError
+) -> None:
     """에러가 나도 대화 이력은 온전히 남긴다: 사용자 질문(topic=에러) + llm 쪽엔 에러 안내 문구.
     재접속해서 대화방을 다시 열어도 "다시 시도해주세요" 문구가 그대로 보이게 된다."""
     db.add(Chat(chatroom_id=chatroom_id, speaker="user", message=message, topic="에러"))
@@ -129,7 +141,9 @@ def send_message(db: Session, chatroom_id: str, user_id: str, message: str) -> d
     if is_first_message:
         # 첫 메시지일 때만 두 요청을 동시에 던져서 순차 실행 시 더해지던 지연을 없앤다.
         with ThreadPoolExecutor(max_workers=2) as executor:
-            chat_future = executor.submit(get_chat_completion, chatroom_id, message, history)
+            chat_future = executor.submit(
+                get_chat_completion, chatroom_id, message, history
+            )
             name_future = executor.submit(generate_chatroom_name, message)
 
             try:
@@ -150,19 +164,28 @@ def send_message(db: Session, chatroom_id: str, user_id: str, message: str) -> d
             _save_error_turn(db, chatroom_id, message, e)
             raise ChatServiceError(e.message, status_code=e.status_code)
 
-    db.add(Chat(chatroom_id=chatroom_id, speaker="user", message=message, topic=result["topic"]))
+    db.add(
+        Chat(
+            chatroom_id=chatroom_id,
+            speaker="user",
+            message=message,
+            topic=result["topic"],
+        )
+    )
 
     llm_chat = Chat(chatroom_id=chatroom_id, speaker="llm", message=result["answer"])
     db.add(llm_chat)
     db.flush()  # llm_chat.chat_id를 채우기 위해 (커밋 전에 FK로 참조해야 함)
 
     for source in result["sources"]:
-        db.add(ChatSource(
-            chat_id=llm_chat.chat_id,
-            doc_id=source.get("doc_id"),
-            file_name=source.get("original_file_name", ""),
-            page=source.get("page"),
-        ))
+        db.add(
+            ChatSource(
+                chat_id=llm_chat.chat_id,
+                doc_id=source.get("doc_id"),
+                file_name=source.get("original_file_name", ""),
+                page=source.get("page"),
+            )
+        )
 
     db.commit()
 

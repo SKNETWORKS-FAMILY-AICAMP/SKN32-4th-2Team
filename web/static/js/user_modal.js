@@ -1,4 +1,19 @@
 (function () {
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
   const overlay = document.getElementById("user-modal-overlay");
   if (!overlay) return;
 
@@ -25,7 +40,7 @@
   const MODE_CONFIG = {
     signup: {
       title: "회원가입", submitLabel: "가입하기",
-      action: "/auth/signup", method: "POST",
+      action: "/login/auth/signup", method: "POST",
       userIdEditable: true, showPasswdConfirm: true, passwdRequired: true,
       showAdminStatus: false, showSignupHint: true,
     },
@@ -50,7 +65,7 @@
     form.dataset.mode = mode;
     form.dataset.method = config.method;
     form.dataset.action = mode === "edit"
-      ? `/admin/users/api/${encodeURIComponent(prefill.userId)}`
+      ? `/admin/users/api/${encodeURIComponent(prefill.userId)}/update`
       : config.action;
 
     titleEl.textContent = config.title;
@@ -123,7 +138,7 @@
     checkIdResult.textContent = "확인 중...";
 
     try {
-      const res = await fetch(`/auth/check-user-id?user_id=${encodeURIComponent(id)}`);
+      const res = await fetch(`/login/auth/check-user-id?user_id=${encodeURIComponent(id)}`);
       const data = await res.json();
 
       if (data.available) {
@@ -148,7 +163,12 @@
     }
 
     try {
-      const res = await fetch(`/admin/users/api/${encodeURIComponent(userId)}`, { method: "DELETE" });
+      const res = await fetch(`/admin/users/api/${encodeURIComponent(userId)}/delete`, { 
+        method: "DELETE",
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      });
       const data = await res.json();
 
       if (!res.ok) {
@@ -194,7 +214,13 @@
     }
 
     try {
-      const res = await fetch(form.dataset.action, { method: form.dataset.method, body: formData });
+      const res = await fetch(form.dataset.action, { 
+        method: form.dataset.method, 
+        body: formData,
+        headers: {
+          'X-CSRFToken': getCookie('csrftoken')
+        }
+      });
       const data = await res.json();
 
       if (!res.ok) {

@@ -31,7 +31,9 @@ USER_ID_PATTERN = re.compile(r"^[a-zA-Z0-9_-]{4,20}$")
 def login_page(request: Request):
     user = get_current_user(request)
     if user:
-        return RedirectResponse(url=post_login_redirect_url(user.get("is_admin")), status_code=303)
+        return RedirectResponse(
+            url=post_login_redirect_url(user.get("is_admin")), status_code=303
+        )
     return templates.TemplateResponse(request, "login.html", {"error": None})
 
 
@@ -71,7 +73,10 @@ def check_user_id(user_id: str, db: Session = Depends(get_db)):
     if not USER_ID_PATTERN.match(user_id):
         return JSONResponse(
             status_code=400,
-            content={"available": False, "detail": "아이디는 영문/숫자 4~20자로 입력해주세요."},
+            content={
+                "available": False,
+                "detail": "아이디는 영문/숫자 4~20자로 입력해주세요.",
+            },
         )
 
     exists = db.get(User, user_id) is not None
@@ -126,7 +131,10 @@ def signup_submit(
     db.add(new_user)
     db.commit()
 
-    return JSONResponse(status_code=201, content={"detail": "회원가입이 완료되었습니다. 로그인해주세요."})
+    return JSONResponse(
+        status_code=201,
+        content={"detail": "회원가입이 완료되었습니다. 로그인해주세요."},
+    )
 
 
 @router.post("/auth/logout")
