@@ -1,0 +1,2797 @@
+{
+  "schema_version": 1,
+  "created_at_utc": "2026-08-25T17:09:03.102971+00:00",
+  "command": {
+    "script": "RAG/bench/capture_manifest.py",
+    "argv": [
+      "--output",
+      "RAG\\bench\\results\\20260826_corpus-manifest.json"
+    ],
+    "output": "RAG/bench/results/20260826_corpus-manifest.json"
+  },
+  "git": {
+    "commit": "00441a6b3deefd8afe49ac4876bce357b35d6b78",
+    "branch": "rag-runtime",
+    "dirty": false
+  },
+  "runtime": {
+    "python": {
+      "version": "3.11.9",
+      "implementation": "CPython"
+    },
+    "platform": {
+      "system": "Windows",
+      "release": "10",
+      "version": "10.0.26200",
+      "machine": "AMD64"
+    },
+    "torch": {
+      "version": "2.13.0+cpu",
+      "cuda_build": null,
+      "cuda_available": false,
+      "cudnn_version": null,
+      "num_threads": 24,
+      "num_interop_threads": 24,
+      "devices": []
+    }
+  },
+  "configuration": {
+    "chunking": {
+      "chunk_size": 400,
+      "chunk_overlap": 80,
+      "min_chunk_length": 80,
+      "article_head_enabled": true
+    },
+    "search": {
+      "top_k": 5,
+      "initial_candidates": 20
+    },
+    "models": {
+      "embedding": "jhgan/ko-sroberta-multitask",
+      "reranker": "BAAI/bge-reranker-v2-m3"
+    },
+    "execution": {
+      "device_requested": "auto",
+      "device_effective": "cpu",
+      "warm_vector_stores": true
+    }
+  },
+  "questions": {
+    "path": "LLM/bench/questions.yaml",
+    "size_bytes": 12495,
+    "sha256": "fa0355bfa69cf173acf03e70380b82e3a6d653b3a327ceaced6fcab372cbff53"
+  },
+  "corpus": {
+    "root": "RAG/res/pdf",
+    "pdf_count": 93,
+    "total_bytes": 28210781,
+    "aggregate_sha256": "ff94c6ed20a596825baa3c8bc70e4cfc13116df5bb372b7e93a85ca77abe103c",
+    "files": [
+      {
+        "path": "RAG/res/pdf/1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(법률).pdf",
+        "size_bytes": 197171,
+        "sha256": "bef0d99ed58f75b4799920e8a7daa264150efe2b96fc1e9e0d3e0041ae022027"
+      },
+      {
+        "path": "RAG/res/pdf/1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행규칙).pdf",
+        "size_bytes": 123863,
+        "sha256": "d5b9cc7b202cf0bc56180a126bd73943dea78161b4c43e1e6a10fdc0c1950813"
+      },
+      {
+        "path": "RAG/res/pdf/1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행령).pdf",
+        "size_bytes": 147069,
+        "sha256": "e695b8ad7e945fe712a3522cf3ecc9f8925e5c03b980319d72bc3a86adc4728e"
+      },
+      {
+        "path": "RAG/res/pdf/2.공공기관의 운영에 관한 법률(법률).pdf",
+        "size_bytes": 190150,
+        "sha256": "2e61f48f2de836df45fddd469fecd2d18d4b2fc3eaf05b592c31f42dfd0b7f22"
+      },
+      {
+        "path": "RAG/res/pdf/2.공공기관의 운영에 관한 법률(시행령).pdf",
+        "size_bytes": 158070,
+        "sha256": "84070ab313e1741764e6f4b53379aa11e3f45b4c2796a0bf3501c03cbe717137"
+      },
+      {
+        "path": "RAG/res/pdf/3.교육공무원법(법률).pdf",
+        "size_bytes": 198715,
+        "sha256": "185e5b67ca115a65ac2dc437ce0d2e17addf9c7da142b141acc6b1a4b45c5d55"
+      },
+      {
+        "path": "RAG/res/pdf/4.교육공무원임용령(시행령).pdf",
+        "size_bytes": 193956,
+        "sha256": "02ac5520575a9f60b98f9c480dac30481172ff3e52218886b4a25cf319e2db92"
+      },
+      {
+        "path": "RAG/res/pdf/5.근로기준법(법률).pdf",
+        "size_bytes": 232877,
+        "sha256": "6d18a09787a765208e550c41a3e24076c23688217c87101e203218f744932d47"
+      },
+      {
+        "path": "RAG/res/pdf/5.근로기준법(시행규칙).pdf",
+        "size_bytes": 113543,
+        "sha256": "167f0db9bc5a04179c27220c77251cae3a8ee2e5e451b9dd06191e2688c05e8d"
+      },
+      {
+        "path": "RAG/res/pdf/5.근로기준법(시행령).pdf",
+        "size_bytes": 169900,
+        "sha256": "e8edf56b9cb6b1f8e55867ce91d58bff791c0629e495a4bb7d108e3958075ed1"
+      },
+      {
+        "path": "RAG/res/pdf/6.기간제 및 단시간근로자 보호 등에 관한 법률(법률).pdf",
+        "size_bytes": 115493,
+        "sha256": "88c884f81bd9877798d0483de5c81d03572a0c244d387d0b7e97acae6d9dec84"
+      },
+      {
+        "path": "RAG/res/pdf/6.기간제 및 단시간근로자 보호 등에 관한 법률(시행규칙).pdf",
+        "size_bytes": 67035,
+        "sha256": "d68dbce8feb020a4499a6d40ec17842b0dc1330a9549accede39724507c67a76"
+      },
+      {
+        "path": "RAG/res/pdf/6.기간제 및 단시간근로자 보호 등에 관한 법률(시행령).pdf",
+        "size_bytes": 96275,
+        "sha256": "6702f91c8e154e9fe6f239f68fe678dcb055648613a0016d41b0e93ea3c14d20"
+      },
+      {
+        "path": "RAG/res/pdf/감사규정.pdf",
+        "size_bytes": 306507,
+        "sha256": "b9afd2db17470bf8604b47127ca8aee239faf28f7c7f4d44b6eb6766fee92eb0"
+      },
+      {
+        "path": "RAG/res/pdf/감사규정시행규칙.pdf",
+        "size_bytes": 694533,
+        "sha256": "19fcf12e18bde3c8ed13747b79ceb47e61872173762e3b237e8e6110134b2368"
+      },
+      {
+        "path": "RAG/res/pdf/강사인사관리 규칙.pdf",
+        "size_bytes": 446287,
+        "sha256": "3576a32e50dae1b6b92c3986cbb7a862756772c02e66fb62f043c83889d2c5ad"
+      },
+      {
+        "path": "RAG/res/pdf/개교기념일에관한규칙.pdf",
+        "size_bytes": 59084,
+        "sha256": "7aabcb8977ba69d89a46e149847cefe591feb900922f0b26b70dbeea58ed3a85"
+      },
+      {
+        "path": "RAG/res/pdf/개인정보 보호규칙.pdf",
+        "size_bytes": 1161942,
+        "sha256": "149c91913f7977803c864c40b317085cc150ed45748c7648c905ee5c2976802b"
+      },
+      {
+        "path": "RAG/res/pdf/계약사무처리규칙.pdf",
+        "size_bytes": 402494,
+        "sha256": "0c80ec92b035ffe798aa11c07dfb1b4f76cd374beba9f3c20a71f704aebc4a65"
+      },
+      {
+        "path": "RAG/res/pdf/계약직직원임용지침.pdf",
+        "size_bytes": 307588,
+        "sha256": "d99609f2b0affe123a9d2206dfdf2db09f2c4ce73f4b4103f78989539057cb20"
+      },
+      {
+        "path": "RAG/res/pdf/공무국외출장 운영지침.pdf",
+        "size_bytes": 315967,
+        "sha256": "9f78bf81b749643b7fe8a2b920c81edc71d9fe72994198ef262d3edc8efa8103"
+      },
+      {
+        "path": "RAG/res/pdf/공무직 직원 인사 및 보수에 관한 규칙.pdf",
+        "size_bytes": 277724,
+        "sha256": "ffe920b523adb05a90ca17b8b523a2c36b90fb39ac18e9e4f6d6a6c28dff8017"
+      },
+      {
+        "path": "RAG/res/pdf/교내홍보물게시에 관한 지침.pdf",
+        "size_bytes": 148040,
+        "sha256": "bd49f40d876030d7953c8515efc8c1e95e2f6e44f872a7cc5ee36220e827c809"
+      },
+      {
+        "path": "RAG/res/pdf/교원연구제에관한규칙.pdf",
+        "size_bytes": 394567,
+        "sha256": "743e7a62fded87880953d88797507b67de4f15003d694994db0c4580d69c9371"
+      },
+      {
+        "path": "RAG/res/pdf/교원인사규정.pdf",
+        "size_bytes": 479380,
+        "sha256": "c402ef620aa3df04f37f4d03182c40fe8d0663bc25c80b6f4024fcb2374cabb8"
+      },
+      {
+        "path": "RAG/res/pdf/교원호봉확정지침.pdf",
+        "size_bytes": 216433,
+        "sha256": "26041d939546baeb743f10a80b80b3c0f49f1d6a819cac667213ceadad856c6d"
+      },
+      {
+        "path": "RAG/res/pdf/교직원 음주운전 비위행위 확인에 관한 지침.pdf",
+        "size_bytes": 195311,
+        "sha256": "9c67ac56603ce106322e8f94300aeedb5dbb7d94d68b9c23593daca9845322f9"
+      },
+      {
+        "path": "RAG/res/pdf/교직원대여주택관리및사용에관한지침.pdf",
+        "size_bytes": 163788,
+        "sha256": "1a99a679e134f31f9b50282f75ad05e2615b331625a9cd921d5adefc31c8d910"
+      },
+      {
+        "path": "RAG/res/pdf/교직원명예퇴직수당등지급규정.pdf",
+        "size_bytes": 164537,
+        "sha256": "4d65f75e2c450c9cc4b6ae431a37a044f706d35a0193242122a6c5c81f6ecdb7"
+      },
+      {
+        "path": "RAG/res/pdf/교직원주택대여및주택자금대부지침.pdf",
+        "size_bytes": 344415,
+        "sha256": "299bab03b0eed1ad45ab0cef85dc29f18fab2b734af9bfded431020b677303ad"
+      },
+      {
+        "path": "RAG/res/pdf/교직원특수병치료비지원지침.pdf",
+        "size_bytes": 134537,
+        "sha256": "ac05aada4d831a7db32e86085852e082fe938e814d85a2f6608c9c98c779011f"
+      },
+      {
+        "path": "RAG/res/pdf/국외여행에관한규칙.pdf",
+        "size_bytes": 292186,
+        "sha256": "bd61cb2fbfa03a9b8e5cdada011d17f84b3b096e95930cc54df5b7338b3e3678"
+      },
+      {
+        "path": "RAG/res/pdf/기금운용심의회 운영 규칙.pdf",
+        "size_bytes": 134376,
+        "sha256": "5cf8bef79bd988b0ccb839eaf52d7b8e35533b7476751fbe75ef02b335443eff"
+      },
+      {
+        "path": "RAG/res/pdf/기록물관리 규칙.pdf",
+        "size_bytes": 529326,
+        "sha256": "4d3256a1673c80585b6a6c821c6e1786c52053ad95ea4e45bf080d508c46abd0"
+      },
+      {
+        "path": "RAG/res/pdf/기술연구원 성과급적 연봉제 운영규칙.pdf",
+        "size_bytes": 218355,
+        "sha256": "eade838755d2ce4e5488150381bcda84a705a1807c402c0730531bea1ef1e4a9"
+      },
+      {
+        "path": "RAG/res/pdf/기술연구원 인사규정 시행규칙.pdf",
+        "size_bytes": 90357,
+        "sha256": "f0d905d192f01528bc6a3fdcb3104acc70567d0351c3e49b1104bce485195229"
+      },
+      {
+        "path": "RAG/res/pdf/기술연구원 인사규정.pdf",
+        "size_bytes": 125489,
+        "sha256": "2a73f26ad0be480c989016e9de59cf3602a218d3eb7feb2e9d9e178edd9ba1d3"
+      },
+      {
+        "path": "RAG/res/pdf/내규관리규칙.pdf",
+        "size_bytes": 329821,
+        "sha256": "caa67eba5dceabf3712631422c528d4a5575ee1260a74621f9163e8898466f0e"
+      },
+      {
+        "path": "RAG/res/pdf/당직 및 비상근무규칙.pdf",
+        "size_bytes": 362385,
+        "sha256": "c0b8f837557a175c06b72ec94a2217f0fd0957217430e7505361a52d404db662"
+      },
+      {
+        "path": "RAG/res/pdf/대학 홍보 운영에 관한 규칙.pdf",
+        "size_bytes": 172202,
+        "sha256": "e2b61ec77f516a7a988120d285a675f9a780322746c011a355add15b000d3209"
+      },
+      {
+        "path": "RAG/res/pdf/대학발전계획 수립 및 운영에 관한 규칙.pdf",
+        "size_bytes": 169850,
+        "sha256": "96ad1206573057ffe4e55276560def3310a5a94200a4c962cd33387a3af911dd"
+      },
+      {
+        "path": "RAG/res/pdf/대학발전기금 관리규칙.pdf",
+        "size_bytes": 175737,
+        "sha256": "032f619be8e7cb114ff9e9ba8d1bca6d086b300e003f083c8e87363d56a557cb"
+      },
+      {
+        "path": "RAG/res/pdf/법인카드 관리 운영지침.pdf",
+        "size_bytes": 481604,
+        "sha256": "a09613a7ad07945fc46a350a306432ed2c79378b98102682539017bd312ba952"
+      },
+      {
+        "path": "RAG/res/pdf/별정직직원인사관리지침.pdf",
+        "size_bytes": 163312,
+        "sha256": "ad74c1885989f731a65f77f6765af61997adcc22e1532c910110ecdda58df664"
+      },
+      {
+        "path": "RAG/res/pdf/보수규정.pdf",
+        "size_bytes": 402643,
+        "sha256": "afb654e499f8813379056d5b06b4ce1569a3b201fe593ade8785488489ac945b"
+      },
+      {
+        "path": "RAG/res/pdf/보안업무처리규칙.pdf",
+        "size_bytes": 588712,
+        "sha256": "a6b98f2abe20b517546d9c2475dd2d5808ec25cf5ea92e73993c90937663b41a"
+      },
+      {
+        "path": "RAG/res/pdf/복무규정.pdf",
+        "size_bytes": 372537,
+        "sha256": "cca1cea04270bc9df720daf44d7972d33e62164f6d211e03372c62107fbdb957"
+      },
+      {
+        "path": "RAG/res/pdf/부정청탁 및 금품 등 수수의 신고사무 처리지침.pdf",
+        "size_bytes": 426158,
+        "sha256": "cae7947d11aba995ff873234ee0c239e490356bc25b1064fce4c6f227cfc7dc7"
+      },
+      {
+        "path": "RAG/res/pdf/부패행위 신고, 접수, 처리 및 신고자 보호 등에 관한 지침.pdf",
+        "size_bytes": 413812,
+        "sha256": "30894c626d94ca22b0e3641f2b60f92134dc86a9e332978d39981848c3d10ea8"
+      },
+      {
+        "path": "RAG/res/pdf/비정규직 채용 사전심사제 운영 지침(안).pdf",
+        "size_bytes": 197266,
+        "sha256": "e7b24fe6afc79e4628237e05c96b9876e65709bdb670c7709621c8813dc0ffb5"
+      },
+      {
+        "path": "RAG/res/pdf/비정년트랙전임교원 운영에 관한 규칙.pdf",
+        "size_bytes": 369635,
+        "sha256": "7ca41c5be0b0681412c22be2e47b34b632cc2a9588003e2e1e05edee7b3cf439"
+      },
+      {
+        "path": "RAG/res/pdf/사무관리규칙.pdf",
+        "size_bytes": 455394,
+        "sha256": "7297fdc4b2dc453067823273b7d3f9fa6f6d03e384810d0a3d2a99b8bb5a00d1"
+      },
+      {
+        "path": "RAG/res/pdf/상품권 구매ㆍ사용 및 관리에 관한 지침.pdf",
+        "size_bytes": 269136,
+        "sha256": "9891d8fbbde3405983c19305d70a24c22fcdb355fbcbca5181c99d6b92f37f75"
+      },
+      {
+        "path": "RAG/res/pdf/수당등에관한규칙.pdf",
+        "size_bytes": 429944,
+        "sha256": "0778b7d1fcdf76f67afd4c17f50a57d86bf079b18b06c46efcea77cc821bcf28"
+      },
+      {
+        "path": "RAG/res/pdf/시간선택제 직원에 관한 규칙.pdf",
+        "size_bytes": 224565,
+        "sha256": "08dd46dbb82296bfbd8c804360b1080764749f9b9837d03bf02c9167e60c11ab"
+      },
+      {
+        "path": "RAG/res/pdf/시간외근무수당지급지침.pdf",
+        "size_bytes": 193229,
+        "sha256": "1e54b26aa38204f8bf9b21380f27f91cffd1f6d2da10a8a39c00101676ae7995"
+      },
+      {
+        "path": "RAG/res/pdf/시설공사직영처리규칙.pdf",
+        "size_bytes": 154706,
+        "sha256": "6208e055057d4f2463de5cd45a46ea74888fc86f6ee53a933bf873e0c293ad17"
+      },
+      {
+        "path": "RAG/res/pdf/시설관리규칙.pdf",
+        "size_bytes": 360309,
+        "sha256": "9d039c64462e257bce0b039741aabdc03b1160ca06b2bddfc32d7cf5d5212712"
+      },
+      {
+        "path": "RAG/res/pdf/신분증규칙.pdf",
+        "size_bytes": 187603,
+        "sha256": "bd6be5fc34864d0927473b11f7f523580bbc621c8298dfb536a9d9d29a7ea30e"
+      },
+      {
+        "path": "RAG/res/pdf/여비지급규칙.pdf",
+        "size_bytes": 584873,
+        "sha256": "32aacab123f50b65f737df7c7935899723cb084ca09fe8164984358b522a810f"
+      },
+      {
+        "path": "RAG/res/pdf/유연근무제 운영지침 .pdf",
+        "size_bytes": 343002,
+        "sha256": "4fc5442bb06273ce11f0a10de3fd83b8776b86a8d915bc3fd7867ed5371962bf"
+      },
+      {
+        "path": "RAG/res/pdf/인권 보호 및 침해 예방을 위한 규칙.pdf",
+        "size_bytes": 399260,
+        "sha256": "adfe9cb2b69a021c9ed4ac0bdad0187aa895ae8636b437b938383edbd837ec1b"
+      },
+      {
+        "path": "RAG/res/pdf/인권경영 이행 규칙.pdf",
+        "size_bytes": 305255,
+        "sha256": "360e7627fc646b79a066e4cf8770f6eb3fe5693ad5268c98af17458f623a53ef"
+      },
+      {
+        "path": "RAG/res/pdf/임금피크제 운영에 관한 지침.pdf",
+        "size_bytes": 125897,
+        "sha256": "ffdb2bb81bb1a7096586d38e22636190e3c154d4d81a69e538063a3c0dcc6da0"
+      },
+      {
+        "path": "RAG/res/pdf/임시교원인사관리규칙.pdf",
+        "size_bytes": 330047,
+        "sha256": "514047e5646c00c45ea703110f456dc4d84f099932262aca4fe73b2a78899f05"
+      },
+      {
+        "path": "RAG/res/pdf/자체평가에 관한 규칙.pdf",
+        "size_bytes": 149240,
+        "sha256": "5719549a70529015ff1b1ac3c6b52daf728ccab167ff06ae55e9b97e230d866e"
+      },
+      {
+        "path": "RAG/res/pdf/재산및물품운용관리규칙.pdf",
+        "size_bytes": 340911,
+        "sha256": "dd78b77ccb21a57cd8f73b5dea3f557da108e9f8a51b4bda5c78529f4bca5243"
+      },
+      {
+        "path": "RAG/res/pdf/정년보장교원호봉승급지침.pdf",
+        "size_bytes": 118801,
+        "sha256": "0fb0c1986768388897f6b7620099e71e771909902ac8932cea79487af1af7570"
+      },
+      {
+        "path": "RAG/res/pdf/정보보안 기본규칙.pdf",
+        "size_bytes": 1088501,
+        "sha256": "7949a1011772e130b23dac60ab1610f69de68316e67a8bde5a3a583e8fad425f"
+      },
+      {
+        "path": "RAG/res/pdf/정보보호업무 연속성관리지침.pdf",
+        "size_bytes": 529923,
+        "sha256": "8ae757ebf6a155bd922fa94747ac0273fe50a80d92f6a5d7a33c84a3548a77c6"
+      },
+      {
+        "path": "RAG/res/pdf/제안서평가위원회 구성 및 운영지침.pdf",
+        "size_bytes": 253085,
+        "sha256": "f9ae093d6f8cb68301df0f6637eb773cf1933bf58f2715c96528236d159f676c"
+      },
+      {
+        "path": "RAG/res/pdf/제안제도운영규칙.pdf",
+        "size_bytes": 219459,
+        "sha256": "de5a42ba71f9d18bac823b64f0a443d3f1f689d895a10e447ad863cfefb1c360"
+      },
+      {
+        "path": "RAG/res/pdf/제증명발급규칙.pdf",
+        "size_bytes": 152175,
+        "sha256": "72b58103c36cca8181a640182a0d50bb2b1a137c537c36e3d05d8a2d19f23afb"
+      },
+      {
+        "path": "RAG/res/pdf/조교인사관리규칙.pdf",
+        "size_bytes": 253304,
+        "sha256": "31ce825460d72e217afa7d7963d68cff37ec880a0d0caa9086696358ab32b7d8"
+      },
+      {
+        "path": "RAG/res/pdf/직원승진시험시행 지침.pdf",
+        "size_bytes": 164586,
+        "sha256": "7cbad860e67d622ca121c4460c84e92de0110e13166ba9bbe7f30670dd12d811"
+      },
+      {
+        "path": "RAG/res/pdf/직원인사규정 시행규칙.pdf",
+        "size_bytes": 830861,
+        "sha256": "79ebb0e7b97b8f670064f9c3fc047df07e04048d675704a43c95dec33047cffb"
+      },
+      {
+        "path": "RAG/res/pdf/직원인사규정.pdf",
+        "size_bytes": 419600,
+        "sha256": "fb1366f303972202e8e38e2696fc3fde4eaa715201a05fe68097d5cbcab4451a"
+      },
+      {
+        "path": "RAG/res/pdf/직원채용에 관한 지침.pdf",
+        "size_bytes": 473159,
+        "sha256": "12baafd41c1a2f3a7a07e5054e4c847086ac6f5495d8600c9d7bbac08291f64a"
+      },
+      {
+        "path": "RAG/res/pdf/직제규정 시행규칙.pdf",
+        "size_bytes": 719910,
+        "sha256": "e4d3d62cf00e3a6c1b634ba514ae57be22df7b129f1cf5c97f8e4bb545754837"
+      },
+      {
+        "path": "RAG/res/pdf/직제규정.pdf",
+        "size_bytes": 308522,
+        "sha256": "798acf50df6d596c192e9cd791ea1db9c165cdf1bc89829a62204f5e4b9dccbd"
+      },
+      {
+        "path": "RAG/res/pdf/차량관리 규칙.pdf",
+        "size_bytes": 289120,
+        "sha256": "513510d10955b58e5d620de3c9ac776f9139cfd8d5c8180c15ab676501239314"
+      },
+      {
+        "path": "RAG/res/pdf/청렴마일리지 운영지침.pdf",
+        "size_bytes": 214074,
+        "sha256": "acced89bc8017e98bb88fdb82fe7da1d80df84540b6b035a6e8fe0663ff08f62"
+      },
+      {
+        "path": "RAG/res/pdf/타교출강처리지침.pdf",
+        "size_bytes": 114293,
+        "sha256": "e7a214bc87d9d143c74b9b6cdb0c5f9e01402305b51c99ead22c059009bd3098"
+      },
+      {
+        "path": "RAG/res/pdf/퇴직금지급규칙.pdf",
+        "size_bytes": 70971,
+        "sha256": "cccb4b84be6fe142e247a4f6e3f519462b8e4c719ed1731845a92b898a55deb9"
+      },
+      {
+        "path": "RAG/res/pdf/학교법인감사의회계감사에대한업무처리지침.pdf",
+        "size_bytes": 162256,
+        "sha256": "7656f139be74aabc0bc45b8965f80922ae816c315157731e495086d0d6ad6965"
+      },
+      {
+        "path": "RAG/res/pdf/학교법인한국기술교육대학교업무분장규칙.pdf",
+        "size_bytes": 108809,
+        "sha256": "f9ecec7127bc3dc0ec6996ef841a012f732de355ee8abc634333af31d2a6c9d2"
+      },
+      {
+        "path": "RAG/res/pdf/학교법인한국기술교육대학교위임규칙.pdf",
+        "size_bytes": 166782,
+        "sha256": "125c5d7d4f629ce095b297ee6ff9467c52e706b257be08cd49e83e3427302b4a"
+      },
+      {
+        "path": "RAG/res/pdf/한국기술교육대학교 교직원행동강령.pdf",
+        "size_bytes": 595265,
+        "sha256": "9e730d27aa947a79dc7a4ef19b6bd13d466107f5f8b73225e8ee0650423da413"
+      },
+      {
+        "path": "RAG/res/pdf/한국기술교육대학교 직무범죄고발지침.pdf",
+        "size_bytes": 121852,
+        "sha256": "eb9663279642ee28a663a1883ecdf380248be184f9868a6834c824f054b4a381"
+      },
+      {
+        "path": "RAG/res/pdf/한국기술교육대학교위임규칙.pdf",
+        "size_bytes": 595500,
+        "sha256": "498518bf7853e4234a4a3a757a020a31de3b4fb5e4dea97e38e904b0d236b72e"
+      },
+      {
+        "path": "RAG/res/pdf/홈페이지구축 및 운영지침.pdf",
+        "size_bytes": 363392,
+        "sha256": "d0263fb96e30f02d4380b8b3205df0d9eee7b56e59209e9501aa0e1540b21396"
+      },
+      {
+        "path": "RAG/res/pdf/회계규정.pdf",
+        "size_bytes": 380321,
+        "sha256": "16a34b90deb296c14929a192a5e9c4bdd72283828f02d286de6c5bfeffd7f6c2"
+      },
+      {
+        "path": "RAG/res/pdf/휴직자 복무관리 지침.pdf",
+        "size_bytes": 409875,
+        "sha256": "f9fd7d238d3fbd1aa35b80247a3606a068d44d395b181ba2242899ab61c78ed7"
+      }
+    ]
+  },
+  "vector_stores": {
+    "root": "RAG/vector_store",
+    "faiss_version": "1.15.0",
+    "store_count": 93,
+    "file_count": 186,
+    "total_bytes": 15633090,
+    "aggregate_sha256": "9c6b242931c57a616771ca07afdc41c28aa00ce475f226d57b11cc7b6387c1f2",
+    "total_chunks": 3681,
+    "index_types": [
+      "IndexFlatL2"
+    ],
+    "dimensions": [
+      768
+    ],
+    "metrics": [
+      {
+        "code": 1,
+        "name": "METRIC_L2"
+      }
+    ],
+    "stores": [
+      {
+        "path": "RAG/vector_store/1",
+        "files": [
+          {
+            "path": "RAG/vector_store/1/index.faiss",
+            "size_bytes": 463917,
+            "sha256": "e3de6195965760a850bb3326e7afc41a476207a2e81795a00112c0b880d363d8"
+          },
+          {
+            "path": "RAG/vector_store/1/index.pkl",
+            "size_bytes": 183943,
+            "sha256": "97bf90f08c0878a5ae66b5f7ee0faeafb121c3eaab7cc504ef4e3cde4685ae6f"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 151,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/10",
+        "files": [
+          {
+            "path": "RAG/vector_store/10/index.faiss",
+            "size_bytes": 258093,
+            "sha256": "8efbc3798caddc7a9c43033e90b9754d4a47dcf6a52db2d1d369f4a9e01b99e3"
+          },
+          {
+            "path": "RAG/vector_store/10/index.pkl",
+            "size_bytes": 103971,
+            "sha256": "29a8c4e01b66f5865896c7ee689e33d146d41ea704559a11a0012b1ae8d9489c"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 84,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/11",
+        "files": [
+          {
+            "path": "RAG/vector_store/11/index.faiss",
+            "size_bytes": 82989,
+            "sha256": "31eef7ee8d427bb724a6b0d27b68ba90d4473f12252015f8d51e46ec6b751e24"
+          },
+          {
+            "path": "RAG/vector_store/11/index.pkl",
+            "size_bytes": 34487,
+            "sha256": "c7036e303a5b67a5fb49aa8fc6709b39ab414fda9a2f7d8a4086f1dbe46f1cbc"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 27,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/12",
+        "files": [
+          {
+            "path": "RAG/vector_store/12/index.faiss",
+            "size_bytes": 6189,
+            "sha256": "eb8bc513c4525b858d04853afbda3f59db0c8a58e7bcafccf950c51c40dec4e6"
+          },
+          {
+            "path": "RAG/vector_store/12/index.pkl",
+            "size_bytes": 2438,
+            "sha256": "0d31ab8f61c071e9acf74a906f8a2bcac996abec9f83d4bedb39536b7695b640"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 2,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/13",
+        "files": [
+          {
+            "path": "RAG/vector_store/13/index.faiss",
+            "size_bytes": 36909,
+            "sha256": "48f1b923d094d0a29f68e4df265a293676ec9865312cac6b3e81042a39840e6f"
+          },
+          {
+            "path": "RAG/vector_store/13/index.pkl",
+            "size_bytes": 15328,
+            "sha256": "b69526c17223d532c9c2904a86d4c4e6d55c5edffc47f75fb514959b31e057b0"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 12,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/14",
+        "files": [
+          {
+            "path": "RAG/vector_store/14/index.faiss",
+            "size_bytes": 76845,
+            "sha256": "c0ec2aa1d90b5c805c809483cc984cc1213bc3c6ecf7338b877e32602312aee0"
+          },
+          {
+            "path": "RAG/vector_store/14/index.pkl",
+            "size_bytes": 31438,
+            "sha256": "3a7f3a5c18cbd7386f53274ca206df98d069c235133748b9da57cb9639af46d6"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 25,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/15",
+        "files": [
+          {
+            "path": "RAG/vector_store/15/index.faiss",
+            "size_bytes": 184365,
+            "sha256": "0f9cbf96cedd6fcc7a54fb9d13312e372f929f28e7108d14ef517859f68a1291"
+          },
+          {
+            "path": "RAG/vector_store/15/index.pkl",
+            "size_bytes": 73219,
+            "sha256": "7bef873141a866be409426e59f32c9945d28a289679d0af3d5d5ba8925bc15ec"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 60,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/16",
+        "files": [
+          {
+            "path": "RAG/vector_store/16/index.faiss",
+            "size_bytes": 181293,
+            "sha256": "dc4ea50838d73cc23a9fc6d3cf344d593e39dd5620685424ec011e2e6374fe5d"
+          },
+          {
+            "path": "RAG/vector_store/16/index.pkl",
+            "size_bytes": 67150,
+            "sha256": "9627c9b0ef6f42c988bb552e19dbcd622dfb9c1629f876aeba498d279b8d246e"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 59,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/17",
+        "files": [
+          {
+            "path": "RAG/vector_store/17/index.faiss",
+            "size_bytes": 3117,
+            "sha256": "c9c6d64f1bf15736a12844b17507b34ef2619f98d31db078f488353b0a68e707"
+          },
+          {
+            "path": "RAG/vector_store/17/index.pkl",
+            "size_bytes": 1264,
+            "sha256": "b71d4c0bc9ccefb3db893bac5ed0f03e7d8bddc0322ddb4ca7651a8ef67bdc35"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 1,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/18",
+        "files": [
+          {
+            "path": "RAG/vector_store/18/index.faiss",
+            "size_bytes": 549933,
+            "sha256": "a393b94bbf04b542dfb92444ff61bd0ace046666d64e40a45aaaa9aa0622cc1e"
+          },
+          {
+            "path": "RAG/vector_store/18/index.pkl",
+            "size_bytes": 210938,
+            "sha256": "496c1a64748ecaa20fd8b32c47b23a3acfc69b953344f57cbcae9943ca4999fb"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 179,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/19",
+        "files": [
+          {
+            "path": "RAG/vector_store/19/index.faiss",
+            "size_bytes": 101421,
+            "sha256": "262c628a700c66b61196f75a928ee08efe303869f724629f2543f0f11e281340"
+          },
+          {
+            "path": "RAG/vector_store/19/index.pkl",
+            "size_bytes": 40422,
+            "sha256": "238ce1d421c0f9d1ef16ae7a73181e04003c0b10e97add7ce01e7e74e287bac0"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 33,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/2",
+        "files": [
+          {
+            "path": "RAG/vector_store/2/index.faiss",
+            "size_bytes": 95277,
+            "sha256": "8b9b8d933abab80df34640972b994c7b777d0d36a2d1ed41d592f98b89c39f6e"
+          },
+          {
+            "path": "RAG/vector_store/2/index.pkl",
+            "size_bytes": 38881,
+            "sha256": "ce8d81c8163eb851982bc17ea1b49d2b9e7306edd94f3b9ced7da1bd09072d10"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 31,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/20",
+        "files": [
+          {
+            "path": "RAG/vector_store/20/index.faiss",
+            "size_bytes": 89133,
+            "sha256": "a477dd366156f8254ef9d67654999486159cb226e03f785efb3042b47703e5d8"
+          },
+          {
+            "path": "RAG/vector_store/20/index.pkl",
+            "size_bytes": 30268,
+            "sha256": "527995f5e677493688ae5897ea07e822852b596ae0b449f2be163a36ee4ef2c6"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 29,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/21",
+        "files": [
+          {
+            "path": "RAG/vector_store/21/index.faiss",
+            "size_bytes": 43053,
+            "sha256": "ac8ce9765d0d6f681503f98001b6c074ea032bd57ec334b055b08126eca10e2a"
+          },
+          {
+            "path": "RAG/vector_store/21/index.pkl",
+            "size_bytes": 16557,
+            "sha256": "a793c8cc657a0bf321744b9c954456051cd160feb0a76c34cef4eadc1825e124"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 14,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/22",
+        "files": [
+          {
+            "path": "RAG/vector_store/22/index.faiss",
+            "size_bytes": 61485,
+            "sha256": "e76f147efd1d6cc0f375e77ea4aca1120a150fa89de15d10192b5a1bf6baa8cf"
+          },
+          {
+            "path": "RAG/vector_store/22/index.pkl",
+            "size_bytes": 20839,
+            "sha256": "e277f62b2687c7c7fa05bf23fa548edb0d6c28e13c9ede57f05c0b73012622cc"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 20,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/23",
+        "files": [
+          {
+            "path": "RAG/vector_store/23/index.faiss",
+            "size_bytes": 15405,
+            "sha256": "04eee6c23aee5c4a1c46abdfadda5f55c0d2afbd7456d75d26869fecd65a49dc"
+          },
+          {
+            "path": "RAG/vector_store/23/index.pkl",
+            "size_bytes": 5811,
+            "sha256": "bdd3546bc0911250d2947c7aa4742b535d041981bb007fa20ad5cd9456557f85"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 5,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/24",
+        "files": [
+          {
+            "path": "RAG/vector_store/24/index.faiss",
+            "size_bytes": 95277,
+            "sha256": "fde998312abe7e1dec69299a52f1132bb576460c8b2618b1bd125ac809783e64"
+          },
+          {
+            "path": "RAG/vector_store/24/index.pkl",
+            "size_bytes": 34149,
+            "sha256": "5c2524a4936dfc534d0f4a9ad5a14bbf7dac4a63ccf9fd869a304b60c2b07fa7"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 31,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/25",
+        "files": [
+          {
+            "path": "RAG/vector_store/25/index.faiss",
+            "size_bytes": 175149,
+            "sha256": "088af6b5bcf2e94ef3b92c7376a0dfefbb16d7e8f57da425f33627a070a9260b"
+          },
+          {
+            "path": "RAG/vector_store/25/index.pkl",
+            "size_bytes": 70598,
+            "sha256": "f1488b7cfabab3ad74455fe17248ca2948eea63f7fedba99f041a3f247107ed9"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 57,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/26",
+        "files": [
+          {
+            "path": "RAG/vector_store/26/index.faiss",
+            "size_bytes": 46125,
+            "sha256": "be384a423ebddffdb26d65660e2f957e07f05fce3d3e16d670760d294d3a8e22"
+          },
+          {
+            "path": "RAG/vector_store/26/index.pkl",
+            "size_bytes": 19515,
+            "sha256": "22eee4652682207a255fbafd907c600aa6db460fdb46ae91ddfa116e1f961229"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 15,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/27",
+        "files": [
+          {
+            "path": "RAG/vector_store/27/index.faiss",
+            "size_bytes": 15405,
+            "sha256": "8ae17a0fecb5c7ed30b4096e9a95783855cfde2efb31f5e6bcf1d9c2d5a8ab22"
+          },
+          {
+            "path": "RAG/vector_store/27/index.pkl",
+            "size_bytes": 7238,
+            "sha256": "5867f2ed0f616bfbb03e8b7002d633171f384150b2870630a503afc857794b5b"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 5,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/28",
+        "files": [
+          {
+            "path": "RAG/vector_store/28/index.faiss",
+            "size_bytes": 18477,
+            "sha256": "273b563243dfe8b6856068cf87c197398e64b7662c111be434fc7ed7bc68607b"
+          },
+          {
+            "path": "RAG/vector_store/28/index.pkl",
+            "size_bytes": 6830,
+            "sha256": "8b29929d74f9ce2c6627090fed987f13fa4a8fd84750499c3cf27eab835fa2c5"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 6,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/29",
+        "files": [
+          {
+            "path": "RAG/vector_store/29/index.faiss",
+            "size_bytes": 21549,
+            "sha256": "11488b46946da725d60b75f1c0b6920630679e513c430dd9944a6890e89ae44a"
+          },
+          {
+            "path": "RAG/vector_store/29/index.pkl",
+            "size_bytes": 8776,
+            "sha256": "5c8314d8370b4a5f7b65d1afbdf43583f3fa63df0094bf0b2ef3464d2f34c3f9"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 7,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/3",
+        "files": [
+          {
+            "path": "RAG/vector_store/3/index.faiss",
+            "size_bytes": 196653,
+            "sha256": "d9b131feab0dd2a6af6a64c371dba6f794af1cbf707782cf42a1775d6b8c0113"
+          },
+          {
+            "path": "RAG/vector_store/3/index.pkl",
+            "size_bytes": 81262,
+            "sha256": "187ef51178b773d13fa4e3ef854ce5d1fc1a31efecdfd3f8843e9637be36c47f"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 64,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/30",
+        "files": [
+          {
+            "path": "RAG/vector_store/30/index.faiss",
+            "size_bytes": 116781,
+            "sha256": "c8b837870999544c23d8c178b39920cb375c29bc37020fe52157f7649af39e19"
+          },
+          {
+            "path": "RAG/vector_store/30/index.pkl",
+            "size_bytes": 43023,
+            "sha256": "26196168eb960482d1e40bff05fbe861b399f7727fe9ead6f095e329974ee6b7"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 38,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/31",
+        "files": [
+          {
+            "path": "RAG/vector_store/31/index.faiss",
+            "size_bytes": 15405,
+            "sha256": "9abd70507fab387050439f5107bcba8b12baf088401836ff37b60744b79e58e9"
+          },
+          {
+            "path": "RAG/vector_store/31/index.pkl",
+            "size_bytes": 5967,
+            "sha256": "07430a4eab135d127467143de7a242bdabf6ee46ae8cbb4b4b956224291808f3"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 5,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/32",
+        "files": [
+          {
+            "path": "RAG/vector_store/32/index.faiss",
+            "size_bytes": 67629,
+            "sha256": "ba3742c543bcfb4ba4ada3e1a2322eaa16eae121787dfdaabb14d807e20cc738"
+          },
+          {
+            "path": "RAG/vector_store/32/index.pkl",
+            "size_bytes": 24332,
+            "sha256": "b5dc1c789bf80b27e55e42b01be925c48563ffed95547bb3f5bef11cdc4ada8b"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 22,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/33",
+        "files": [
+          {
+            "path": "RAG/vector_store/33/index.faiss",
+            "size_bytes": 12333,
+            "sha256": "955209eecaff9aa7a8051588fa7aebffd5d01b1e1043b82793581a2a4d485938"
+          },
+          {
+            "path": "RAG/vector_store/33/index.pkl",
+            "size_bytes": 4486,
+            "sha256": "314e8fab492723e7ba9d1003780596478a1753b04bdc17c361eaa3a54132dd24"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 4,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/34",
+        "files": [
+          {
+            "path": "RAG/vector_store/34/index.faiss",
+            "size_bytes": 181293,
+            "sha256": "c90908318f6386d9e77aaea15c588394f894c12c89f3acc199907088b6796f34"
+          },
+          {
+            "path": "RAG/vector_store/34/index.pkl",
+            "size_bytes": 65728,
+            "sha256": "521e69b2394776f58b3766cc5a8863089314eb7b72dd0343ba49ef41e7a7f64a"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 59,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/35",
+        "files": [
+          {
+            "path": "RAG/vector_store/35/index.faiss",
+            "size_bytes": 27693,
+            "sha256": "6f1ef6327603704df5ea662d64be0aef60018787e2c4c0152f667721eb90f305"
+          },
+          {
+            "path": "RAG/vector_store/35/index.pkl",
+            "size_bytes": 11657,
+            "sha256": "7d475521277800c9092bf44d5b87343c21ae9582f5a4375bb5a72a80538d6d61"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 9,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/36",
+        "files": [
+          {
+            "path": "RAG/vector_store/36/index.faiss",
+            "size_bytes": 64557,
+            "sha256": "1785a446afbfe6854ac49c5edad16558875775d4cfaab35299f553711e02d419"
+          },
+          {
+            "path": "RAG/vector_store/36/index.pkl",
+            "size_bytes": 24340,
+            "sha256": "e74631ca25e67b70d12b4f9dc3b237ea38694e4809693f7673dddbb8d9123432"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 21,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/37",
+        "files": [
+          {
+            "path": "RAG/vector_store/37/index.faiss",
+            "size_bytes": 79917,
+            "sha256": "0c44aff8a678221927b6598b12b707e1cf84a124fa99366c1c5b0c87f949480a"
+          },
+          {
+            "path": "RAG/vector_store/37/index.pkl",
+            "size_bytes": 30510,
+            "sha256": "8393ff236382b77c0465978c9091f2e6f292e916a12b38bdd5e7948f54e8efbf"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 26,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/38",
+        "files": [
+          {
+            "path": "RAG/vector_store/38/index.faiss",
+            "size_bytes": 101421,
+            "sha256": "e1e7d7b65f2cf99c249eb19600ee06d722239d9af5e79ba7dea9c1996da70c3f"
+          },
+          {
+            "path": "RAG/vector_store/38/index.pkl",
+            "size_bytes": 36059,
+            "sha256": "a9b638e5e944603b02b5d304c44fa4fc76163209f7b5bd55a3a8ae962dcd79fd"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 33,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/39",
+        "files": [
+          {
+            "path": "RAG/vector_store/39/index.faiss",
+            "size_bytes": 116781,
+            "sha256": "f222d19d7e20de800ea647203027b2b707845f6a56593e8b1634e4f5a9e3916e"
+          },
+          {
+            "path": "RAG/vector_store/39/index.pkl",
+            "size_bytes": 45259,
+            "sha256": "6f9ffe5da7a4270479bca038ecf609ebf2ca21f45c9fa0c205fc91016381d924"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 38,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/4",
+        "files": [
+          {
+            "path": "RAG/vector_store/4/index.faiss",
+            "size_bytes": 439341,
+            "sha256": "bd894d85fc31610e786a4f58d40dab6062df9d38a1e4c5e9920c46bb31d9e2ea"
+          },
+          {
+            "path": "RAG/vector_store/4/index.pkl",
+            "size_bytes": 174969,
+            "sha256": "dc1c4c9ea5031e88fe51c345a0b3be9b482468680f184c0897601a948dc404de"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 143,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/40",
+        "files": [
+          {
+            "path": "RAG/vector_store/40/index.faiss",
+            "size_bytes": 18477,
+            "sha256": "fa30b9dc855bdd47cc912f2420d4e018203f132cb2ca18291edeb1ad8c815941"
+          },
+          {
+            "path": "RAG/vector_store/40/index.pkl",
+            "size_bytes": 7142,
+            "sha256": "28c89f36fcd398feb1470dfa3fdedfec99f6c670e5a833e02558a1fe3a0d0581"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 6,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/41",
+        "files": [
+          {
+            "path": "RAG/vector_store/41/index.faiss",
+            "size_bytes": 21549,
+            "sha256": "20ec0934ca0e44b73aedc8d2a53268934e55dc0d7bf8973672745059c47d0792"
+          },
+          {
+            "path": "RAG/vector_store/41/index.pkl",
+            "size_bytes": 8471,
+            "sha256": "c18b612e32121cb4fd528c837a172f94a2ad35377833eb6239087018a55bc529"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 7,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/42",
+        "files": [
+          {
+            "path": "RAG/vector_store/42/index.faiss",
+            "size_bytes": 15405,
+            "sha256": "1087e3e7ce176afbb650f6f1ff78cfb8106821dd1648478c0a0c50014eaefe13"
+          },
+          {
+            "path": "RAG/vector_store/42/index.pkl",
+            "size_bytes": 6176,
+            "sha256": "b59f9455a9886d302051b46bd0df35cb555be5aad238fb5e621386939cd96eac"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 5,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/43",
+        "files": [
+          {
+            "path": "RAG/vector_store/43/index.faiss",
+            "size_bytes": 98349,
+            "sha256": "fddc0332dda48afd403092e6e5a5f35eb256a52aa297b9264a2fca9ae7c8eeaf"
+          },
+          {
+            "path": "RAG/vector_store/43/index.pkl",
+            "size_bytes": 34890,
+            "sha256": "317c0ce2fc83a144c277b8ba1e9989ecb74cab37b0355c57877c94b307a35b0a"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 32,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/44",
+        "files": [
+          {
+            "path": "RAG/vector_store/44/index.faiss",
+            "size_bytes": 18477,
+            "sha256": "3b2e77a38142b5bfabf8673fa6df50e3ab052d896c3165d0a923ef7133028518"
+          },
+          {
+            "path": "RAG/vector_store/44/index.pkl",
+            "size_bytes": 7510,
+            "sha256": "9edf0dbc8843b4904a20b9f881555053e1fcd00332af9b56efd0cb0541cf20ac"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 6,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/45",
+        "files": [
+          {
+            "path": "RAG/vector_store/45/index.faiss",
+            "size_bytes": 230445,
+            "sha256": "9519abf06df40a29d7f1292b8d4ba3bfaa3e8dd5a8c721e52ba05a8ef8136f5f"
+          },
+          {
+            "path": "RAG/vector_store/45/index.pkl",
+            "size_bytes": 82607,
+            "sha256": "3f3599f186a55c3a69d69e56c73c722450ec36f4786ec37ccb255ef8ec0b0c0d"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 75,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/46",
+        "files": [
+          {
+            "path": "RAG/vector_store/46/index.faiss",
+            "size_bytes": 258093,
+            "sha256": "969f431440e9abfebd4175c3177ab94f553c1e15e3a07a21878ca23f50a0687a"
+          },
+          {
+            "path": "RAG/vector_store/46/index.pkl",
+            "size_bytes": 93355,
+            "sha256": "b132de7defed7d1b8fcb2597d54801b38d577218cd0b8c8f2dce3489d1ad8d76"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 84,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/47",
+        "files": [
+          {
+            "path": "RAG/vector_store/47/index.faiss",
+            "size_bytes": 150573,
+            "sha256": "36bfee1ed06226d6550adec780cf8015c2eb692f6b2ac73a6268491c65dc60f5"
+          },
+          {
+            "path": "RAG/vector_store/47/index.pkl",
+            "size_bytes": 54806,
+            "sha256": "6b84444973f971e804f33d66977079f126208c47ddacf81a887c70906ed84ff1"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 49,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/48",
+        "files": [
+          {
+            "path": "RAG/vector_store/48/index.faiss",
+            "size_bytes": 132141,
+            "sha256": "3b5ddb785012ffbe78e54fb635e48db6fdf32a3fedefd3a3d2c8a348047e5e8e"
+          },
+          {
+            "path": "RAG/vector_store/48/index.pkl",
+            "size_bytes": 46331,
+            "sha256": "daa86c9b3b8690b638b75a5e355853238ec76fa8fd65f17115437dbe368f77d7"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 43,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/49",
+        "files": [
+          {
+            "path": "RAG/vector_store/49/index.faiss",
+            "size_bytes": 107565,
+            "sha256": "4ef8c630ff708fb92074868401b0b219529936e0b5d4c4df55f2960772653c46"
+          },
+          {
+            "path": "RAG/vector_store/49/index.pkl",
+            "size_bytes": 42102,
+            "sha256": "73b1bbfbff047e2d5dad6089e8bd28a12eceb0a856aebc747dd9334581177a4f"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 35,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/5",
+        "files": [
+          {
+            "path": "RAG/vector_store/5/index.faiss",
+            "size_bytes": 242733,
+            "sha256": "978730ababbace8e9c00377d76a7488eb09323b16dc6cb14c8118e524b1ca63d"
+          },
+          {
+            "path": "RAG/vector_store/5/index.pkl",
+            "size_bytes": 98463,
+            "sha256": "703f3547e0badea4a46d0f9278f75aea7e04f2f5e5866b7e297f73c1392db23b"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 79,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/50",
+        "files": [
+          {
+            "path": "RAG/vector_store/50/index.faiss",
+            "size_bytes": 21549,
+            "sha256": "533b008e0927d8bf23e71e26058e00197b3d8ef249a13da0a35b4d40ffd1a12c"
+          },
+          {
+            "path": "RAG/vector_store/50/index.pkl",
+            "size_bytes": 9149,
+            "sha256": "ab5c0ceac330676c8b2475d6b071f6d835796347597420c3d2e47b46c8d91dbc"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 7,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/51",
+        "files": [
+          {
+            "path": "RAG/vector_store/51/index.faiss",
+            "size_bytes": 125997,
+            "sha256": "b1d2be6d8a3a0452147c6872a666638e8be7ea94f6c4233c1553a5e501bea54b"
+          },
+          {
+            "path": "RAG/vector_store/51/index.pkl",
+            "size_bytes": 44263,
+            "sha256": "688d015eb779a764c65e98a728e69c2401014187815a1524746ef7fb31b053c0"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 41,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/52",
+        "files": [
+          {
+            "path": "RAG/vector_store/52/index.faiss",
+            "size_bytes": 178221,
+            "sha256": "32746adb6e1f8cb96d68b6a07bd06efac72d63e60c96361afd5c061c74b4047d"
+          },
+          {
+            "path": "RAG/vector_store/52/index.pkl",
+            "size_bytes": 67854,
+            "sha256": "2b37b4c2664d280eccb52f513dd039017c259aca7ae000687792c5e02e94a3f3"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 58,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/53",
+        "files": [
+          {
+            "path": "RAG/vector_store/53/index.faiss",
+            "size_bytes": 39981,
+            "sha256": "e87f0fcde164e1aa72e8830dd6fdcb6ed8a6490890183473f51dedcbde5bc171"
+          },
+          {
+            "path": "RAG/vector_store/53/index.pkl",
+            "size_bytes": 14403,
+            "sha256": "d5ef697d28dbed4cd7d94678c734ec2a15e5c702c1220dcfe6ed7105174e9ad2"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 13,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/54",
+        "files": [
+          {
+            "path": "RAG/vector_store/54/index.faiss",
+            "size_bytes": 175149,
+            "sha256": "b69b867dab9c85087a2e5a550e74c3ab45280a930ace4f1be817bb98bb22c37e"
+          },
+          {
+            "path": "RAG/vector_store/54/index.pkl",
+            "size_bytes": 61751,
+            "sha256": "df6cdf7fbd6a9ebcedae7649d9736865391257f0ca6efdd6d4597739a9a02c32"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 57,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/55",
+        "files": [
+          {
+            "path": "RAG/vector_store/55/index.faiss",
+            "size_bytes": 33837,
+            "sha256": "501bf846319526589562101e6b31ae5c8f64030f0a968ef1aa2a0916858a6d00"
+          },
+          {
+            "path": "RAG/vector_store/55/index.pkl",
+            "size_bytes": 13705,
+            "sha256": "8dd549dd9e75fa4a466ce1f1e9227339c733c5ed43fcb03fcf9af71f65692bee"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 11,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/56",
+        "files": [
+          {
+            "path": "RAG/vector_store/56/index.faiss",
+            "size_bytes": 39981,
+            "sha256": "29f636f34e1f116510362aabc36f2b25c992177ea93cfdc9d2d4db7d148c2e0a"
+          },
+          {
+            "path": "RAG/vector_store/56/index.pkl",
+            "size_bytes": 14396,
+            "sha256": "1b3da01ad16ac12ababf4029d805c6b084c89f0747c295f3cd3f1bebcffd6105"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 13,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/57",
+        "files": [
+          {
+            "path": "RAG/vector_store/57/index.faiss",
+            "size_bytes": 15405,
+            "sha256": "72ca39211e5c8e94703d37ab2e06284d4ecaab532899383e57cfca1cfe5d48a9"
+          },
+          {
+            "path": "RAG/vector_store/57/index.pkl",
+            "size_bytes": 5933,
+            "sha256": "15dfb417ee958ab4cb964271d27d76eca94ea2e8823912fda52d27a7f4458a29"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 5,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/58",
+        "files": [
+          {
+            "path": "RAG/vector_store/58/index.faiss",
+            "size_bytes": 52269,
+            "sha256": "4b80ae591a47c0efa351214a865fc68f953380e02017cddcaaf23cdf39990ed0"
+          },
+          {
+            "path": "RAG/vector_store/58/index.pkl",
+            "size_bytes": 21484,
+            "sha256": "9c46af09b22ecb1a0771eb51d73623db9823c2dd44b95cb62d4aee99763c35fb"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 17,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/59",
+        "files": [
+          {
+            "path": "RAG/vector_store/59/index.faiss",
+            "size_bytes": 27693,
+            "sha256": "b5663409a936269584a00ceacbeae4bd01ae4ee785488e3371575f4e01eb5414"
+          },
+          {
+            "path": "RAG/vector_store/59/index.pkl",
+            "size_bytes": 8426,
+            "sha256": "2b4320ef2963fd951a33a715c1b51284baddb2171a510a1b4c813e0d297a7e88"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 9,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/6",
+        "files": [
+          {
+            "path": "RAG/vector_store/6/index.faiss",
+            "size_bytes": 408621,
+            "sha256": "6ae8182dc8c15b5013c5b64a7a2e79b53b6798301c05eba9ef52af180eee28ff"
+          },
+          {
+            "path": "RAG/vector_store/6/index.pkl",
+            "size_bytes": 162597,
+            "sha256": "666174f9a10af465004efa0babb373ba772220b63d76f1642590004352771a3e"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 133,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/60",
+        "files": [
+          {
+            "path": "RAG/vector_store/60/index.faiss",
+            "size_bytes": 184365,
+            "sha256": "696fbc06d6c6a4e1b6c371a37bbb3482936662345b2271879c1ecf4137c0f5fc"
+          },
+          {
+            "path": "RAG/vector_store/60/index.pkl",
+            "size_bytes": 66701,
+            "sha256": "d44a779ed74d5b597a5161f1a082e7d89f9302b7460fafa9f248af88b1f95c6d"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 60,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/61",
+        "files": [
+          {
+            "path": "RAG/vector_store/61/index.faiss",
+            "size_bytes": 98349,
+            "sha256": "0152bc35195cae8fa41579c2633d394e4d911251927a974e3b3fbb3efa173fca"
+          },
+          {
+            "path": "RAG/vector_store/61/index.pkl",
+            "size_bytes": 38689,
+            "sha256": "785f69e23322c5367b6c10bb6903c5802bba8e30b6ddcf489be47b3704ba1f2c"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 32,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/62",
+        "files": [
+          {
+            "path": "RAG/vector_store/62/index.faiss",
+            "size_bytes": 175149,
+            "sha256": "164b991755193f9420ee273bab7b4fb3d8d02ff3ca96ba4f4ee20f6d9258bf05"
+          },
+          {
+            "path": "RAG/vector_store/62/index.pkl",
+            "size_bytes": 68669,
+            "sha256": "c32837c1f92157c2f026bd63dda68ddf19ee1444b54f4ef05df56da38b14dd40"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 57,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/63",
+        "files": [
+          {
+            "path": "RAG/vector_store/63/index.faiss",
+            "size_bytes": 67629,
+            "sha256": "b5c8968f63e9a0b2d414f5259c963e254cee1fc8fd512f85e78d70a957643b76"
+          },
+          {
+            "path": "RAG/vector_store/63/index.pkl",
+            "size_bytes": 25125,
+            "sha256": "8882fb56cb90214b6cc10ec5428da8248a67887e229bce417a5ed08f2144c692"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 22,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/64",
+        "files": [
+          {
+            "path": "RAG/vector_store/64/index.faiss",
+            "size_bytes": 12333,
+            "sha256": "f2bcbd1f7b4dc24f285b2bb79673ae7259bed1a3863b868bce09fd37c29ffd61"
+          },
+          {
+            "path": "RAG/vector_store/64/index.pkl",
+            "size_bytes": 4997,
+            "sha256": "c087ab4220dc1cbc3b02b5c84a15fb1e18d793dcf67465a45a00641720e58464"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 4,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/65",
+        "files": [
+          {
+            "path": "RAG/vector_store/65/index.faiss",
+            "size_bytes": 67629,
+            "sha256": "2619bc26eaccc100f760eabacd6e2e9e5f12fdd3105cec36e40fe8cc4026e175"
+          },
+          {
+            "path": "RAG/vector_store/65/index.pkl",
+            "size_bytes": 25570,
+            "sha256": "4292951e8e1a2dcccfe7cda138ac9a44cd8b299db7e3d23600da419156088d43"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 22,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/66",
+        "files": [
+          {
+            "path": "RAG/vector_store/66/index.faiss",
+            "size_bytes": 18477,
+            "sha256": "fb3f6e977ff2e9513d14acdc2a66024c3f33e77c3c6ab3efce29ff242c8a0d5a"
+          },
+          {
+            "path": "RAG/vector_store/66/index.pkl",
+            "size_bytes": 7459,
+            "sha256": "4d684abafb948b1a9119a8120516fbb3eff394ba89b7a444c60f2c2eb84ca3d4"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 6,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/67",
+        "files": [
+          {
+            "path": "RAG/vector_store/67/index.faiss",
+            "size_bytes": 116781,
+            "sha256": "467bd0be58bc4dee887a29097a9986ef7e148411d5dec2d625c5115a15d0fd76"
+          },
+          {
+            "path": "RAG/vector_store/67/index.pkl",
+            "size_bytes": 39986,
+            "sha256": "3fa552eb98946e865c164952f89f06c14026ef042c7bac6f5c1ab645e5381bec"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 38,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/68",
+        "files": [
+          {
+            "path": "RAG/vector_store/68/index.faiss",
+            "size_bytes": 9261,
+            "sha256": "7618d7d05b61b3e9351106be67907ad8de5d13f6ab52799f732578d75537d1de"
+          },
+          {
+            "path": "RAG/vector_store/68/index.pkl",
+            "size_bytes": 4152,
+            "sha256": "7baed198dad47d5b2c13714d8d2f1e4658e2bf080c4ce8bd67036f5c6ad5eeb6"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 3,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/69",
+        "files": [
+          {
+            "path": "RAG/vector_store/69/index.faiss",
+            "size_bytes": 632877,
+            "sha256": "d5f4a3a26230b7f409b0b8900791daea22083bc4638ff2afc3aef1312343acd0"
+          },
+          {
+            "path": "RAG/vector_store/69/index.pkl",
+            "size_bytes": 242171,
+            "sha256": "bdbab7ddf46092f161a649b693aaa828ae2aede6e78ac337ebc52dcd2b2c2003"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 206,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/7",
+        "files": [
+          {
+            "path": "RAG/vector_store/7/index.faiss",
+            "size_bytes": 430125,
+            "sha256": "c561a1473c67689316d8850d762f7c7933a8f5836974de67346fa3bacd2829de"
+          },
+          {
+            "path": "RAG/vector_store/7/index.pkl",
+            "size_bytes": 168293,
+            "sha256": "033e7256eb1ffc27d2303fe2037e962d0c5e0d644fdc9ca5eda6351d860eb89d"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 140,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/70",
+        "files": [
+          {
+            "path": "RAG/vector_store/70/index.faiss",
+            "size_bytes": 144429,
+            "sha256": "18a787394e71c66216f4d129e19471c7bba89b78b467bc1bf2c918df6ce24492"
+          },
+          {
+            "path": "RAG/vector_store/70/index.pkl",
+            "size_bytes": 57923,
+            "sha256": "4e626a3cf4334e05038da2a70d7f42fc7b56a11d4af2601128e441ac4d301318"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 47,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/71",
+        "files": [
+          {
+            "path": "RAG/vector_store/71/index.faiss",
+            "size_bytes": 39981,
+            "sha256": "b1486c6e4f8d457de68f27b61e67171fafbd8e97430977e921e051b89b0dc8b5"
+          },
+          {
+            "path": "RAG/vector_store/71/index.pkl",
+            "size_bytes": 15061,
+            "sha256": "74311320afe3061d1aa679d917a8c095c62e5ae54be2861f6e88b5d17159fb68"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 13,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/72",
+        "files": [
+          {
+            "path": "RAG/vector_store/72/index.faiss",
+            "size_bytes": 21549,
+            "sha256": "22e6f4347687d5431b3b52adac6aec9ff37f1ad8dab633e7272e2601fac32d91"
+          },
+          {
+            "path": "RAG/vector_store/72/index.pkl",
+            "size_bytes": 8599,
+            "sha256": "76376afcdc12138384bdffa778016003e373f03081ed27bf16a0008467537a6a"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 7,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/73",
+        "files": [
+          {
+            "path": "RAG/vector_store/73/index.faiss",
+            "size_bytes": 15405,
+            "sha256": "59c4f5ac4c2ce4bd228edbad39f200a3ceb6aeecfa05d3e22f02957a58148413"
+          },
+          {
+            "path": "RAG/vector_store/73/index.pkl",
+            "size_bytes": 6283,
+            "sha256": "5bfa197f346c2875ef26948534817588e7ea5b0ad1b097c344c76991c263225d"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 5,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/74",
+        "files": [
+          {
+            "path": "RAG/vector_store/74/index.faiss",
+            "size_bytes": 43053,
+            "sha256": "f3533bd0af7a58963ab230097cb9e0db4b359e4f7e8917ff136735ad5389db1f"
+          },
+          {
+            "path": "RAG/vector_store/74/index.pkl",
+            "size_bytes": 15350,
+            "sha256": "8f01b21907765ec8fb78ea0b03f76afc7d7ab1d42fada6d7a8dcd46625efc210"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 14,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/75",
+        "files": [
+          {
+            "path": "RAG/vector_store/75/index.faiss",
+            "size_bytes": 18477,
+            "sha256": "8b2774c33cf5b969c84ae13295c5418a83a07b06a8fb0892e0f769e9daac4633"
+          },
+          {
+            "path": "RAG/vector_store/75/index.pkl",
+            "size_bytes": 7604,
+            "sha256": "1b8ba659e89bfd20af3b8e7d4663be94b03d8c32fadf612dc34f5faf08ff40c4"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 6,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/76",
+        "files": [
+          {
+            "path": "RAG/vector_store/76/index.faiss",
+            "size_bytes": 402477,
+            "sha256": "1dc5c14a91c70316f0baf1d76404b9915f8015ac4d7904fc06aa8fbb28494762"
+          },
+          {
+            "path": "RAG/vector_store/76/index.pkl",
+            "size_bytes": 145552,
+            "sha256": "6598d623dde91fc8526e53b05473c1c19427022f35771d25d07c1e9d3c2c236c"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 131,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/77",
+        "files": [
+          {
+            "path": "RAG/vector_store/77/index.faiss",
+            "size_bytes": 205869,
+            "sha256": "96c1cbb40b78680a27928db6f292865e075aaf044339fcf8d5b2cc81d3693afb"
+          },
+          {
+            "path": "RAG/vector_store/77/index.pkl",
+            "size_bytes": 79257,
+            "sha256": "d036772b5204d99c7695069091f2e29305bae51c10cafbc44595cb49a661b479"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 67,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/78",
+        "files": [
+          {
+            "path": "RAG/vector_store/78/index.faiss",
+            "size_bytes": 113709,
+            "sha256": "e54d5d5ffd7ea685684fca3893db5cc53bab21c89ad0aeb204b9bf24cbfa26bd"
+          },
+          {
+            "path": "RAG/vector_store/78/index.pkl",
+            "size_bytes": 44266,
+            "sha256": "755554a64e6b96ddd81e0ff928eb0644c4b2efbff2fa1f9121a4f63c3414c6d8"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 37,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/79",
+        "files": [
+          {
+            "path": "RAG/vector_store/79/index.faiss",
+            "size_bytes": 298029,
+            "sha256": "c8fe4bf6bbb8ce07f8f0dfbe2e38334bb3e33de74737c2eb41cc2d5296366d6f"
+          },
+          {
+            "path": "RAG/vector_store/79/index.pkl",
+            "size_bytes": 111494,
+            "sha256": "16c3467f11113a87bec89f116823a7265626ed7cef526c8d70d2a1bd77e87062"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 97,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/8",
+        "files": [
+          {
+            "path": "RAG/vector_store/8/index.faiss",
+            "size_bytes": 488493,
+            "sha256": "6ad4f3cf638ba970df13f3dc3c52d02bbacc9f112d8b4cd615f274da6da84487"
+          },
+          {
+            "path": "RAG/vector_store/8/index.pkl",
+            "size_bytes": 194583,
+            "sha256": "a61c9991f963eb3b1d3b12244001542cced7c42dceab852cfb6ab948b388ca35"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 159,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/80",
+        "files": [
+          {
+            "path": "RAG/vector_store/80/index.faiss",
+            "size_bytes": 101421,
+            "sha256": "5bfc0468e78d4c1995ffff14dfbfc6f6a82c115e349d95bec854edc4aa012e58"
+          },
+          {
+            "path": "RAG/vector_store/80/index.pkl",
+            "size_bytes": 35478,
+            "sha256": "a7ad3c94bf79985baec4deaff752fe294dbc668491719369e9a199930413632a"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 33,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/81",
+        "files": [
+          {
+            "path": "RAG/vector_store/81/index.faiss",
+            "size_bytes": 52269,
+            "sha256": "559635971656e9487a610880fb296bc239eeecb0b1dfc819a1e8c67446e88c5b"
+          },
+          {
+            "path": "RAG/vector_store/81/index.pkl",
+            "size_bytes": 19562,
+            "sha256": "409e6955a91b2d6f50ad757e7f7e94af642f4b815cb990272542d4155842b70b"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 17,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/82",
+        "files": [
+          {
+            "path": "RAG/vector_store/82/index.faiss",
+            "size_bytes": 21549,
+            "sha256": "fc11f4e5a9e3adffe55eee81d249cc859435bf1a143b6bb6fb957fd031d8bf31"
+          },
+          {
+            "path": "RAG/vector_store/82/index.pkl",
+            "size_bytes": 8638,
+            "sha256": "828837d35764c15d9138d7156fdd0ea1e2a62ebb8a5316277c74462c999fb2a9"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 7,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/83",
+        "files": [
+          {
+            "path": "RAG/vector_store/83/index.faiss",
+            "size_bytes": 6189,
+            "sha256": "84d1d346aae022a8fd01449ad596c9419e3b2de99c1e2fde7f72b2603be1fefe"
+          },
+          {
+            "path": "RAG/vector_store/83/index.pkl",
+            "size_bytes": 2783,
+            "sha256": "5762e2524a7b1ae24bce8a5604d440046abaa6f040158ac377773f2a1fb5befc"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 2,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/84",
+        "files": [
+          {
+            "path": "RAG/vector_store/84/index.faiss",
+            "size_bytes": 3117,
+            "sha256": "0af861e16a1cfccc722fe8a69bc5953924ead84d5ed7af4007e35fe0ab07844c"
+          },
+          {
+            "path": "RAG/vector_store/84/index.pkl",
+            "size_bytes": 1308,
+            "sha256": "282f15074c43210ccf5730d01fab821a1701981197307792a9e173b200afe082"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 1,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/85",
+        "files": [
+          {
+            "path": "RAG/vector_store/85/index.faiss",
+            "size_bytes": 15405,
+            "sha256": "5986a9addc78872389747e2176e2df1b195add838c7513b0e34231e4b68b0bc8"
+          },
+          {
+            "path": "RAG/vector_store/85/index.pkl",
+            "size_bytes": 6463,
+            "sha256": "3c7615f25d9394bfdf8a623651639fd1ef3f20a57894b45fcd6e5a4370078c21"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 5,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/86",
+        "files": [
+          {
+            "path": "RAG/vector_store/86/index.faiss",
+            "size_bytes": 6189,
+            "sha256": "fcdd3ff7a4f88352d7b2aec68060b33016b35c4b7bc1f32fbeaf7a3b6fe7ee1c"
+          },
+          {
+            "path": "RAG/vector_store/86/index.pkl",
+            "size_bytes": 2981,
+            "sha256": "5c7a164997d6c47f025e026e92bd9632ce3e7492da129c13540285eb4d85589f"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 2,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/87",
+        "files": [
+          {
+            "path": "RAG/vector_store/87/index.faiss",
+            "size_bytes": 21549,
+            "sha256": "198a53e3b31c13f8a74fc1cfa4057b2a3866f3de992a66ff3b3465328c1d20bf"
+          },
+          {
+            "path": "RAG/vector_store/87/index.pkl",
+            "size_bytes": 8063,
+            "sha256": "e9eb0b5cfb85b434b681d74b8e7d00ba2aa2ea8d8d0995c05fb49c7c85dbf1be"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 7,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/88",
+        "files": [
+          {
+            "path": "RAG/vector_store/88/index.faiss",
+            "size_bytes": 230445,
+            "sha256": "acc9ea88e1ca7e21369a7aa45575fb48a52c7ddd3589207423384f0bb1fbd529"
+          },
+          {
+            "path": "RAG/vector_store/88/index.pkl",
+            "size_bytes": 87089,
+            "sha256": "fd48aefdd891648c7f1efe811e4f1ad8481aa6361f7d94af00bf17639e2c149d"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 75,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/89",
+        "files": [
+          {
+            "path": "RAG/vector_store/89/index.faiss",
+            "size_bytes": 27693,
+            "sha256": "5f4af51886cf6bfaf27d2e280c7b8ff0088821fb9f90a7560da9cee67f6ad945"
+          },
+          {
+            "path": "RAG/vector_store/89/index.pkl",
+            "size_bytes": 10188,
+            "sha256": "f4b0e8a0a73d93135070056f7f0c8803c281ce91d04846cdd5ee4a2b21f3d59e"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 9,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/9",
+        "files": [
+          {
+            "path": "RAG/vector_store/9/index.faiss",
+            "size_bytes": 70701,
+            "sha256": "314aa87645b5847e907599d78da2090d5554c7d41170af4f74536f6f6d5797d7"
+          },
+          {
+            "path": "RAG/vector_store/9/index.pkl",
+            "size_bytes": 28230,
+            "sha256": "77514afe142848901675ec00210d49b6e8a648cc0ed3bde0d21310b567cab2c8"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 23,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/90",
+        "files": [
+          {
+            "path": "RAG/vector_store/90/index.faiss",
+            "size_bytes": 276525,
+            "sha256": "6f83de9c6737ec67473a3fcd47b60ec9f6d0344afa1deb09e8e3edd815a4c566"
+          },
+          {
+            "path": "RAG/vector_store/90/index.pkl",
+            "size_bytes": 98362,
+            "sha256": "40b4e696f959e6441be85320093b5b70474ae94b534d69132639bdbb82d45a08"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 90,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/91",
+        "files": [
+          {
+            "path": "RAG/vector_store/91/index.faiss",
+            "size_bytes": 82989,
+            "sha256": "887a00168973f9e491051ed7dea34fa769d67f5041db291f0df86a4c9d4ae75d"
+          },
+          {
+            "path": "RAG/vector_store/91/index.pkl",
+            "size_bytes": 31968,
+            "sha256": "53f43abab40bb9da7301f9e4e5c0cc8c6e09c86cf7c3a5f6559592312f6de729"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 27,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/92",
+        "files": [
+          {
+            "path": "RAG/vector_store/92/index.faiss",
+            "size_bytes": 215085,
+            "sha256": "768cd958aec05518d049bf1e32bcdeba99a3cd7ce430cc727cdd36cde7f04aa8"
+          },
+          {
+            "path": "RAG/vector_store/92/index.pkl",
+            "size_bytes": 85158,
+            "sha256": "db4d814fc7897279ecd4f4ab0e7b8654ee188457a0aa4f020220ca622a4b2e04"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 70,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      },
+      {
+        "path": "RAG/vector_store/93",
+        "files": [
+          {
+            "path": "RAG/vector_store/93/index.faiss",
+            "size_bytes": 122925,
+            "sha256": "25306e701efaff0758ea059d843f325d33f6e86e4f734c4cf91c8aeb909c4557"
+          },
+          {
+            "path": "RAG/vector_store/93/index.pkl",
+            "size_bytes": 39352,
+            "sha256": "49e1c37d27680a3b8a05682d611b320980c3a43552073d4fa08a2eae8dcb9a2a"
+          }
+        ],
+        "faiss": {
+          "index_type": "IndexFlatL2",
+          "dimension": 768,
+          "ntotal": 40,
+          "metric": {
+            "code": 1,
+            "name": "METRIC_L2"
+          }
+        }
+      }
+    ]
+  },
+  "experiment_assets": {
+    "file_count": 280,
+    "total_bytes": 43856366,
+    "aggregate_sha256": "88be510fd2d0c6e590cc2104ebf8ff51295f360627943bff2b9c60c7730a1722"
+  }
+}
