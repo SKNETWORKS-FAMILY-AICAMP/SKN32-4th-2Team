@@ -10,6 +10,10 @@ env:
   ECR_REPOSITORY: deployment-test
   CONTAINER_NAME: deployment-test
 
+permissions:
+  id-token: write   # OIDC 토큰 발급에 필요
+  contents: read
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
@@ -24,11 +28,10 @@ jobs:
         id: vars
         run: echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
-      - name: Configure AWS credentials
+      - name: Configure AWS credentials (OIDC)
         uses: aws-actions/configure-aws-credentials@v4
         with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/github-actions-ecr-oidc-role
           aws-region: ${{ env.AWS_REGION }}
 
       - name: Login to Amazon ECR
