@@ -8,10 +8,11 @@ pydantic>=2.7.4,<3.0.0
 langchain==0.2.16
 langchain-community==0.2.16
 langchain-text-splitters==0.2.4
-langchain-core>=0.2.38
+langchain-core>=0.2.38,<0.3.0
 faiss-cpu
 pypdf
 sentence-transformers
-numpy>=2.0.0
+# langchain 0.2.x requires NumPy below 2.0 on Python 3.12+.
+numpy>=1.26,<2.0
 scikit-learn
 rank-bm25

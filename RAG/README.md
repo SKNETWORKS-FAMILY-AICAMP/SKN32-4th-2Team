@@ -39,7 +39,7 @@ RAG_DB_PORT=3306
 RAG_DB_USER=실제_계정
 RAG_DB_PASSWORD=실제_비밀번호
 RAG_DB_NAME=rag_chatbot
-RAG_CORS_ORIGINS=http://127.0.0.1:8100,http://localhost:8100
+RAG_CORS_ORIGINS=http://127.0.0.1:8000,http://localhost:8000
 ~~~
 
 서버가 뜨면 http://127.0.0.1:8001/docs 에서 API 문서를, /health에서 프로세스 상태를 확인할 수 있습니다.
@@ -106,11 +106,11 @@ RAG_DEVICE를 지정하지 않으면 PyTorch CUDA 가능 여부에 따라 cuda �
 
 | 서비스 | 주소 |
 | --- | --- |
-| Django WEB | http://127.0.0.1:8100 |
-| LLM FastAPI | http://127.0.0.1:8102 |
-| RAG FastAPI | http://127.0.0.1:8101 |
+| Django WEB | http://127.0.0.1:8000 |
+| LLM FastAPI | http://127.0.0.1:8002 |
+| RAG FastAPI | http://127.0.0.1:8001 |
 
-이 조합에서는 RAG/.env의 RAG_API_PORT=8101, LLM/.env의 RAG_BASE_URL=http://127.0.0.1:8101, Django의 DOC_API_BASE_URL=http://127.0.0.1:8101로 맞춥니다.
+이 조합에서는 RAG/.env의 RAG_API_PORT=8001, LLM/.env의 RAG_BASE_URL=http://127.0.0.1:8001, Django의 DOC_API_BASE_URL=http://127.0.0.1:8001로 맞춥니다.
 
 ## Git 정책
 
