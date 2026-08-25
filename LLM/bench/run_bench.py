@@ -211,14 +211,18 @@ async def main() -> int:
     ap.add_argument("--top-k", type=int, default=5)
     ap.add_argument("--rpm", type=int, default=0, help="분당 요청 상한. 0이면 제한 없음")
     ap.add_argument("--limit", type=int, default=0, help="앞에서 N개만 (빠른 확인용)")
-    ap.add_argument("--timeout", type=float, default=60.0, help="측정용 타임아웃(초)")
+    ap.add_argument(
+        "--timeout",
+        type=float,
+        default=15.0,
+        help="서비스와 동일한 LLM 타임아웃(초). 장시간 계측은 명시적으로 늘립니다",
+    )
     args = ap.parse_args()
     tag = args.tag or args.variant
 
     # 설정은 lru_cache 라 첫 참조 전에 넣어야 한다.
-    # 운영 기본값 5초를 그대로 쓰면 느린 프로바이더가 전부 타임아웃으로 기록돼
-    # 지연 분포를 볼 수 없다. 측정 중에는 넉넉히 두고, 5초 초과 여부는
-    # 기록된 latency_ms 로 사후 판단한다.
+    # 기본값은 운영과 같은 15초로 회귀를 잡는다. 제한 없이 지연 분포를 볼 때만
+    # --timeout 값을 명시적으로 늘린다.
     os.environ["LLM_TIMEOUT_SEC"] = str(args.timeout)
     os.environ["LLM_MODE"] = "live"
     if args.model:
@@ -234,10 +238,9 @@ async def main() -> int:
         _install_corpus_retrieval(args.top_k)
     else:
         # 실제 RAG 를 쓴다. 서비스 코드를 그대로 통과하므로 아무것도 갈아끼우지 않는다.
-        # 타임아웃은 운영값(3초)보다 넉넉히 준다 — 느려서 degraded 로 빠지면
-        # '검색이 실패했다' 와 '검색이 느리다' 가 구분되지 않는다.
+        # CPU FAISS도 같은 기준으로 검증하도록 운영 기본값과 일치시킨다.
         os.environ["RAG_MODE"] = "live"
-        os.environ.setdefault("RAG_TIMEOUT_SEC", "30")
+        os.environ.setdefault("RAG_TIMEOUT_SEC", "45")
         os.environ["RAG_TOP_K"] = str(args.top_k)
         get_settings.cache_clear()
     _wrap_search_to_capture()

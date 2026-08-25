@@ -26,7 +26,7 @@ def get_chat_api_base_url():
 
 def get_chat_api_timeout():
     """Get CHAT_API_TIMEOUT_SECONDS from settings with a default fallback."""
-    return float(getattr(settings, 'CHAT_API_TIMEOUT_SECONDS', 15))
+    return float(getattr(settings, 'CHAT_API_TIMEOUT_SECONDS', 70))
 
 _CONNECT_TIMEOUT = 5.0
 

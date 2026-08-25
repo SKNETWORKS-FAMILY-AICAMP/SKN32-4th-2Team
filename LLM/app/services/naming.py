@@ -6,9 +6,11 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 
+from app.config import get_settings
 from app.domain import CHATROOM_NAME_MAX_LEN, CHATROOM_NAME_TARGET_LEN
 from app.prompts import CHATROOM_NAME_SYSTEM
 from app.providers.base import Message
@@ -41,11 +43,14 @@ def fallback_name(message: str) -> str:
 async def generate_name(message: str, provider_name: str | None = None) -> str:
     provider = get_provider(provider_name)
     try:
-        result = await provider.generate(
-            system=CHATROOM_NAME_SYSTEM,
-            messages=[Message(role="user", content=message)],
-            temperature=0.3,
-            max_tokens=60,
+        result = await asyncio.wait_for(
+            provider.generate(
+                system=CHATROOM_NAME_SYSTEM,
+                messages=[Message(role="user", content=message)],
+                temperature=0.3,
+                max_tokens=60,
+            ),
+            timeout=get_settings().llm_timeout_sec,
         )
         name = sanitize(result.text)
         # mock 모드나 이상 응답이 그대로 제목이 되는 것을 막는다.

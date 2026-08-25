@@ -21,7 +21,7 @@ class Settings(BaseSettings):
     # --- 서비스 ---
     llm_service_port: int = 8002
     default_provider: Literal["openai", "gemini"] = "openai"
-    llm_timeout_sec: float = 5.0
+    llm_timeout_sec: float = 15.0
 
     # 답변 길이 상한. 프롬프트로 "3~6문장" 을 요구하지만 지시일 뿐이라
     # 모델이 안 지킬 수 있다 — Qwen2.5:7b 는 벤치에서 2415자를 57초에 걸쳐
@@ -76,7 +76,7 @@ class Settings(BaseSettings):
     # --- RAG ---
     rag_mode: Literal["live", "mock"] = "mock"
     rag_base_url: str = "http://localhost:8001"
-    rag_timeout_sec: float = 3.0
+    rag_timeout_sec: float = 45.0
     rag_top_k: int = 5
 
     # 관련도가 이 값 미만인 검색 결과는 버린다.

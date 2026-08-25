@@ -59,7 +59,7 @@ Copy-Item .env.example .env
 | `RAG/.env` | `RAG_DB_*`가 위와 같은 MySQL의 `rag_chatbot`, `RAG_API_PORT=8001` |
 | `LLM/.env` | `RAG_BASE_URL=http://127.0.0.1:8001`, 실제 테스트라면 LLM API 키 |
 
-CPU/GPU 비교를 할 때만 `RAG/.env`에 `RAG_DEVICE=cpu` 또는 `RAG_DEVICE=cuda`를 명시한다. 빈 값은 자동 선택이다.
+기본 `RAG_DEVICE=auto`는 CUDA 지원 PyTorch와 GPU가 있으면 CUDA를, 아니면 CPU를 선택한다. CPU/GPU 비교를 할 때만 `RAG_DEVICE=cpu` 또는 `RAG_DEVICE=cuda`로 강제한다.
 
 기본 `RAG_WARM_VECTOR_STORES=1`은 RAG 기동 중 임베딩·리랭커 모델과 FAISS 캐시를 미리 적재한다. 따라서 처음 서버를 켤 때는 시간이 더 걸리지만, 첫 채팅이 모델 로딩 때문에 실패하지 않는다. 메모리가 매우 부족한 PC에서만 `0`으로 바꾸며, 그 경우 첫 검색이 느려질 수 있다.
 

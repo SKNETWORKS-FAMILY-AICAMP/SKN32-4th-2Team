@@ -1,0 +1,5 @@
+# Benchmark outputs are generated locally. Curated raw results are force-added
+# after validation so one run cannot silently pollute another run's Git metadata.
+*.json
+*.jsonl
+*.csv

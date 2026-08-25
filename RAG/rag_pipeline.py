@@ -11,19 +11,46 @@ _reranker_model = None
 def _device() -> str:
     """RAG 실행 장치를 반환한다.
 
-    RAG_DEVICE가 지정되면 그 값을 우선하고, 미지정이면 CUDA 사용 가능 여부로
-    자동 선택한다. cuda를 강제했는데 CUDA PyTorch가 없으면 모델 로드에서
-    즉시 오류가 나므로 배포 설정 오류를 숨기지 않는다.
+    기본값 ``auto``는 CUDA 지원 PyTorch와 GPU를 사용할 수 있을 때 CUDA를,
+    그 외에는 CPU를 선택한다. cpu/cuda 강제값은 성능 비교와 문제 진단용이다.
     """
-    forced = os.getenv("RAG_DEVICE", "").strip().lower()
-    if forced:
-        return forced
+    requested = os.getenv("RAG_DEVICE", "auto").strip().lower() or "auto"
+    if requested == "cpu":
+        return "cpu"
+
+    is_cuda = requested == "cuda" or re.fullmatch(r"cuda:\d+", requested)
+    if requested != "auto" and not is_cuda:
+        raise ValueError("RAG_DEVICE must be one of: auto, cpu, cuda, cuda:<index>")
+
     try:
         import torch
 
-        return "cuda" if torch.cuda.is_available() else "cpu"
-    except ImportError:
+        cuda_available = bool(torch.cuda.is_available())
+    except ImportError as exc:
+        if is_cuda:
+            raise RuntimeError(
+                "RAG_DEVICE requests CUDA, but PyTorch is not installed"
+            ) from exc
         return "cpu"
+
+    if requested == "auto":
+        return "cuda" if cuda_available else "cpu"
+    if not cuda_available:
+        raise RuntimeError(
+            f"RAG_DEVICE={requested}, but CUDA is not available in this PyTorch runtime"
+        )
+    if ":" in requested:
+        device_index = int(requested.split(":", 1)[1])
+        if device_index >= torch.cuda.device_count():
+            raise RuntimeError(
+                f"RAG_DEVICE={requested}, but only {torch.cuda.device_count()} CUDA device(s) are available"
+            )
+    return requested
+
+
+def get_runtime_device() -> str:
+    """배포 상태 확인용 공개 장치 resolver."""
+    return _device()
 
 
 class DocumentLike:

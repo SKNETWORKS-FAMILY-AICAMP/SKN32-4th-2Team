@@ -14,12 +14,14 @@
 
 from __future__ import annotations
 
+import asyncio
 import logging
 import re
 import unicodedata
 from collections import OrderedDict
 from collections.abc import Sequence
 
+from app.config import get_settings
 from app.domain import FALLBACK_TOPIC, TOPIC_CATEGORIES
 from app.errors import LLMServiceError
 from app.prompts import TOPIC_SYSTEM, build_topic_input
@@ -90,10 +92,13 @@ async def classify(
             return hit, True
 
     try:
-        raw = await provider.classify(
-            system=TOPIC_SYSTEM,
-            user_content=build_topic_input(message, source_files),
-            allowed=TOPIC_CATEGORIES,
+        raw = await asyncio.wait_for(
+            provider.classify(
+                system=TOPIC_SYSTEM,
+                user_content=build_topic_input(message, source_files),
+                allowed=TOPIC_CATEGORIES,
+            ),
+            timeout=get_settings().llm_timeout_sec,
         )
         topic = validate(raw)
     except LLMServiceError:
