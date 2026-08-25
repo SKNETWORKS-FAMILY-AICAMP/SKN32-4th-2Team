@@ -2,6 +2,8 @@ from fastapi import FastAPI, UploadFile, File, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from contextlib import asynccontextmanager
+import logging
 import mysql.connector
 from mysql.connector import Error
 import os
@@ -16,14 +18,20 @@ from rag_pipeline import (
     get_embedding_model,
     get_reranker_model,
     search_across_vector_stores,
+    warm_vector_store_cache,
     select_documents_for_bulk_load,
     select_pending_documents,
 )
 
 
-# Lazy initialization to avoid startup issues
+# 모델과 FAISS 인덱스는 lifespan에서 미리 준비한다. 첫 사용자 질문이 모델 다운로드와
+# 캐시 적재를 떠안지 않도록 서버가 준비 완료되기 전에 이 작업을 끝낸다.
 embedding_model = None
 reranker_model = None
+rag_ready = False
+warmed_vector_stores = 0
+vector_store_warmup_failures = 0
+logger = logging.getLogger("rag.startup")
 
 def get_models():
     global embedding_model, reranker_model
@@ -34,7 +42,43 @@ def get_models():
     return embedding_model, reranker_model
 
 
-app = FastAPI(title=Config.API_TITLE)
+@asynccontextmanager
+async def lifespan(_: FastAPI):
+    """모델과 로컬 FAISS 캐시를 적재한 뒤에만 RAG 요청을 받는다."""
+    global rag_ready, warmed_vector_stores, vector_store_warmup_failures
+
+    logger.info("RAG 모델 워밍업을 시작합니다.")
+    try:
+        active_embedding_model, _ = get_models()
+        vector_root = os.path.join(Config.BASE_DIR, "vector_store")
+        if Config.WARM_VECTOR_STORES:
+            warmed_vector_stores, failed_stores = warm_vector_store_cache(
+                vector_root,
+                active_embedding_model,
+            )
+            vector_store_warmup_failures = len(failed_stores)
+            if failed_stores:
+                failed_ids = ", ".join(doc_id for doc_id, _ in failed_stores)
+                logger.warning("워밍업에서 읽지 못한 FAISS 인덱스: %s", failed_ids)
+        else:
+            warmed_vector_stores = 0
+            vector_store_warmup_failures = 0
+            logger.info("FAISS 캐시 워밍업을 생략했습니다 (RAG_WARM_VECTOR_STORES=0).")
+
+        rag_ready = True
+        logger.info(
+            "RAG 워밍업 완료: 모델 준비, FAISS %s개 캐시, 실패 %s개",
+            warmed_vector_stores,
+            vector_store_warmup_failures,
+        )
+    except Exception:
+        logger.exception("RAG 워밍업 실패: 서버를 시작하지 않습니다.")
+        raise
+
+    yield
+
+
+app = FastAPI(title=Config.API_TITLE, lifespan=lifespan)
 
 # CORS 설정
 app.add_middleware(
@@ -127,8 +171,12 @@ async def root():
 async def health():
     """LLM 서비스가 RAG 프로세스의 가용성을 확인할 때 쓰는 경량 엔드포인트."""
     return {
-        "status": "ok",
+        "status": "ok" if rag_ready else "warming",
+        "models_ready": embedding_model is not None and reranker_model is not None,
         "vector_store_exists": os.path.isdir(os.path.join(Config.BASE_DIR, "vector_store")),
+        "warmed_vector_stores": warmed_vector_stores,
+        "vector_store_warmup_failures": vector_store_warmup_failures,
+        "vector_store_cache_warmed": Config.WARM_VECTOR_STORES,
     }
 
 @app.get("/api/documents", response_model=List[DocumentResponse])
@@ -540,7 +588,7 @@ async def search_vector(request: SearchRequest):
         if not os.path.exists(vector_root):
             raise HTTPException(status_code=404, detail="No vector store found")
 
-        # 첫 검색에서만 모델을 초기화하고 이후 요청에서는 캐시된 인스턴스를 쓴다.
+        # startup에서 워밍업된 인스턴스를 재사용한다.
         active_embedding_model, active_reranker_model = get_models()
 
         results = search_across_vector_stores(

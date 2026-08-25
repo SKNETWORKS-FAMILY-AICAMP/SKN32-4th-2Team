@@ -3,6 +3,10 @@
 사내 HR 규정 PDF를 MySQL 문서 목록과 문서별 FAISS 인덱스로 관리하고 검색하는 FastAPI 서비스입니다.
 이 서비스는 Django로 이관하지 않습니다. Django WEB은 사용자·채팅·세션을 담당하고, RAG는 FastAPI로 독립 실행되어 LLM이 HTTP로 호출합니다.
 
+팀원이 새 환경에서 처음 실행하는 절차와 이후의 일반 실행 절차는 [SETUP.md](SETUP.md)를 기준으로 합니다.
+
+첫 PDF 부트스트랩이 성공한 같은 PC·같은 DB에서는 이후 `python app.py`로 RAG 서버만 다시 실행하면 됩니다. 새 PC, 새 DB, 삭제된 `vector_store`, 새 PDF, 파이프라인 설정 변경 시에만 부트스트랩 또는 재색인이 다시 필요합니다.
+
 ~~~text
 Django WEB  →  LLM FastAPI  →  RAG FastAPI
                                   ├─ MySQL: document 메타데이터
@@ -42,24 +46,28 @@ RAG_DB_NAME=rag_chatbot
 RAG_CORS_ORIGINS=http://127.0.0.1:8000,http://localhost:8000
 ~~~
 
+서버는 모델과 FAISS 캐시 워밍업이 끝난 뒤에만 `Application startup complete`를 출력합니다. 처음 기동할 때는 모델 다운로드·메모리 적재 때문에 시간이 걸릴 수 있으므로, 이 로그와 `/health`의 `models_ready: true`를 확인한 뒤 LLM과 Django를 실행합니다. 기본 `RAG_WARM_VECTOR_STORES=1`은 문서별 FAISS 캐시도 미리 읽어 첫 질문 지연을 없앱니다.
+
 서버가 뜨면 http://127.0.0.1:8001/docs 에서 API 문서를, /health에서 프로세스 상태를 확인할 수 있습니다.
 
-## MySQL 초기화와 문서 시드
+## MySQL 초기화와 문서 부트스트랩
 
-리포지터리 루트의 sql/rag_chatbot_schema.sql은 스키마 생성용입니다. RAG/app.py도 같은 경로를 읽어 테이블이 없을 때 생성합니다.
+공유 MySQL 스키마는 Django 마이그레이션이 소유합니다. RAG는 시작할 때 테이블을 자동 생성하지 않습니다.
 
-RAG/sql/rag_document.sql은 초기 PDF 26건을 넣기 위한 개발 초기화 스크립트입니다. 이 파일에는 TRUNCATE TABLE document가 포함되어 있습니다.
+```powershell
+cd ..\web
+.\.venv-django\Scripts\python.exe manage.py migrate --noinput
 
-> 공유·스테이징·운영 MySQL에는 rag_document.sql을 실행하지 마세요. 기존 문서 행과 인덱스가 모두 끊어질 수 있습니다.
+cd ..\RAG
+.\.venv\Scripts\python.exe scripts\bootstrap_documents.py
+.\.venv\Scripts\python.exe scripts\bootstrap_documents.py --apply
+```
 
-새 로컬 DB만 초기화할 때의 순서:
+`bootstrap_documents.py`는 `res/pdf`의 PDF를 모두 `document`에 비파괴적으로 등록하고 FAISS 인덱스까지 만든다. 기본 실행은 미리보기이며, `--apply`일 때만 실제 쓰기가 일어난다. 중단된 경우 같은 명령을 다시 실행하면 적재되지 않은 문서부터 이어서 처리한다.
 
-1. MySQL 스키마를 생성합니다.
-2. document 테이블이 비어 있는 새 로컬 DB에서만 RAG/sql/rag_document.sql을 실행합니다.
-3. 관리 화면 또는 POST /api/documents/load-all?mode=overwrite로 PDF를 인덱싱합니다.
-4. 검색 API로 문서명·페이지·조문 머리가 맞는지 확인합니다.
+`RAG/sql/rag_document.sql`은 과거의 고정 코퍼스용 파일로 `TRUNCATE TABLE document`를 포함한다. 현재 초기화에는 사용하지 않는다. `POST /api/documents/load-all`도 이미 등록된 DB 행만 색인하므로, PDF를 폴더에 복사한 뒤 최초 등록 용도로 사용하면 안 된다.
 
-이미 운영 중인 DB는 DB 행, PDF 원본, vector_store를 먼저 백업하고 대상 환경에서만 재적재합니다.
+자세한 팀별 설정, 서버 기동 순서, 재색인 조건과 문제 해결은 [SETUP.md](SETUP.md)를 참고한다.
 
 ## API
 

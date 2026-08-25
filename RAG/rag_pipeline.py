@@ -390,6 +390,31 @@ def load_vector_store_cached(vector_path: str, embedding_model):
     return vector_db
 
 
+def warm_vector_store_cache(vector_root: str, embedding_model) -> tuple[int, list[tuple[str, str]]]:
+    """서버 기동 중 문서별 FAISS 인덱스를 미리 읽어 첫 검색 지연을 없앤다.
+
+    깨진 인덱스 하나가 전체 RAG 기동을 막지 않도록 실패 목록을 반환한다. 검색 시에도
+    해당 인덱스는 기존과 동일하게 건너뛴다.
+    """
+    if not os.path.isdir(vector_root):
+        return 0, []
+
+    loaded = 0
+    failed: list[tuple[str, str]] = []
+    for doc_id in sorted(os.listdir(vector_root)):
+        vector_path = os.path.join(vector_root, doc_id)
+        if not os.path.isdir(vector_path):
+            continue
+
+        try:
+            load_vector_store_cached(vector_path, embedding_model)
+            loaded += 1
+        except Exception as exc:
+            failed.append((doc_id, str(exc)))
+
+    return loaded, failed
+
+
 def search_across_vector_stores(
     query: str,
     vector_root: str,
