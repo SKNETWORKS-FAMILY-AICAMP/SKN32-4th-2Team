@@ -54,8 +54,9 @@ OPENAI_MODEL=gpt-4o-mini
 
 RAG_MODE=live
 RAG_BASE_URL=http://127.0.0.1:8001
-RAG_TIMEOUT_SEC=10
+RAG_TIMEOUT_SEC=45
 RAG_TOP_K=5
+ANSWER_CITE_ARTICLES=true
 ~~~
 
 키 없이 화면·연동 흐름만 확인할 때는 LLM_MODE=mock을 사용합니다. 실제 RAG 검색을 확인하려면 RAG_MODE=live를 유지합니다.
@@ -66,11 +67,11 @@ RAG_TOP_K=5
 
 | 서비스 | 설정 | 예시 값 |
 | --- | --- | --- |
-| Django WEB | CHAT_API_BASE_URL | http://127.0.0.1:8102 |
-| Django WEB | DOC_API_BASE_URL | http://127.0.0.1:8101 |
-| LLM | LLM_SERVICE_PORT | 8102 |
-| LLM | RAG_BASE_URL | http://127.0.0.1:8101 |
-| RAG | RAG_API_PORT | 8101 |
+| Django WEB | CHAT_API_BASE_URL | http://127.0.0.1:8002 |
+| Django WEB | DOC_API_BASE_URL | http://127.0.0.1:8001 |
+| LLM | LLM_SERVICE_PORT | 8002 |
+| LLM | RAG_BASE_URL | http://127.0.0.1:8001 |
+| RAG | RAG_API_PORT | 8001 |
 
 실행 순서는 RAG, LLM, Django WEB입니다. 배포 환경에서는 127.0.0.1 대신 서비스 이름 또는 내부 DNS를 사용합니다.
 
@@ -82,7 +83,9 @@ RAG_TOP_K=5
 
 ## 조문 인용 설정
 
-ANSWER_CITE_ARTICLES는 기본값 false로 유지합니다. 최신 RAG의 조문 머리 청킹을 반영하고 대상 문서를 재적재한 뒤, 답변의 조 번호가 실제 근거와 일치하는지 E2E 테스트를 통과했을 때만 true로 변경합니다.
+최신 RAG의 조문 머리 청킹·대상 인덱스 재적재·WEB → LLM → RAG E2E 검증이 완료되어, 현재 통합 구성은 `ANSWER_CITE_ARTICLES=true`를 사용합니다. `strip_unverifiable_citations`가 검색 문맥에 없는 조 번호는 계속 제거하므로, 답변에 남는 조문 번호는 검색 근거와 대조됩니다.
+
+CPU 환경의 RAG 검색은 약 15~26초가 측정됐습니다. GPU 전환 전 개발·시연 환경에서는 `RAG_TIMEOUT_SEC=45`를 사용하고, GPU 성능 측정 후 서비스 수준에 맞게 낮춥니다.
 
 ## 성능 측정 기준
 
