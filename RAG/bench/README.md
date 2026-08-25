@@ -30,6 +30,38 @@ RAG\.venv\Scripts\python.exe RAG\bench\run_api_bench.py `
   --label cpu-warm-baseline --repeats 3
 ```
 
+코퍼스와 FAISS 인덱스가 같은 데이터인지 확인할 수 있는 manifest를 생성합니다.
+
+```powershell
+RAG\.venv\Scripts\python.exe RAG\bench\capture_manifest.py
+```
+
+FAISS/Qdrant와 CPU/GPU를 같은 검색 코드에서 비교할 때는 직접 backend 벤치를
+사용합니다. 이 벤치는 매 실행을 새 프로세스에서 시작하며 LLM과 HTTP 서버가
+필요하지 않습니다.
+
+```powershell
+RAG\.venv\Scripts\python.exe -m pip install -r RAG\bench\requirements.txt
+
+RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
+  --backend faiss-cached --device cpu --label controlled
+
+RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
+  --backend qdrant-tuned --device cuda --label controlled
+```
+
+지원 backend는 다음과 같습니다.
+
+- `faiss-cached`: 현재 운영과 같은 문서별 FAISS 캐시
+- `faiss-unified`: 기존 벡터를 한 개의 exact FAISS 인덱스로 합친 전역 top-20
+- `qdrant-naive`: embedded in-memory exact Qdrant의 전역 top-20
+- `qdrant-tuned`: Qdrant 상위 80개에서 문서당 3개, 전체 20개로 제한
+
+`qdrant-*`는 독립 Qdrant 서버나 HNSW 성능이 아니라 로컬 exact 모드입니다.
+GPU 비교는 CUDA 지원 PyTorch가 설치된 동일 `RAG/.venv`에서 실행해야 합니다.
+FAISS와 embedded Qdrant 검색은 CPU에서 수행되며 GPU는 질문 임베딩과 CrossEncoder
+리랭커를 가속합니다.
+
 다른 서버를 측정할 때는 `--base-url`을 지정합니다. 결과는 기본적으로
 `RAG/bench/results/<시각>_<label>.json`에 저장됩니다.
 
@@ -42,6 +74,11 @@ RAG\.venv\Scripts\python.exe RAG\bench\run_api_bench.py `
 - `runtime`: Python, Torch, CUDA 사용 가능 여부, 로컬 인덱스 수
 - `health`: 측정 직전 서버 준비 상태와 워밍업된 인덱스 수
 - `git`: 측정 코드의 브랜치, 커밋, 미커밋 변경 여부
+
+직접 backend 결과의 `summary.stages_ms`에는 `embed`, `vector_search`, `bm25`,
+`rerank`, `finalize`, `total` 단계가 따로 기록됩니다. Qdrant의 Euclidean 거리는
+FAISS `IndexFlatL2`와 숫자 단위가 다르므로 raw 값과 비교용 squared-L2를 모두
+보존합니다.
 
 현재 서버는 시작 시 FAISS 인덱스를 워밍업하므로 이 스크립트의 수치는 warm 검색
 지연입니다. 서버 시작부터 ready까지 걸린 시간과 `RAG_WARM_VECTOR_STORES=0` 상태의
