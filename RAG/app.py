@@ -62,45 +62,9 @@ DELETE_DIR = Config.DELETE_DIR
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 os.makedirs(DELETE_DIR, exist_ok=True)
 
-# 데이터베이스 초기화 함수
-def initialize_database():
-    """서버 시작 시 데이터베이스 초기화 (SQL 파일 자동 실행)"""
-    try:
-        connection = get_db_connection()
-        cursor = connection.cursor()
-        
-        # SQL 파일 경로
-        base_dir = os.path.dirname(os.path.dirname(__file__))
-        schema_file = os.path.join(base_dir, 'sql', 'rag_chatbot_schema.sql')
-        
-        # 스키마 파일 실행
-        if os.path.exists(schema_file):
-            with open(schema_file, 'r', encoding='utf-8') as f:
-                sql_script = f.read()
-                # 여러 SQL 문을 분리해서 실행
-                statements = sql_script.split(';')
-                for statement in statements:
-                    statement = statement.strip()
-                    if statement and not statement.startswith('--'):
-                        cursor.execute(statement)
-            connection.commit()
-            print("Database schema initialized successfully")
-
-        # 초기 샘플 문서는 별도 SQL 파일을 한 번 실행해 주세요.
-        # 예: mysql -u <사용자> -p < RAG/sql/rag_document.sql
-        
-        cursor.close()
-        connection.close()
-        
-    except Error as e:
-        print(f"Database initialization error: {e}")
-        # 초기화 실패해도 서버는 계속 실행
-
-# 서버 시작 시 데이터베이스 초기화
-@app.on_event("startup")
-def startup_event():
-    print("Initializing database...")
-    initialize_database()
+# The shared MySQL schema is owned by Django migrations.  RAG must never run
+# the legacy full-schema script because it conflicts with Django's user and
+# auth tables.
 
 # 데이터베이스 연결
 def get_db_connection():
@@ -207,12 +171,6 @@ async def get_document(doc_id: int):
         """
         cursor.execute(query, (doc_id,))
         document = cursor.fetchone()
-        if document["is_loaded"]:
-            return {
-                "message": "Already loaded",
-                "doc_id": doc_id
-            }
-        
         if not document:
             raise HTTPException(status_code=404, detail="Document not found")
 
