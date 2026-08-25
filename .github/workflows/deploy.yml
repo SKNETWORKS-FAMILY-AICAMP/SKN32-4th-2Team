@@ -53,41 +53,61 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Deploy to EC2
-        uses: appleboy/ssh-action@v1
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets.AWS_ACCOUNT_ID }}:role/skn-github-actions-ecr-oidc-role
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Deploy to EC2 via SSM
         env:
           IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
-        with:
-          host: ${{ secrets.EC2_HOST }}
-          username: ${{ secrets.EC2_USERNAME }}
-          key: ${{ secrets.EC2_SSH_KEY }}
-          envs: IMAGE_TAG
-          script: |
-            set -e
+          AWS_ACCOUNT_ID: ${{ secrets.AWS_ACCOUNT_ID }}
+          INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+        run: |
+          COMMAND_ID=$(aws ssm send-command \
+            --instance-ids "$INSTANCE_ID" \
+            --document-name "AWS-RunShellScript" \
+            --comment "Deploy deployment-test $IMAGE_TAG" \
+            --parameters commands="[
+              \"set -e\",
+              \"AWS_REGION=ap-northeast-2\",
+              \"ECR_REPOSITORY=deployment-test\",
+              \"CONTAINER_NAME=deployment-test\",
+              \"IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-2.amazonaws.com/\$ECR_REPOSITORY\",
+              \"aws ecr get-login-password --region \$AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.ap-northeast-2.amazonaws.com\",
+              \"docker pull \$IMAGE_URI:$IMAGE_TAG\",
+              \"docker stop \$CONTAINER_NAME || true\",
+              \"docker rm \$CONTAINER_NAME || true\",
+              \"docker run -d --name \$CONTAINER_NAME -p 8000:8000 \$IMAGE_URI:$IMAGE_TAG\",
+              \"docker image prune -f\"
+            ]" \
+            --query "Command.CommandId" \
+            --output text)
 
-            AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
-            AWS_REGION=ap-northeast-2
-            ECR_REPOSITORY=deployment-test
-            CONTAINER_NAME=deployment-test
-            IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY
+          echo "SSM Command ID: $COMMAND_ID"
 
-            echo "Login to ECR"
-            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+          # 명령 완료까지 대기
+          aws ssm wait command-executed \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" || true
 
-            echo "Pull new image"
-            docker pull $IMAGE_URI:$IMAGE_TAG
+          # 결과 출력
+          aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --output table
 
-            echo "Stop old container"
-            docker stop $CONTAINER_NAME || true
+          # 실제 실행 상태 확인 후 실패 시 job도 실패 처리
+          STATUS=$(aws ssm get-command-invocation \
+            --command-id "$COMMAND_ID" \
+            --instance-id "$INSTANCE_ID" \
+            --query "Status" \
+            --output text)
 
-            echo "Remove old container"
-            docker rm $CONTAINER_NAME || true
+          echo "Final status: $STATUS"
 
-            echo "Run new container"
-            docker run -d \
-              --name $CONTAINER_NAME \
-              -p 8000:8000 \
-              $IMAGE_URI:$IMAGE_TAG
-
-            echo "Clean up dangling images"
-            docker image prune -f
+          if [ "$STATUS" != "Success" ]; then
+            echo "Deployment failed on EC2 (status: $STATUS)"
+            exit 1
+          fi
