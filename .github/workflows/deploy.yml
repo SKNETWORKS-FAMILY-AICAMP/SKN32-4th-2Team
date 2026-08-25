@@ -5,18 +5,84 @@ on:
     branches:
       - deployment-test
 
+env:
+  AWS_REGION: ap-northeast-2
+  ECR_REPOSITORY: deployment-test
+  CONTAINER_NAME: deployment-test
+
 jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    outputs:
+      image_tag: ${{ steps.vars.outputs.image_tag }}
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set image tag
+        id: vars
+        run: echo "image_tag=${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: ecr-login
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push image to ECR
+        env:
+          ECR_REGISTRY: ${{ steps.ecr-login.outputs.registry }}
+          IMAGE_TAG: ${{ steps.vars.outputs.image_tag }}
+        run: |
+          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest
+
   deploy:
+    needs: build-and-push
     runs-on: ubuntu-latest
 
     steps:
-      - name: SSH Test
+      - name: Deploy to EC2
         uses: appleboy/ssh-action@v1
+        env:
+          IMAGE_TAG: ${{ needs.build-and-push.outputs.image_tag }}
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USERNAME }}
           key: ${{ secrets.EC2_SSH_KEY }}
+          envs: IMAGE_TAG
           script: |
-            whoami
-            hostname
-            docker --version
+            AWS_ACCOUNT_ID=${{ secrets.AWS_ACCOUNT_ID }}
+            AWS_REGION=ap-northeast-2
+            ECR_REPOSITORY=deployment-test
+            CONTAINER_NAME=deployment-test
+            IMAGE_URI=$AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY
+
+            echo "Login to ECR"
+            aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_REGION.amazonaws.com
+
+            echo "Pull new image"
+            docker pull $IMAGE_URI:$IMAGE_TAG
+
+            echo "Stop old container"
+            docker stop $CONTAINER_NAME || true
+
+            echo "Remove old container"
+            docker rm $CONTAINER_NAME || true
+
+            echo "Run new container"
+            docker run -d \
+              --name $CONTAINER_NAME \
+              -p 80:8000 \
+              $IMAGE_URI:$IMAGE_TAG
+
+            echo "Clean up dangling images"
+            docker image prune -f
