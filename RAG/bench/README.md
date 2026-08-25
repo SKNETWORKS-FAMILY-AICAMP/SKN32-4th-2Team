@@ -50,6 +50,15 @@ RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
   --backend qdrant-tuned --device cuda --label controlled
 ```
 
+리랭커 후보 20개와 10개의 속도·품질 차이는 동일 명령에 다음 옵션만 바꿔
+측정합니다. `top_k=5`는 유지됩니다.
+
+```powershell
+RAG\.venv\Scripts\python.exe RAG\bench\run_backend_bench.py `
+  --backend faiss-cached --device cpu --initial-candidates 10 `
+  --label controlled-candidates10
+```
+
 지원 backend는 다음과 같습니다.
 
 - `faiss-cached`: 현재 운영과 같은 문서별 FAISS 캐시

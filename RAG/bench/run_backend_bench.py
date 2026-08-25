@@ -324,7 +324,15 @@ def _candidate(
 class FaissCachedBackend:
     """Production-like document-per-store FAISS search with warmed stores."""
 
-    def __init__(self, paths: Sequence[Path], embedding_model: Any, pipeline: Any):
+    def __init__(
+        self,
+        paths: Sequence[Path],
+        embedding_model: Any,
+        pipeline: Any,
+        *,
+        initial_candidates: int,
+    ):
+        self.initial_candidates = initial_candidates
         self.stores: list[tuple[str, Any]] = []
         self.point_count = 0
         for path in paths:
@@ -347,7 +355,7 @@ class FaissCachedBackend:
                     )
                 )
         return sorted(candidates, key=lambda item: item["squared_l2"])[
-            :INITIAL_CANDIDATES
+            :self.initial_candidates
         ]
 
     def close(self) -> None:
@@ -357,11 +365,19 @@ class FaissCachedBackend:
 class FaissUnifiedBackend:
     """One exact FAISS IndexFlatL2 assembled from existing stored vectors."""
 
-    def __init__(self, paths: Sequence[Path], embedding_model: Any, pipeline: Any):
+    def __init__(
+        self,
+        paths: Sequence[Path],
+        embedding_model: Any,
+        pipeline: Any,
+        *,
+        initial_candidates: int,
+    ):
         import faiss
         import numpy as np
 
         self._np = np
+        self.initial_candidates = initial_candidates
         self.payloads: list[tuple[str, Any]] = []
         self.index: Any = None
         for path in paths:
@@ -389,7 +405,7 @@ class FaissUnifiedBackend:
 
     def search(self, query_vector: Sequence[float]) -> list[dict[str, Any]]:
         query = self._np.asarray([query_vector], dtype="float32")
-        fetch = min(INITIAL_CANDIDATES, self.point_count)
+        fetch = min(self.initial_candidates, self.point_count)
         distances, positions = self.index.search(query, fetch)
         candidates: list[dict[str, Any]] = []
         for raw_distance, position in zip(distances[0], positions[0]):
@@ -422,6 +438,8 @@ class QdrantBackend:
         pipeline: Any,
         *,
         tuned: bool,
+        initial_candidates: int,
+        qdrant_fetch: int,
     ):
         # Lazy by design: FAISS benchmarks and utility tests work without the
         # optional qdrant-client package.
@@ -435,6 +453,8 @@ class QdrantBackend:
 
         self._qm = qm
         self.tuned = tuned
+        self.initial_candidates = initial_candidates
+        self.qdrant_fetch = qdrant_fetch
         self.client = QdrantClient(location=":memory:")
         self.point_count = 0
         dimension: int | None = None
@@ -486,11 +506,12 @@ class QdrantBackend:
 
     def search(self, query_vector: Sequence[float]) -> list[dict[str, Any]]:
         params = self._qm.SearchParams(exact=True)
+        fetch = self.qdrant_fetch if self.tuned else self.initial_candidates
         if hasattr(self.client, "query_points"):
             hits = self.client.query_points(
                 self.COLLECTION,
                 query=list(query_vector),
-                limit=min(QDRANT_FETCH, self.point_count),
+                limit=min(fetch, self.point_count),
                 search_params=params,
                 with_payload=True,
             ).points
@@ -498,7 +519,7 @@ class QdrantBackend:
             hits = self.client.search(
                 self.COLLECTION,
                 query_vector=list(query_vector),
-                limit=min(QDRANT_FETCH, self.point_count),
+                limit=min(fetch, self.point_count),
                 search_params=params,
                 with_payload=True,
             )
@@ -517,8 +538,12 @@ class QdrantBackend:
                 )
             )
         if self.tuned:
-            return apply_per_document_limit(candidates)
-        return candidates[:INITIAL_CANDIDATES]
+            return apply_per_document_limit(
+                candidates,
+                per_document=PER_DOCUMENT,
+                limit=self.initial_candidates,
+            )
+        return candidates[: self.initial_candidates]
 
     def close(self) -> None:
         self.client.close()
@@ -535,15 +560,42 @@ def _build_backend(
     paths: Sequence[Path],
     embedding_model: Any,
     pipeline: Any,
+    *,
+    initial_candidates: int,
+    qdrant_fetch: int,
 ) -> Any:
     if name == "faiss-cached":
-        return FaissCachedBackend(paths, embedding_model, pipeline)
+        return FaissCachedBackend(
+            paths,
+            embedding_model,
+            pipeline,
+            initial_candidates=initial_candidates,
+        )
     if name == "faiss-unified":
-        return FaissUnifiedBackend(paths, embedding_model, pipeline)
+        return FaissUnifiedBackend(
+            paths,
+            embedding_model,
+            pipeline,
+            initial_candidates=initial_candidates,
+        )
     if name == "qdrant-naive":
-        return QdrantBackend(paths, embedding_model, pipeline, tuned=False)
+        return QdrantBackend(
+            paths,
+            embedding_model,
+            pipeline,
+            tuned=False,
+            initial_candidates=initial_candidates,
+            qdrant_fetch=qdrant_fetch,
+        )
     if name == "qdrant-tuned":
-        return QdrantBackend(paths, embedding_model, pipeline, tuned=True)
+        return QdrantBackend(
+            paths,
+            embedding_model,
+            pipeline,
+            tuned=True,
+            initial_candidates=initial_candidates,
+            qdrant_fetch=qdrant_fetch,
+        )
     raise ValueError(f"Unknown backend: {name}")
 
 
@@ -675,6 +727,18 @@ def _parse_args() -> argparse.Namespace:
     parser.add_argument("--label", default="current")
     parser.add_argument("--repeats", type=int, default=3)
     parser.add_argument("--warmups", type=int, default=1)
+    parser.add_argument(
+        "--initial-candidates",
+        type=int,
+        default=INITIAL_CANDIDATES,
+        help="Number of chunks sent to BM25/CrossEncoder (compare 10 vs 20)",
+    )
+    parser.add_argument(
+        "--qdrant-fetch",
+        type=int,
+        default=QDRANT_FETCH,
+        help="Exact Qdrant hits fetched before tuned per-document limiting",
+    )
     parser.add_argument("--limit", type=int, default=0, help="0 runs all questions")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--_worker", action="store_true", help=argparse.SUPPRESS)
@@ -683,6 +747,10 @@ def _parse_args() -> argparse.Namespace:
         parser.error("--repeats must be at least 1")
     if args.warmups < 0 or args.limit < 0:
         parser.error("--warmups and --limit cannot be negative")
+    if args.initial_candidates < TOP_K:
+        parser.error(f"--initial-candidates must be at least top-k ({TOP_K})")
+    if args.qdrant_fetch < args.initial_candidates:
+        parser.error("--qdrant-fetch cannot be smaller than --initial-candidates")
     return args
 
 
@@ -730,7 +798,14 @@ def _run_worker(args: argparse.Namespace) -> int:
             pipeline.get_reranker_model, torch=torch, device=args.device
         )
         backend, backend_init_ms = _measure(
-            lambda: _build_backend(args.backend, paths, embedding_model, pipeline),
+            lambda: _build_backend(
+                args.backend,
+                paths,
+                embedding_model,
+                pipeline,
+                initial_candidates=args.initial_candidates,
+                qdrant_fetch=args.qdrant_fetch,
+            ),
             torch=torch,
             device=args.device,
         )
@@ -827,9 +902,9 @@ def _run_worker(args: argparse.Namespace) -> int:
                 "questions_sha256": questions_sha256,
                 "vector_root": str(args.vector_root.resolve()),
                 "top_k": TOP_K,
-                "initial_candidates": INITIAL_CANDIDATES,
+                "initial_candidates": args.initial_candidates,
                 "per_document": PER_DOCUMENT,
-                "qdrant_fetch": QDRANT_FETCH,
+                "qdrant_fetch": args.qdrant_fetch,
                 "qdrant_exact": args.backend.startswith("qdrant"),
                 "qdrant_document_diversity": args.backend == "qdrant-tuned",
                 "corpus_reembedded": False,
