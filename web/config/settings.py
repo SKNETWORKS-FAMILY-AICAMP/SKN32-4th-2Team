@@ -12,12 +12,13 @@ https://docs.djangoproject.com/en/6.1/ref/settings/
 
 import os
 from pathlib import Path
-from dotenv import load_dotenv
+from urllib.parse import parse_qs, unquote, urlparse
 
-load_dotenv()
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+load_dotenv(BASE_DIR / ".env")
 
 
 # Quick-start development settings - unsuitable for production
@@ -43,6 +44,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "users",
     "chat",
+    "documents.apps.DocumentsConfig",
 ]
 
 MIDDLEWARE = [
@@ -81,16 +83,25 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 if DATABASE_URL and DATABASE_URL.startswith("mysql"):
+    database_url = urlparse(DATABASE_URL)
+    database_name = database_url.path.lstrip("/")
+
+    if not database_url.hostname or not database_name:
+        raise ValueError(
+            "DATABASE_URL must include a MySQL host and database name."
+        )
+
+    query_params = parse_qs(database_url.query)
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.mysql",
-            "NAME": DATABASE_URL.split("/")[-1].split("?")[0],
-            "USER": DATABASE_URL.split("://")[1].split(":")[0],
-            "PASSWORD": DATABASE_URL.split(":")[1].split("@")[0],
-            "HOST": DATABASE_URL.split("@")[1].split(":")[0],
-            "PORT": DATABASE_URL.split(":")[-1].split("/")[0],
+            "NAME": unquote(database_name),
+            "USER": unquote(database_url.username or ""),
+            "PASSWORD": unquote(database_url.password or ""),
+            "HOST": database_url.hostname,
+            "PORT": database_url.port or 3306,
             "OPTIONS": {
-                "charset": "utf8mb4",
+                "charset": query_params.get("charset", ["utf8mb4"])[0],
             },
         }
     }

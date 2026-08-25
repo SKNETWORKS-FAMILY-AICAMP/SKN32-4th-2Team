@@ -5,11 +5,15 @@ __pycache__/
 
 # 가상환경 제외
 .venv/
+.venv-django/
 venv/
 env/
 
 # 환경 변수 파일 제외
 .env
+
+# 로컬 개발 데이터베이스 제외
+db.sqlite3
 
 # IDE 설정 제외
 .idea/
