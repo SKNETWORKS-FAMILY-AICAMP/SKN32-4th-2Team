@@ -8,6 +8,24 @@ _embedding_model = None
 _reranker_model = None
 
 
+def _device() -> str:
+    """RAG 실행 장치를 반환한다.
+
+    RAG_DEVICE가 지정되면 그 값을 우선하고, 미지정이면 CUDA 사용 가능 여부로
+    자동 선택한다. cuda를 강제했는데 CUDA PyTorch가 없으면 모델 로드에서
+    즉시 오류가 나므로 배포 설정 오류를 숨기지 않는다.
+    """
+    forced = os.getenv("RAG_DEVICE", "").strip().lower()
+    if forced:
+        return forced
+    try:
+        import torch
+
+        return "cuda" if torch.cuda.is_available() else "cpu"
+    except ImportError:
+        return "cpu"
+
+
 class DocumentLike:
     def __init__(self, page_content: str, metadata: Optional[dict] = None):
         self.page_content = page_content
@@ -33,6 +51,30 @@ def _normalize_whitespace(text: str) -> str:
     text = re.sub(r"\n\s+", "\n", text)
     text = re.sub(r"\s{2,}", " ", text)
     return text.strip()
+
+
+# 조문 머리(예: 제60조(연차 유급휴가))를 청크 앞에 보강한다. 조문 중간에서
+# 잘린 청크도 LLM이 근거 조문을 식별할 수 있게 하기 위한 메타데이터다.
+_ARTICLE_HEAD = re.compile(r"제\s?\d+조(?:의\s?\d+)?\s*\([^)]{1,40}\)")
+
+
+def _article_heads(text: str) -> List[tuple]:
+    """본문에서 (문자 위치, 조문 머리) 목록을 추출한다."""
+    return [
+        (match.start(), re.sub(r"\s+", " ", match.group(0)).strip())
+        for match in _ARTICLE_HEAD.finditer(text)
+    ]
+
+
+def _head_for(offset: int, heads: List[tuple]) -> Optional[str]:
+    """지정 위치보다 앞에 있는 가장 가까운 조문 머리를 반환한다."""
+    found = None
+    for position, head in heads:
+        if position <= offset:
+            found = head
+        else:
+            break
+    return found
 
 
 def _is_meaningful_chunk(content: str, *, min_length: int = 80) -> bool:
@@ -164,15 +206,55 @@ def build_chunks_from_pages(
                 if part.strip():
                     chunks.append(LangchainDocument(page_content=part.strip(), metadata=doc.metadata.copy()))
 
+    # 페이지를 넘어 이어지는 조문도 처리하려고, 페이지별 머리 목록과
+    # 이전 페이지에서 이어진 마지막 조문을 먼저 계산한다.
+    page_info: dict = {}
+    carry_by_source: dict = {}
+    for doc in documents:
+        source_key = (doc.metadata or {}).get("source_file", "")
+        page_text = getattr(doc, "page_content", "") or ""
+        # 청크는 공백 정규화를 거치므로 좌표도 공백을 제거한 기준으로 맞춘다.
+        heads = [
+            (len(re.sub(r"\s+", "", page_text[:position])), head)
+            for position, head in _article_heads(page_text)
+        ]
+        page_info[id(doc)] = (heads, carry_by_source.get(source_key))
+        if heads:
+            carry_by_source[source_key] = heads[-1][1]
+
     cleaned_chunks: List[Any] = []
     seen_signatures = set()
+    min_chunk_length = int(os.getenv("RAG_MIN_CHUNK_LENGTH", "80"))
 
     for idx, chunk in enumerate(chunks):
         content = _normalize_whitespace(getattr(chunk, "page_content", "") or "")
-        if not _is_meaningful_chunk(content, min_length=80):
+        if not _is_meaningful_chunk(content, min_length=min_chunk_length):
             continue
 
         metadata = dict(getattr(chunk, "metadata", {}) or {})
+        source_key = metadata.get("source_file", "")
+        article = None
+        probe = re.sub(r"\s+", "", content[:40])
+        for doc in documents:
+            if (doc.metadata or {}).get("source_file") != source_key:
+                continue
+            flattened_page = re.sub(r"\s+", "", getattr(doc, "page_content", "") or "")
+            offset = flattened_page.find(probe)
+            if offset < 0:
+                continue
+            heads, carry_in = page_info[id(doc)]
+            article = _head_for(offset, heads) or carry_in
+            break
+
+        # 청크의 시작 조문을 확실히 남긴다. 본문 뒤에 다른 조문이 있어도
+        # 앞부분의 근거를 그 다른 조문으로 잘못 인용하지 않게 한다.
+        if (
+            article
+            and os.getenv("RAG_ARTICLE_HEAD", "1") != "0"
+            and not _ARTICLE_HEAD.match(content)
+        ):
+            content = f"[{article}] {content}"
+
         metadata.update({
             "chunk_id": idx,
             "char_count": len(content),
@@ -180,6 +262,7 @@ def build_chunks_from_pages(
             "source_file": metadata.get("source_file", "unknown.pdf"),
             "page_number": metadata.get("page_number", metadata.get("page", 1)),
             "is_legal_text": True,
+            "article": article,
         })
 
         signature = re.sub(r"\s+", " ", content)
@@ -198,9 +281,11 @@ def get_embedding_model():
     if _embedding_model is None:
         from langchain_community.embeddings import HuggingFaceEmbeddings
 
+        device = _device()
+        print(f"[rag_pipeline] embedding model device={device}")
         _embedding_model = HuggingFaceEmbeddings(
-            model_name="jhgan/ko-sroberta-multitask",
-            model_kwargs={"device": "cpu"},
+            model_name=os.getenv("RAG_EMBEDDING_MODEL", "jhgan/ko-sroberta-multitask"),
+            model_kwargs={"device": device},
             encode_kwargs={"normalize_embeddings": True},
         )
 
@@ -213,7 +298,18 @@ def get_reranker_model():
     if _reranker_model is None:
         from sentence_transformers import CrossEncoder
 
-        _reranker_model = CrossEncoder("BAAI/bge-reranker-v2-m3")
+        device = _device()
+        print(f"[rag_pipeline] reranker device={device}")
+        kwargs = {"device": device}
+        if device.startswith("cuda"):
+            import torch
+
+            # GPU에서는 fp16으로 올려 VRAM 사용량을 낮춘다.
+            kwargs["model_kwargs"] = {"torch_dtype": torch.float16}
+        _reranker_model = CrossEncoder(
+            os.getenv("RAG_RERANKER_MODEL", "BAAI/bge-reranker-v2-m3"),
+            **kwargs,
+        )
 
     return _reranker_model
 
@@ -273,6 +369,27 @@ def load_vector_store(vector_path: str, embedding_model):
     )
 
 
+# 로드된 FAISS 인덱스를 재사용한다. index.faiss의 수정 시각이 바뀌면
+# overwrite 재적재로 판단해 다음 검색에서 자동으로 다시 읽는다.
+_store_cache: dict = {}
+
+
+def load_vector_store_cached(vector_path: str, embedding_model):
+    index_file = os.path.join(vector_path, "index.faiss")
+    try:
+        mtime = os.path.getmtime(index_file)
+    except OSError:
+        mtime = None
+
+    cached = _store_cache.get(vector_path)
+    if cached is not None and cached[0] == mtime:
+        return cached[1]
+
+    vector_db = load_vector_store(vector_path, embedding_model)
+    _store_cache[vector_path] = (mtime, vector_db)
+    return vector_db
+
+
 def search_across_vector_stores(
     query: str,
     vector_root: str,
@@ -284,14 +401,17 @@ def search_across_vector_stores(
 ):
     candidates = []
 
+    # 질문 임베딩을 스토어마다 반복하지 않고 요청당 한 번만 생성한다.
+    query_embedding = embedding_model.embed_query(query)
+
     for doc_id in sorted(os.listdir(vector_root)):
         doc_path = os.path.join(vector_root, doc_id)
         if not os.path.isdir(doc_path):
             continue
 
         try:
-            vector_db = load_vector_store(doc_path, embedding_model)
-            docs = vector_db.similarity_search_with_score(query, k=3)
+            vector_db = load_vector_store_cached(doc_path, embedding_model)
+            docs = vector_db.similarity_search_with_score_by_vector(query_embedding, k=3)
         except Exception:
             continue
 

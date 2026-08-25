@@ -1,41 +1,64 @@
-# RAG 시스템 설정
+"""RAG 서비스 설정.
+
+실제 DB 자격 증명은 RAG/.env 또는 프로세스 환경변수에서만 읽는다.
+기본값에 팀원 PC의 계정·비밀번호를 넣지 않는다.
+"""
+
+from __future__ import annotations
+
 import os
+from pathlib import Path
+
+from dotenv import load_dotenv
+
+
+_BASE_DIR = Path(__file__).resolve().parent
+load_dotenv(_BASE_DIR / ".env")
+
+
+def _int_env(name: str, default: int) -> int:
+    value = os.getenv(name)
+    return int(value) if value not in (None, "") else default
+
+
+def _csv_env(name: str, default: str) -> list[str]:
+    raw = os.getenv(name, default)
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
 
 class Config:
-    # API 설정
-    API_HOST = "0.0.0.0"
-    API_PORT = 8001
+    # API
+    API_HOST = os.getenv("RAG_API_HOST", "0.0.0.0")
+    API_PORT = _int_env("RAG_API_PORT", 8001)
     API_TITLE = "RAG Document Management API"
-    
-    # 데이터베이스 설정
-    DB_HOST = "localhost"
-    DB_PORT = 3306
-    DB_USER = "root"
-    DB_PASSWORD = "1234"  # 필요시 비밀번호 설정
-    DB_NAME = "rag_chatbot"
-    
-    # 파일 저장 경로
-    BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    UPLOAD_DIR = os.path.join(BASE_DIR, "res", "pdf")
-    DELETE_DIR = os.path.join(UPLOAD_DIR, "delete")
-    
-    # CORS 설정
-    CORS_ORIGINS = ["*"]  # 개발용 - 프로덕션에서는 특정 도메인으로 제한
-    
-    # 파일 업로드 제한
-    MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
-    ALLOWED_EXTENSIONS = [".pdf"]
-    
-    # 벡터 DB 설정 (추후 RAG 연동시 사용)
-    VECTOR_DB_HOST = "localhost"
-    VECTOR_DB_PORT = 6333  # Qdrant 기본 포트
-    VECTOR_DB_COLLECTION = "rag_documents"
 
-    # RAG 품질 관리 설정
-    CHUNK_SIZE = 400
-    CHUNK_OVERLAP = 80
-    MIN_CHUNK_LENGTH = 80
-    EMBEDDING_MODEL = "jhgan/ko-sroberta-multitask"
-    RERANKER_MODEL = "BAAI/bge-reranker-v2-m3"
-    SEARCH_TOP_K = 5
-    SEARCH_INITIAL_CANDIDATES = 20
+    # MySQL
+    DB_HOST = os.getenv("RAG_DB_HOST", "127.0.0.1")
+    DB_PORT = _int_env("RAG_DB_PORT", 3306)
+    DB_USER = os.getenv("RAG_DB_USER", "")
+    DB_PASSWORD = os.getenv("RAG_DB_PASSWORD", "")
+    DB_NAME = os.getenv("RAG_DB_NAME", "rag_chatbot")
+
+    # Files and local FAISS indexes
+    BASE_DIR = str(_BASE_DIR)
+    UPLOAD_DIR = os.getenv("RAG_UPLOAD_DIR", str(_BASE_DIR / "res" / "pdf"))
+    DELETE_DIR = os.getenv("RAG_DELETE_DIR", str(Path(UPLOAD_DIR) / "delete"))
+
+    # Browser clients. Production should list only trusted origins.
+    CORS_ORIGINS = _csv_env(
+        "RAG_CORS_ORIGINS",
+        "http://127.0.0.1:8100,http://localhost:8100",
+    )
+
+    # Upload limits
+    MAX_FILE_SIZE = _int_env("RAG_MAX_FILE_SIZE", 50 * 1024 * 1024)
+    ALLOWED_EXTENSIONS = [".pdf"]
+
+    # Retrieval quality settings
+    CHUNK_SIZE = _int_env("RAG_CHUNK_SIZE", 400)
+    CHUNK_OVERLAP = _int_env("RAG_CHUNK_OVERLAP", 80)
+    MIN_CHUNK_LENGTH = _int_env("RAG_MIN_CHUNK_LENGTH", 80)
+    EMBEDDING_MODEL = os.getenv("RAG_EMBEDDING_MODEL", "jhgan/ko-sroberta-multitask")
+    RERANKER_MODEL = os.getenv("RAG_RERANKER_MODEL", "BAAI/bge-reranker-v2-m3")
+    SEARCH_TOP_K = _int_env("RAG_SEARCH_TOP_K", 5)
+    SEARCH_INITIAL_CANDIDATES = _int_env("RAG_SEARCH_INITIAL_CANDIDATES", 20)

@@ -159,6 +159,14 @@ def serialize_document(doc: dict) -> dict:
 async def root():
     return {"message": "RAG Document Management API", "port": Config.API_PORT}
 
+@app.get("/health")
+async def health():
+    """LLM 서비스가 RAG 프로세스의 가용성을 확인할 때 쓰는 경량 엔드포인트."""
+    return {
+        "status": "ok",
+        "vector_store_exists": os.path.isdir(os.path.join(Config.BASE_DIR, "vector_store")),
+    }
+
 @app.get("/api/documents", response_model=List[DocumentResponse])
 async def get_documents():
     """삭제되지 않은 모든 문서 목록 조회"""
@@ -574,11 +582,14 @@ async def search_vector(request: SearchRequest):
         if not os.path.exists(vector_root):
             raise HTTPException(status_code=404, detail="No vector store found")
 
+        # 첫 검색에서만 모델을 초기화하고 이후 요청에서는 캐시된 인스턴스를 쓴다.
+        active_embedding_model, active_reranker_model = get_models()
+
         results = search_across_vector_stores(
             query,
             vector_root,
-            embedding_model,
-            reranker_model,
+            active_embedding_model,
+            active_reranker_model,
             top_k=Config.SEARCH_TOP_K,
             initial_candidates=Config.SEARCH_INITIAL_CANDIDATES,
         )
