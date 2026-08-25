@@ -12,7 +12,9 @@ from pydantic import BaseModel, Field
 
 from app.domain import TOPIC_CATEGORIES
 
-ProviderName = Literal["openai", "gemini", "qwen"]
+# 서비스 API에서는 상용 프로바이더만 선택할 수 있다.
+# Qwen 관련 코드는 별도 실험 및 벤치마크 트랙에 남기되 운영 요청으로는 받지 않는다.
+ProviderName = Literal["openai", "gemini"]
 Speaker = Literal["user", "llm"]
 
 
