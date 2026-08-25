@@ -1,5 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
+from django.http import JsonResponse, QueryDict
 from django.views.decorators.http import require_http_methods
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.db.models import Q
@@ -94,9 +94,13 @@ def create_user_api(request):
 @user_passes_test(is_admin, login_url='/login')
 @require_http_methods(["PATCH"])
 def update_user_api(request, user_id):
+    # Django는 PATCH 본문을 request.POST로 파싱하지 않는다. 프론트가 보내는
+    # application/x-www-form-urlencoded 본문을 명시적으로 읽어야 한다.
+    data = QueryDict(request.body, encoding=request.encoding or "utf-8")
+
     if user_id == request.user.username:
-        is_admin = request.POST.get('is_admin')
-        is_disabled = request.POST.get('is_disabled')
+        is_admin = data.get('is_admin')
+        is_disabled = data.get('is_disabled')
         if is_admin == 'false' or is_disabled == 'true':
             return JsonResponse({'detail': '본인 계정의 관리자 권한은 해제할 수 없습니다.' if is_admin == 'false' else '본인 계정은 비활성화할 수 없습니다.'}, status=400)
     
@@ -105,7 +109,7 @@ def update_user_api(request, user_id):
     except User.DoesNotExist:
         return JsonResponse({'detail': '사용자를 찾을 수 없습니다.'}, status=404)
     
-    form = UserUpdateForm(request.POST)
+    form = UserUpdateForm(data)
     if not form.is_valid():
         errors = form.errors.get_json_data()
         first_error = list(errors.values())[0][0]['message'] if errors else '수정에 실패했습니다.'
@@ -120,10 +124,10 @@ def update_user_api(request, user_id):
     if form.cleaned_data.get('passwd'):
         user.set_password(form.cleaned_data['passwd'])
     
-    if 'is_admin' in form.cleaned_data:
+    if 'is_admin' in data:
         user.is_admin = form.cleaned_data['is_admin']
     
-    if 'is_disabled' in form.cleaned_data:
+    if 'is_disabled' in data:
         user.is_disabled = form.cleaned_data['is_disabled']
     
     user.save()
