@@ -26,6 +26,13 @@ def _csv_env(name: str, default: str) -> list[str]:
     return [item.strip() for item in raw.split(",") if item.strip()]
 
 
+def _bool_env(name: str, default: bool) -> bool:
+    value = os.getenv(name)
+    if value in (None, ""):
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
 class Config:
     # API
     API_HOST = os.getenv("RAG_API_HOST", "0.0.0.0")
@@ -60,5 +67,7 @@ class Config:
     MIN_CHUNK_LENGTH = _int_env("RAG_MIN_CHUNK_LENGTH", 80)
     EMBEDDING_MODEL = os.getenv("RAG_EMBEDDING_MODEL", "jhgan/ko-sroberta-multitask")
     RERANKER_MODEL = os.getenv("RAG_RERANKER_MODEL", "BAAI/bge-reranker-v2-m3")
+    # 첫 질의가 모델·FAISS 적재를 떠안지 않도록 기본적으로 서버 기동 중 캐시한다.
+    WARM_VECTOR_STORES = _bool_env("RAG_WARM_VECTOR_STORES", True)
     SEARCH_TOP_K = _int_env("RAG_SEARCH_TOP_K", 5)
     SEARCH_INITIAL_CANDIDATES = _int_env("RAG_SEARCH_INITIAL_CANDIDATES", 20)
