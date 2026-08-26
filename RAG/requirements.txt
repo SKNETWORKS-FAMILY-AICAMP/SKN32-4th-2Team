@@ -1,3 +1,10 @@
+# CPU-only PyTorch. torch is an indirect dependency (sentence-transformers needs
+# torch>=2.2); without this pin pip would take the multi-GB CUDA wheel from PyPI,
+# which is dead weight because the deployed container has no GPU. The +cpu build
+# only exists on the PyTorch index, so it is added as an extra index below.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.13.0+cpu
+
 fastapi==0.104.1
 uvicorn==0.24.0
 mysql-connector-python==8.2.0
