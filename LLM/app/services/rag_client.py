@@ -11,6 +11,7 @@ import logging
 import ntpath
 import posixpath
 import time
+from collections.abc import Sequence
 
 import httpx
 
@@ -86,17 +87,76 @@ def _file_name_of(result: dict, metadata: dict) -> str:
 def _page_of(result: dict, metadata: dict) -> int | None:
     """사람이 읽는 페이지 번호(1부터)를 뽑는다.
 
-    RAG 가 어느 표기를 주는지가 버전마다 달라서 1-based 인 것부터 확인한다.
-    `metadata.page` 는 0-based 라 그대로 쓰면 화면에 'p.0' 이 뜬다.
+    RAG 가 어느 표기를 주는지가 버전마다 달라서 의미가 명확한 필드부터 확인한다.
+
+    - ``page_number``/``page_label``: 사람이 읽는 1-based 번호
+    - ``page_index``: 명시적인 0-based 인덱스
+    - 최상위 ``page``: 구버전의 1-based 번호(0은 첫 페이지로 보정)
+    - ``metadata.page``: LangChain/PyPDFLoader의 0-based 인덱스
+
+    현재 RAG 전처리의 구버전은 PyPDFLoader의 0-based ``metadata.page``을
+    ``metadata.page_number``로 그대로 복사했다. 두 값이 같으면 구버전으로
+    보고 한 페이지를 더한다. 그래서 첫 페이지만 p.0을 막는 데 그치지 않고
+    뒤 페이지의 off-by-one도 함께 고친다. 음수나 숫자가 아닌 값은 표시하지
+    않아 잘못된 ``p.-1``이 나가지 않게 한다.
     """
-    if result.get("page") is not None:
-        return result["page"]
+
+    def _as_int(value: object) -> int | None:
+        if isinstance(value, bool):
+            return None
+        if isinstance(value, int):
+            return value
+        if isinstance(value, str):
+            stripped = value.strip()
+            if stripped.isdigit():
+                return int(stripped)
+        return None
+
+    def _one_based(value: object) -> int | None:
+        number = _as_int(value)
+        if number is None or number < 0:
+            return None
+        return max(1, number)
+
+    def _zero_based(value: object) -> int | None:
+        index = _as_int(value)
+        if index is None or index < 0:
+            return None
+        return index + 1
+
+    # 새 계약인 최상위 필드는 이름만으로 기준을 알 수 있으므로 먼저 사용한다.
     for key in ("page_number", "page_label"):
-        value = metadata.get(key)
-        if value is not None and str(value).isdigit():
-            return int(value)
-    page = metadata.get("page")
-    return page + 1 if isinstance(page, int) else None
+        page = _one_based(result.get(key))
+        if page is not None:
+            return page
+    page = _zero_based(result.get("page_index"))
+    if page is not None:
+        return page
+
+    # PDF가 붙인 실제 페이지 라벨과 명시적인 인덱스도 우선한다.
+    page = _one_based(metadata.get("page_label"))
+    if page is not None:
+        return page
+    page = _zero_based(metadata.get("page_index"))
+    if page is not None:
+        return page
+
+    metadata_number = _as_int(metadata.get("page_number"))
+    metadata_index = _as_int(metadata.get("page"))
+    if metadata_number is not None and metadata_number >= 0:
+        if metadata_index is not None and metadata_number == metadata_index:
+            # 구버전 RAG가 0-based page를 page_number로 그대로 복사한 경우.
+            return metadata_index + 1
+        return max(1, metadata_number)
+
+    # 구버전의 최상위 page는 사람이 읽는 번호로 사용했다. 다만 실제 응답에서
+    # page=0도 관측됐으므로 0만 첫 페이지로 안전하게 보정한다.
+    page = _one_based(result.get("page"))
+    if page is not None:
+        return page
+
+    # LangChain/PyPDFLoader metadata.page는 0-based다.
+    return _zero_based(metadata.get("page"))
 
 
 def get_client() -> httpx.AsyncClient:
@@ -144,30 +204,25 @@ def _relevant(results: list[dict], min_score: float) -> list[dict]:
 
 
 def _to_chunks(results: list[dict], top_k: int) -> list[RetrievedChunk]:
-    """RAG 응답을 내부 모델로 바꾸면서 중복을 제거한다.
+    """RAG 응답을 관련도 순서 그대로 내부 청크 모델로 바꾼다.
 
     필드가 최상위에 있든(`original_file_name`) metadata 안에 있든(`source`) 모두 받는다.
     RAG 쪽이 나중에 `doc_id`/`score` 를 최상위로 올려도 이 함수는 그대로 동작한다.
 
-    RAG 가 돌려주는 단위는 '문서'가 아니라 '청크'라, 한 페이지에서 인접한 청크가
-    여러 개 걸리면 같은 (파일, 페이지)가 중복으로 온다. 그대로 두면 답변 하단에
-    "복무규정.pdf p.5"가 두 번 표시되므로 여기서 합친다.
-    페이지가 다르면 서로 다른 근거이므로 남긴다. 순서(관련도 순)는 유지한다.
+    RAG 가 돌려주는 단위는 '문서'가 아니라 '청크'다. 같은 페이지의 서로 다른
+    청크에도 별개의 조문이나 표 행이 있을 수 있으므로 프롬프트용 청크는 합치지
+    않는다. 화면의 출처 목록만 합쳐야 할 때는 ``unique_source_chunks``를 쓴다.
 
-    RAG 가 `top_k` 파라미터를 받지 않으므로 개수 제한도 여기서 건다.
+    RAG 가 `top_k` 파라미터를 받지 않으므로 개수 제한도 여기서 건다. 문서명이
+    없는 잘못된 결과는 건너뛰되, 나머지는 입력 순서 그대로 최대 ``top_k``개다.
     """
     chunks: list[RetrievedChunk] = []
-    seen: set[tuple[str, int | None]] = set()
     for r in results:
         metadata = r.get("metadata") or {}
         name = _file_name_of(r, metadata)
         if not name:
             continue  # 문서명이 없으면 출처로 표시할 수 없다
         page = _page_of(r, metadata)
-        key = (name, page)
-        if key in seen:
-            continue
-        seen.add(key)
         # doc_id 는 문자열("10")로 오기도 한다. 스키마가 int 라 맞춰준다.
         doc_id = r.get("doc_id") or metadata.get("doc_id")
         if isinstance(doc_id, str):
@@ -183,11 +238,51 @@ def _to_chunks(results: list[dict], top_k: int) -> list[RetrievedChunk]:
                 doc_id=doc_id,
                 page=page,
                 score=score,
+                article=(str(metadata.get("article")) if metadata.get("article") else None),
+                section_type=(
+                    str(metadata.get("section_type")) if metadata.get("section_type") else None
+                ),
+                document_title=(
+                    str(metadata.get("document_title"))
+                    if metadata.get("document_title")
+                    else None
+                ),
+                authority=(str(metadata.get("authority")) if metadata.get("authority") else None),
+                audience=tuple(
+                    str(value)
+                    for value in (
+                        metadata.get("audience")
+                        if isinstance(metadata.get("audience"), (list, tuple))
+                        else [metadata.get("audience")]
+                    )
+                    if value
+                ),
             )
         )
         if len(chunks) >= top_k:
             break
     return chunks
+
+
+def unique_source_chunks(chunks: Sequence[RetrievedChunk]) -> list[RetrievedChunk]:
+    """UI 출처용으로 같은 파일·페이지·조문을 하나만 남긴다.
+
+    답변 프롬프트에는 모든 청크가 필요하지만 화면에 ``규정.pdf p.5``가 반복될
+    필요는 없다. 첫 청크(검색 관련도가 가장 높은 청크)를 대표로 남기며 입력
+    순서를 보존한다. ``doc_id``가 다르면 같은 파일명·페이지여도 별도 문서이므로
+    합치지 않는다. 같은 페이지에 서로 다른 조문이 함께 있을 수 있으므로
+    ``article``까지 같은 경우에만 합친다. 그래야 화면에서 근거 조문 하나가
+    조용히 사라지지 않는다.
+    """
+    unique: list[RetrievedChunk] = []
+    seen: set[tuple[int | None, str, int | None, str | None]] = set()
+    for chunk in chunks:
+        key = (chunk.doc_id, chunk.original_file_name, chunk.page, chunk.article)
+        if key in seen:
+            continue
+        seen.add(key)
+        unique.append(chunk)
+    return unique
 
 
 async def search(query: str, top_k: int | None = None) -> tuple[list[RetrievedChunk], bool, int]:

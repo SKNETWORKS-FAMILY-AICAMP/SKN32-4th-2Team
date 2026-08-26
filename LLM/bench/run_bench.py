@@ -159,12 +159,25 @@ async def _run_one(question: dict, provider: str, top_k: int) -> dict:
     got_sources = (
         [f"{s.original_file_name} p.{s.page}" for s in res.sources] if res else []
     )
+    expected_action = question.get("expected_action")
+    expected_statuses = {
+        "clarify": {"clarification_required"},
+        # 직접 근거가 검색됐으면 답하고, 검색되지 않았으면 근거 없이 채우지 않는
+        # not_found도 안전한 동작이다. 내용 정답 여부는 별도 수기/심판 평가 대상이다.
+        "answer_if_direct_evidence_else_not_found": {"answered", "not_found"},
+    }.get(expected_action)
+    got_status = res.answer_status if res else None
 
     return {
         "question_id": question["id"],
         "group": question.get("group"),
         "question": question["question"],
         "out_of_scope": bool(question.get("out_of_scope")),
+        "severity": question.get("severity"),
+        "expected_action": expected_action,
+        "answer_status": got_status,
+        "action_correct": (got_status in expected_statuses) if expected_statuses else None,
+        "clarification_question": res.clarification_question if res else None,
         "expected_topic": question["category"],
         "got_topic": res.topic if res else None,
         "topic_correct": bool(res and res.topic == question["category"]),

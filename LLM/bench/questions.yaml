@@ -63,6 +63,10 @@ questions:
       - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(법률).pdf"
       - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행령).pdf"
       - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행규칙).pdf"
+    severity: critical
+    expected_action: clarify
+    clarification_slots: [employee_type]
+    must_not_claim: ["기술연구원 3년을 일반 직원에게 적용", "강사·임시교원 규정 일반화"]
 
   - id: leave-parental-b
     group: parental-leave
@@ -73,6 +77,10 @@ questions:
       - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(법률).pdf"
       - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행령).pdf"
       - "1.남녀고용평등과 일ㆍ가정 양립 지원에 관한 법률(시행규칙).pdf"
+    severity: critical
+    expected_action: clarify
+    clarification_slots: [employee_type, leave_type]
+    must_not_claim: ["기술연구원 3년을 일반 직원에게 적용", "입양휴직과 육아휴직 혼합"]
 
   - id: leave-parental-with-maternity
     question: 육아휴직을 출산휴가와 함께 신청할 수 있나요?
@@ -93,6 +101,10 @@ questions:
     question: 유연근무제는 어떻게 신청하나요?
     category: 근태/근무형태
     sources: ["유연근무제 운영지침 .pdf"]
+    severity: critical
+    expected_action: clarify
+    clarification_slots: [flexible_work_type]
+    must_not_claim: ["재택근무 신청 절차를 모든 유연근무에 적용"]
 
   - id: work-flexible-b
     group: flexible-work
@@ -118,6 +130,10 @@ questions:
       - "5.근로기준법(법률).pdf"
       - "5.근로기준법(시행령).pdf"
       - "5.근로기준법(시행규칙).pdf"
+    severity: critical
+    expected_action: answer_if_direct_evidence_else_not_found
+    required_direct_evidence: ["근로기준법 제50조"]
+    must_not_claim: ["유연근무 지침만으로 법정 근로시간 확정"]
 
   - id: work-duty-general
     question: 직원 복무 관련 기본 규정이 어떻게 되나요?
@@ -144,6 +160,9 @@ questions:
       - "5.근로기준법(법률).pdf"
       - "5.근로기준법(시행령).pdf"
       - "5.근로기준법(시행규칙).pdf"
+    severity: critical
+    expected_action: answer_if_direct_evidence_else_not_found
+    must_not_claim: ["근거 없는 직전 3개월 산식", "근로기준법 제47조를 퇴직금 조항으로 인용"]
 
   - id: pay-public-worker
     question: 공무직 직원의 보수 기준이 어떻게 되나요?
@@ -162,6 +181,10 @@ questions:
     question: 공휴일에 대한 급여는 어떻게 산정이돼?
     category: 급여/보수
     sources: ["5.근로기준법(법률).pdf"]
+    severity: critical
+    expected_action: clarify
+    clarification_slots: [holiday_work_status]
+    must_not_claim: ["확인 질문 전 150% 단정", "근거 없는 1.5배 표현"]
 
   # ─────────────── 채용/임용 ───────────────
   - id: hire-contract-a
@@ -177,6 +200,10 @@ questions:
     sources:
       - "계약직직원임용지침.pdf"
       - "6.기간제 및 단시간근로자 보호 등에 관한 법률(법률).pdf"
+    severity: critical
+    expected_action: clarify
+    clarification_slots: [fixed_term_employee_or_teacher]
+    must_not_claim: ["기간제교원 규정을 일반 기간제근로자에게 적용"]
 
   - id: hire-fixed-term-limit
     question: 기간제 근로자를 몇 년까지 쓸 수 있나요?
@@ -227,12 +254,22 @@ questions:
     question: 음주운전을 하면 어떤 처분을 받나요?
     category: 징계/행동강령
     sources: ["교직원 음주운전 비위행위 확인에 관한 지침.pdf"]
+    severity: critical
+    expected_action: clarify
+    clarification_slots: [occurrence, alcohol_or_license, accident]
+    must_not_claim: ["조건 없이 단일 징계 확정", "시행일 제1조를 징계 근거로 인용"]
+    verbatim_range_required: true
 
   - id: disc-dui-b
     group: dui
     question: 직원이 음주운전으로 적발되면 징계 기준이 어떻게 되나요?
     category: 징계/행동강령
     sources: ["교직원 음주운전 비위행위 확인에 관한 지침.pdf"]
+    severity: critical
+    expected_action: clarify
+    clarification_slots: [occurrence, alcohol_or_license, accident]
+    must_not_claim: ["조건 없이 단일 징계 확정", "징계 범위의 중간 처분 누락"]
+    verbatim_range_required: true
 
   - id: disc-code-of-conduct
     question: 교직원 행동강령에서 금지하는 행위는 무엇인가요?

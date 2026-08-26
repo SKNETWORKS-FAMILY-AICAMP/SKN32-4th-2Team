@@ -93,9 +93,10 @@ logs/metrics.jsonl   ← JSONL 한 줄씩. 성능 보고서가 이 파일을 읽
 |---|---|---|---|
 | `chatroom_id` | string | ✅ | `chatroom.chatroom_id` (UUID). 서버 로그 추적용 (아래 설명) |
 | `message` | string | ✅ | 사용자 질문 |
-| `history` | array | ❌ | 이전 대화. **1차에서는 생략**하고, 후속 질문 지원이 필요해지면 그때 채워 보내면 됩니다 (아래 설명) |
+| `history` | array | ❌ | 이전 대화. 생략 가능하지만 현재 Django WEB은 최근 3쌍(최대 6개 메시지)을 보냅니다 (아래 설명) |
 
-**1차 구현에서 보낼 건 두 개뿐입니다.** `history` 는 나중을 위해 열어둔 자리라 지금은 신경 쓰지 않으셔도 됩니다.
+필수 요청 필드는 `chatroom_id`와 `message` 두 개입니다. `history`를 생략하면 독립 질문으로
+처리하며, 현재 Django WEB은 후속 질문의 문맥을 위해 최근 대화를 함께 보냅니다.
 
 `chatroom_id` 는 답변 생성에 쓰이지 않고 **서버 로그에만 남습니다.** 대신 시연 중에
 "이 대화방에서 이상한 답이 나왔다"는 제보가 오면 그 대화만 로그에서 추려낼 수 있어야 하므로 필수입니다.
@@ -106,7 +107,9 @@ logs/metrics.jsonl   ← JSONL 한 줄씩. 성능 보고서가 이 파일을 읽
 
 ```json
 {
-  "answer": "연차유급휴가는 근로기준법 제60조에 따라 ...",
+  "answer": "연차유급휴가는 ...",
+  "answer_status": "answered",
+  "clarification_question": null,
   "topic": "휴가/휴직",
   "sources": [
     { "doc_id": 12, "original_file_name": "5.근로기준법(법률).pdf", "page": 23 },
@@ -122,33 +125,40 @@ logs/metrics.jsonl   ← JSONL 한 줄씩. 성능 보고서가 이 파일을 읽
 |---|---|
 | `original_file_name` | 답변 하단에 표시할 문서명 |
 | `page` | `복무규정.pdf p.5` 형태 표시용. 없으면 `null` |
-| `doc_id` | `document.doc_id`. 문서 원본 링크·다운로드용. 없으면 `null` |
+| `doc_id` | 현재 RAG 코퍼스의 `rag_chatbot_v4.document.doc_id`. 문서 원본 링크·다운로드용이며 RAG가 주지 않으면 `null` |
 
 ### 응답 필드를 어떻게 처리하면 되나
 
 | 필드 | 무엇 | 할 일 |
 |---|---|---|
 | `answer` | 답변 본문 | **DB 저장** → `chat.message` (speaker=`llm`) |
+| `answer_status` | `answered` / `clarification_required` / `not_found` / `rag_unavailable` / `verification_failed` | 선택적 UI 분기. `verification_failed`는 문서 부재가 아니라 생성 답변의 근거 검증 실패 |
+| `clarification_question` | 추가 확인 질문 또는 `null` | `clarification_required`일 때 `answer`와 같은 값 |
 | `topic` | 주제 분류 결과 (8종 중 하나) | **DB 저장** → `chat.topic` (사용자 발화 행) |
-| `sources` | 근거 문서 | **화면 표시.** 답변 하단 "근거 문서" 영역 (스토리보드 13p / 사이트맵 7p) |
+| `sources` | 근거 문서 | **화면 표시 및 `chat_source` 스냅샷 저장.** 답변 하단 "근거 문서" 영역 (스토리보드 13p / 사이트맵 7p) |
 | `rag_degraded` | 문서 검색 실패 여부 | **UI 분기.** `true`면 "근거 문서를 찾지 못했습니다" 안내. 저장 불필요 |
 
-**저장할 건 `answer` 와 `topic` 둘뿐입니다.** 주제를 얻으려고 `/v1/topic` 을 따로 부를 필요가 없습니다 — 내부적으로 답변 생성과 주제 분류를 병렬로 돌려 여기 실어 보냅니다.
+**필수로 저장할 건 `answer` 와 `topic` 둘뿐입니다.** 답변의 근거 표시를 유지하려면
+`sources`의 각 항목도 해당 LLM 응답 행의 `chat_source`에 저장합니다. `answer_status`는 직군·제도
+종류를 확인하는 질문인지 구분하고 싶을 때만 사용합니다. 주제를 얻으려고 `/v1/topic` 을 따로
+부를 필요가 없습니다 — 내부적으로 답변 생성과 주제 분류를 병렬로 돌려 여기 실어 보냅니다.
 
 `rag_degraded: true` 는 **에러가 아니라 정상 200** 입니다. `sources` 만 빈 배열입니다.
 
-### `history` — 지금은 안 보내셔도 됩니다 (나중에 추가 가능)
+### `history` — 선택값이며 Django WEB은 현재 전송
 
-**1차 구현에서는 생략하세요.** 그러면 각 질문을 앞뒤 맥락 없는 독립 질문으로 처리합니다.
+생략하거나 빈 배열이면 각 질문을 앞뒤 맥락 없는 독립 질문으로 처리합니다. 현재 Django WEB은
+최근 3쌍(최대 6개 메시지)을 시간순으로 보내므로, 후속 질문도 문맥을 반영합니다.
 
-나중에 후속 질문까지 지원하고 싶어지면, **WEB 쪽만 고치면 됩니다.** 이 배열을 채워 보내는 순간 서버가 알아서 맥락을 반영합니다. **API 계약도 제 코드도 바뀌지 않습니다.**
+다른 호출자는 필요할 때만 이 배열을 채우면 됩니다. API 계약을 바꿀 필요 없이 서버가
+이전 질문을 검색어와 답변 문맥에 반영합니다.
 
 | `history` | 동작 |
 |---|---|
-| 생략 / `[]` | 질문 독립 처리 — 1차 구현 |
-| 최근 2~3턴 | 후속 질문 인식 — 나중에 |
+| 생략 / `[]` | 질문 독립 처리 |
+| 최근 2~3턴 | 후속 질문 인식 — 현재 Django WEB 방식 |
 
-나중에 붙일 때의 요청 형태는 이렇습니다. **기존 필드는 그대로 두고 배열만 추가**하면 됩니다.
+현재 Django WEB이 사용하는 요청 형태는 다음과 같습니다. 기존 필드는 그대로 두고 배열만 추가하면 됩니다.
 
 ```json
 {
@@ -180,9 +190,15 @@ RAG 가 돌려주는 원본에는 **청크 본문**과 **유사도 점수**도 �
 화면에 표시할 곳이 없고 청크당 수백 자씩이라 응답 대부분이 버려지는 데이터가 되기 때문입니다.
 두 값은 서버 로그(`logs/metrics.jsonl`)에만 남겨 성능 보고서에 씁니다.
 
-중복도 서버에서 합칩니다. RAG 의 단위가 문서가 아니라 청크라 한 페이지에서 여러 조각이 걸리면
-같은 파일·페이지가 중복으로 오는데, `sources` 에 같은 `(파일명, 페이지)` 가 두 번 나오는 일은 없습니다.
+LLM 검증에는 같은 페이지의 서로 다른 조문·표 행을 모두 유지하지만, 화면 출처는 서버에서
+합칩니다. 답변 문장이 실제로 사용한 근거만 `sources`에 포함되며 같은 파일·페이지가 여러 번
+걸려도 `sources` 에 같은 `(파일명, 페이지)` 가 두 번 나오는 일은 없습니다.
 페이지가 다르면(`복무규정.pdf p.5`, `p.6`) 서로 다른 근거이므로 각각 남습니다. 순서는 관련도 순입니다.
+
+`chat_source`는 `doc_id`에 강한 FK를 두지 않는 표시 스냅샷입니다. 따라서 이전 DB 이관으로
+가져온 과거 `chat_source.doc_id`는 새 RAG 코퍼스와 연결하거나 현재 `document`를 조회하는 데
+쓰지 말고, 저장된 `file_name`과 `page`만 과거 대화의 근거 표시로 사용합니다. 새 답변에서
+내려오는 `doc_id`만 현재 `rag_chatbot_v4.document`를 가리킬 수 있습니다.
 
 ---
 
@@ -310,8 +326,9 @@ if (!res.ok) showError(body.message);
 > 자동 재시도를 붙이고 싶으면 `Retry-After` 헤더의 초만큼 쉬었다 보내주세요.
 >
 > 기본 프로바이더인 OpenAI 는 한도가 넉넉해 실사용에서 보기 어렵습니다.
-> Gemini 무료 티어가 **분당 20회** 로 빡빡한데, `/v1/chat` 한 번이 답변 생성과 주제 분류로
-> 프로바이더를 **2회** 호출하므로 실질 한도는 분당 10요청입니다.
+> `/v1/chat`은 기본적으로 답변 생성과 주제 분류로 프로바이더를 **2회** 호출합니다.
+> 급여·휴직·징계 등 고위험 질문은 의미적 근거 검증이 추가되어 정상 경로가 3회이고,
+> 검증 실패 후 교정할 때만 추가 호출이 생깁니다. 무료 티어 한도 산정 시 이를 반영하세요.
 
 **RAG 실패는 에러가 아닙니다.** `200` + `rag_degraded: true` + `sources: []` 로 내려갑니다.
 
@@ -325,17 +342,19 @@ if (!res.ok) showError(body.message);
 
 Request 형식은 `/v1/chat` 과 완전히 동일하므로, 나중에 바꿔도 요청 코드는 그대로 두면 됩니다.
 
-`Content-Type: text/event-stream` 으로 `sources` → `token`×N → `done` 순서로 내려옵니다.
+`Content-Type: text/event-stream` 으로 `sources` → `token` → `done` 순서로 내려옵니다.
+급여·징계 답변은 근거 검증 전에 일부 토큰을 먼저 노출할 수 없으므로, 현재 안전 경로는
+완성본을 검증한 뒤 `token` 이벤트 한 건으로 전달합니다.
 
 ```
 event: sources
 data: {"sources":[...],"rag_degraded":false}
 
 event: token
-data: {"delta":"연차유급"}
+data: {"delta":"연차유급휴가는 ..."}
 
 event: done
-data: {"topic":"휴가/휴직"}
+data: {"topic":"휴가/휴직","answer_status":"answered","clarification_question":null}
 ```
 
 `delta` 를 순서대로 이어붙인 것이 곧 `chat.message` 에 저장할 답변 전문입니다.

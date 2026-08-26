@@ -18,9 +18,10 @@
 | `venv_convert/` | 168MB | `requirements.txt` |
 | `ollama/*.gguf` | 78MB | llama.cpp 변환 (`ollama/build_manifest.json` 에 절차 기록) |
 | `data/holdout.jsonl`, `corpus_cache.json` | 1.5MB | `export_holdout.py` |
+| `data/candidates.jsonl` | 사람 검수 학습 후보 | 초안 병합·검수 절차 후 별도 제공된 검수본 사용 |
 
-**커밋된 것**: 학습·평가 스크립트, 검수 승인된 학습 데이터 100건(`data/candidates.jsonl`),
-비교 보고서(`reports/*.md`), 재현에 필요한 해시·환경 기록.
+**커밋된 것**: 학습·평가 스크립트, 비교 보고서(`reports/*.md`), 재현에 필요한 해시·환경 기록입니다.
+`data/*.jsonl`은 `.gitignore` 대상이므로, 학습을 재현하려면 검수된 입력본을 별도로 준비해야 합니다.
 
 ---
 
@@ -58,7 +59,7 @@ python export_source_inventory.py
 python -m pytest -q
 ```
 
-그다음 [data/candidates.jsonl](data/candidates.jsonl)을 공식 PDF 원문으로 작성하고
+그다음 `data/candidates.jsonl`을 공식 PDF 원문으로 작성하고
 사람 검수가 끝난 행만 `approved: true`로 바꿉니다. 최소 기준은 train 80건,
 valid 20건입니다. 데이터 규칙과 주제별 목표량은 [data/README.md](data/README.md),
 [data/annotation_plan.yaml](data/annotation_plan.yaml)을 따릅니다.

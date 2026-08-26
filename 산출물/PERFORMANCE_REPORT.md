@@ -2,8 +2,7 @@
 
 > **역사적 보고서:** 이 문서는 2026-08-03의 과거 26~28 PDF LLM 실험 기록이다.
 > 93 PDF 검색 성능과 현재 LLM 품질을 합친 최신 결론은
-> `산출물/[필수] 시스템 아키텍처, 테스트 계획 및 결과 보고서/RAG_LLM_PERFORMANCE_REPORT_20260826.md`
-> 를 기준으로 한다.
+> `RAG_LLM_PERFORMANCE_REPORT_20260826.md`를 기준으로 한다.
 
 > 자동 생성: `python bench/report.py` · 2026-08-03 18:26
 > 원본 측정값은 `bench/results/*.jsonl` (git 미포함), 질문 세트는 `bench/questions.yaml`.

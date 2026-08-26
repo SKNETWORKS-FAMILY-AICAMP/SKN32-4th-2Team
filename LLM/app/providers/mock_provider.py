@@ -31,10 +31,12 @@ _KEYWORD_RULES: tuple[tuple[str, tuple[str, ...]], ...] = (
 )
 
 _MOCK_ANSWER = (
-    "[MOCK 응답] 실제 LLM API를 호출하지 않는 개발 모드입니다.\n\n"
-    "질문하신 내용은 사내 인사 규정에 따라 처리됩니다. "
-    "정확한 기준은 아래 근거 문서를 확인해주세요.\n\n"
-    "※ 실제 답변을 받으려면 .env 에 API 키를 넣고 LLM_MODE=live 로 실행하세요."
+    "[상태: NOT_FOUND]\n"
+    "[MOCK 응답] 실제 LLM API를 호출하지 않는 개발 모드입니다."
+)
+_MOCK_GROUNDED_ANSWER = (
+    "[상태: ANSWER]\n"
+    "[MOCK 응답] RAG 검색 결과와 출처 표시 연결을 확인했습니다. [E1]"
 )
 
 # 채팅방 이름 생성 프롬프트를 알아보기 위한 표식 (app/prompts.py CHATROOM_NAME_SYSTEM).
@@ -64,7 +66,8 @@ class MockProvider(LLMProvider):
             last_user = next((m.content for m in reversed(messages) if m.role == "user"), "")
             text = " ".join(last_user.split())[:20] or "새 대화"
         else:
-            text = _MOCK_ANSWER
+            last_user = next((m.content for m in reversed(messages) if m.role == "user"), "")
+            text = _MOCK_GROUNDED_ANSWER if "[근거 E1]" in last_user else _MOCK_ANSWER
         return GenerationResult(
             text=text,
             model=self.model,
@@ -91,6 +94,12 @@ class MockProvider(LLMProvider):
         user_content: str,
         allowed: Sequence[str],
     ) -> str:
+        # 의미 근거 감사 호출도 같은 인터페이스를 사용한다. 일반 주제 분류처럼
+        # ``기타``를 돌려주면 mock 모드의 모든 답변이 검증 실패하므로, 감사 enum
+        # 요청은 결정적으로 통과시켜 UI 배선 테스트가 가능하게 한다.
+        if "SUPPORTED" in allowed and "UNSUPPORTED" in allowed:
+            return "SUPPORTED"
+
         # user_content 에는 질문 뒤에 "참고로 검색된 문서: ..." 힌트가 붙는다.
         # 실제 LLM 은 "문서 이름이 아니라 질문 의도로 판단하라"는 지시를 받으므로,
         # mock 도 질문 부분만 본다. 문서명까지 매칭하면 "그럼 반차는?" 이 검색된

@@ -113,8 +113,11 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   function formatSource(source) {
-    const name = (source.original_file_name || "").replace(/\.[^/.]+$/, "");
-    return source.page ? `${name} p.${source.page}` : name;
+    const fileName = (source.original_file_name || "").replace(/\.[^/.]+$/, "");
+    const name = source.document_title || fileName;
+    const article = source.article ? ` · ${source.article}` : "";
+    const page = source.page ? ` · p.${source.page}` : "";
+    return `${name}${article}${page}`;
   }
 
   function appendMessage(speaker, text, isTyping, sources, ragDegraded) {

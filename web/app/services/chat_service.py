@@ -191,6 +191,8 @@ def send_message(db: Session, chatroom_id: str, user_id: str, message: str) -> d
 
     return {
         "answer": result["answer"],
+        "answer_status": result.get("answer_status", "answered"),
+        "clarification_question": result.get("clarification_question"),
         "sources": result["sources"],
         "rag_degraded": result["rag_degraded"],
     }

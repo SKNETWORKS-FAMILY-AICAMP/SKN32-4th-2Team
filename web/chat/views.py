@@ -65,6 +65,8 @@ def get_messages(chatroom_id, user_id):
             sources_by_chat_id.setdefault(source.chat_id, []).append({
                 'doc_id': source.doc_id,
                 'original_file_name': source.file_name,
+                'document_title': source.document_title,
+                'article': source.article,
                 'page': source.page,
             })
     
@@ -142,11 +144,15 @@ def send_message(chatroom_id, user_id, message):
             chat=llm_chat,
             doc_id=source.get('doc_id'),
             file_name=source.get('original_file_name', ''),
+            document_title=source.get('document_title'),
+            article=source.get('article'),
             page=source.get('page'),
         )
     
     return {
         'answer': result['answer'],
+        'answer_status': result.get('answer_status', 'answered'),
+        'clarification_question': result.get('clarification_question'),
         'sources': result['sources'],
         'rag_degraded': result['rag_degraded'],
     }
@@ -197,6 +203,8 @@ def send_message_api(request, chatroom_id):
     # sources/rag_degraded는 DB에 저장하지 않고 화면 표시(근거 문서 영역, 저하 안내)에만 쓴다.
     return JsonResponse({
         'message': reply['answer'],
+        'answer_status': reply['answer_status'],
+        'clarification_question': reply['clarification_question'],
         'sources': reply['sources'],
         'rag_degraded': reply['rag_degraded'],
     })

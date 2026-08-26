@@ -39,6 +39,14 @@ class Source(BaseModel):
     original_file_name: str = Field(
         ..., description="document.original_file_name. 화면에 표시할 문서명"
     )
+    document_title: str | None = Field(
+        None,
+        description="색인에서 검증된 규정명. 없으면 original_file_name을 표시한다.",
+    )
+    article: str | None = Field(
+        None,
+        description='해당 청크의 조문 표제. 예: "제21조(병가)"',
+    )
     page: int | None = Field(None, description='근거가 위치한 페이지. "복무규정.pdf p.5" 표시용')
 
 
@@ -85,6 +93,24 @@ class ChatResponse(BaseModel):
     """
 
     answer: str = Field(..., description="chat.message 에 그대로 저장 (speaker='llm')")
+    answer_status: Literal[
+        "answered",
+        "clarification_required",
+        "not_found",
+        "rag_unavailable",
+        "verification_failed",
+    ] = Field(
+        "answered",
+        description=(
+            "답변 처리 결과. 기존 WEB은 무시해도 되며, clarification_required이면 "
+            "answer가 사용자에게 보여줄 확인 질문이다. verification_failed는 검색 결과가 "
+            "없다는 뜻이 아니라 생성 답변을 근거로 검증하지 못했다는 뜻이다."
+        ),
+    )
+    clarification_question: str | None = Field(
+        None,
+        description="추가 확인이 필요할 때 answer와 동일한 질문. 그 외에는 null",
+    )
     topic: str = Field(
         ...,
         description=(

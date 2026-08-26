@@ -141,7 +141,7 @@ def get_chat_completion(
 ) -> dict:
     """POST /v1/chat 호출.
 
-    반환: {"answer": str, "topic": str, "sources": list[dict], "rag_degraded": bool}
+    반환: 답변·상태·주제·근거 문서·RAG 저하 여부
     """
     payload = {"chatroom_id": chatroom_id, "message": message}
     if history:
@@ -151,6 +151,8 @@ def get_chat_completion(
 
     return {
         "answer": data.get("answer", ""),
+        "answer_status": data.get("answer_status", "answered"),
+        "clarification_question": data.get("clarification_question"),
         "topic": data.get("topic"),
         "sources": data.get("sources") or [],
         "rag_degraded": bool(data.get("rag_degraded", False)),

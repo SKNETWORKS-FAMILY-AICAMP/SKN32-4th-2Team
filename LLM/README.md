@@ -44,7 +44,8 @@ Copy-Item .env.example .env
 | `RAG_BASE_URL` | `http://127.0.0.1:8001` |
 | `RAG_TIMEOUT_SEC` | CPU 테스트 시 충분히 큰 값 사용(기본 예시 45초) |
 | `RAG_TOP_K` | LLM에 넘길 최종 문서 수 |
-| `ANSWER_CITE_ARTICLES` | 검증한 코퍼스·파이프라인 설정에 맞춰 명시적으로 설정 |
+| `ANSWER_CITE_ARTICLES` | 문서-조문 귀속 검증 전에는 `false` 유지. 화면에는 검증된 근거 문서가 별도 표시됨 |
+| `ANSWER_VERIFY_MODE` | `risky` 권장. 급여·휴직·징계 등만 의미적 근거 검증 (`off`/`all` 선택 가능) |
 
 ## 첫 실행과 일반 실행
 

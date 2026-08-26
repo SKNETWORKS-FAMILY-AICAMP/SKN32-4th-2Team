@@ -1,5 +1,9 @@
-# Benchmark outputs are generated locally. Curated raw results are force-added
-# after validation so one run cannot silently pollute another run's Git metadata.
+# Per-run benchmark outputs stay local. Only compact summaries and the corpus
+# manifest are versioned so reports remain reproducible without raw-result bloat.
 *.json
 *.jsonl
 *.csv
+
+!*-summary.json
+!*-summary.csv
+!*-manifest.json
