@@ -1,0 +1,25 @@
+# RAG/Dockerfile
+FROM python:3.11-slim
+LABEL authors="4nchez"
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    pkg-config \
+    default-libmysqlclient-dev \
+    build-essential \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+COPY . .
+
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
+RUN python scripts/bootstrap_documents.py --apply
+
+EXPOSE 8001
+
+ENTRYPOINT ["/app/entrypoint.sh"]
