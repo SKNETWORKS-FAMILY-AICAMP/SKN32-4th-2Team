@@ -1,20 +1,4 @@
 services:
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-    volumes:
-      - ./nginx/conf.d:/etc/nginx/conf.d:ro
-      - static_volume:/app/staticfiles:ro
-    depends_on:
-      web:
-        condition: service_healthy
-      rag:
-        condition: service_healthy
-      llm:
-        condition: service_healthy
-    restart: unless-stopped
-
   web:
     build: ./web
     env_file: ./web/.env
@@ -22,22 +6,23 @@ services:
       - static_volume:/app/staticfiles
     expose:
       - "8000"
-    depends_on:
-      llm:
-        condition: service_healthy
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
     restart: unless-stopped
+    # depends_on 없음 - 가장 먼저 뜨는 서비스
 
   rag:
     build: ./RAG
     env_file: ./RAG/.env
     expose:
       - "8001"
+    depends_on:
+      web:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
       interval: 10s
@@ -55,11 +40,27 @@ services:
       rag:
         condition: service_healthy
     healthcheck:
-      test: [ "CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8002/health').status==200 else 1)" ]
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://localhost:8002/health').status==200 else 1)"]
       interval: 10s
       timeout: 5s
-      retries: 5
+      retries: 10
       start_period: 15s
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d:ro
+      - static_volume:/app/staticfiles:ro
+    depends_on:
+      web:
+        condition: service_healthy
+      rag:
+        condition: service_healthy
+      llm:
+        condition: service_healthy
     restart: unless-stopped
 
 volumes:
