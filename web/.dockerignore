@@ -1,0 +1,9 @@
+# WEB/.dockerignore, RAG/.dockerignore, LLM/.dockerignore 공통
+.env
+venv/
+.venv/
+__pycache__/
+*.pyc
+.git
+.gitignore
+.dockerignore
