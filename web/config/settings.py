@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "users",
     "chat",
     "documents.apps.DocumentsConfig",
+    "legacy_import.apps.LegacyImportConfig",
 ]
 
 MIDDLEWARE = [
@@ -81,29 +82,49 @@ WSGI_APPLICATION = "config.wsgi.application"
 # Database
 # https://docs.djangoproject.com/en/6.1/ref/settings/#databases
 
-DATABASE_URL = os.getenv("DATABASE_URL")
-if DATABASE_URL and DATABASE_URL.startswith("mysql"):
-    database_url = urlparse(DATABASE_URL)
-    database_name = database_url.path.lstrip("/")
 
-    if not database_url.hostname or not database_name:
+def mysql_database_config(database_url: str, *, variable_name: str) -> dict:
+    """Build Django MySQL settings from one explicit environment variable."""
+
+    parsed_url = urlparse(database_url)
+    database_name = parsed_url.path.lstrip("/")
+
+    if not parsed_url.scheme.startswith("mysql"):
+        raise ValueError(f"{variable_name} must use a MySQL URL.")
+    if not parsed_url.hostname or not database_name:
         raise ValueError(
-            "DATABASE_URL must include a MySQL host and database name."
+            f"{variable_name} must include a MySQL host and database name."
         )
 
-    query_params = parse_qs(database_url.query)
+    query_params = parse_qs(parsed_url.query)
+    return {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": unquote(database_name),
+        "USER": unquote(parsed_url.username or ""),
+        "PASSWORD": unquote(parsed_url.password or ""),
+        "HOST": parsed_url.hostname,
+        "PORT": parsed_url.port or 3306,
+        "OPTIONS": {
+            "charset": query_params.get("charset", ["utf8mb4"])[0],
+        },
+    }
+
+
+def is_same_mysql_database(first: dict, second: dict) -> bool:
+    """Return whether two Django connection settings identify one MySQL DB."""
+
+    return (
+        first["NAME"] == second["NAME"]
+        and str(first.get("HOST", "")).casefold()
+        == str(second.get("HOST", "")).casefold()
+        and str(first.get("PORT", 3306)) == str(second.get("PORT", 3306))
+    )
+
+
+DATABASE_URL = os.getenv("DATABASE_URL")
+if DATABASE_URL:
     DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.mysql",
-            "NAME": unquote(database_name),
-            "USER": unquote(database_url.username or ""),
-            "PASSWORD": unquote(database_url.password or ""),
-            "HOST": database_url.hostname,
-            "PORT": database_url.port or 3306,
-            "OPTIONS": {
-                "charset": query_params.get("charset", ["utf8mb4"])[0],
-            },
-        }
+        "default": mysql_database_config(DATABASE_URL, variable_name="DATABASE_URL")
     }
 else:
     DATABASES = {
@@ -112,6 +133,24 @@ else:
             "NAME": BASE_DIR / "db.sqlite3",
         }
     }
+
+# Normal Django/RAG runtime uses only ``default``. This optional connection is
+# exclusively for the one-off legacy importer; its models reject writes and
+# its router blocks migrations on the source database.
+LEGACY_DATABASE_URL = os.getenv("LEGACY_DATABASE_URL")
+if LEGACY_DATABASE_URL:
+    legacy_database = mysql_database_config(
+        LEGACY_DATABASE_URL,
+        variable_name="LEGACY_DATABASE_URL",
+    )
+    if DATABASE_URL and is_same_mysql_database(DATABASES["default"], legacy_database):
+        raise ValueError(
+            "LEGACY_DATABASE_URL must point to a different physical database "
+            "than DATABASE_URL."
+        )
+    DATABASES["legacy"] = legacy_database
+
+DATABASE_ROUTERS = ["legacy_import.db_router.LegacyImportRouter"]
 
 
 # Password validation

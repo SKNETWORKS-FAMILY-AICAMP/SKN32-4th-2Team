@@ -6,7 +6,9 @@
 Django WEB (8000) → LLM (8002) → RAG (8001) → MySQL + FAISS
 ```
 
-새 환경의 MySQL 마이그레이션과 PDF 색인은 [../RAG/SETUP.md](../RAG/SETUP.md)를 먼저 완료해야 합니다. RAG 부트스트랩 전에는 LLM이 기동되어도 검색 요청이 `No vector store found`로 실패하고, 응답은 `rag_degraded=true` 상태가 될 수 있습니다. RAG의 `Application startup complete`와 `/health`의 `models_ready: true`를 확인한 뒤 LLM을 시작하면 첫 질문이 모델 적재를 떠안지 않습니다.
+LLM은 MySQL에 직접 연결하지 않습니다. 대상 DB는 WEB의 `DATABASE_URL`과 RAG의 `RAG_DB_NAME`이 함께 가리키는 신규 DB `rag_chatbot_v4`이며, LLM에는 이 두 변수나 `LEGACY_DATABASE_URL`을 설정하지 않습니다.
+
+새 환경의 MySQL 마이그레이션과 PDF 색인은 [전체 실행 가이드](../SETUP.md)를 먼저 완료해야 합니다. 이전 DB를 보유한 팀원은 WEB에서 사용자·채팅 데이터와 과거 근거 표시 스냅샷인 `chat_source`만 일회성 이관하고, RAG는 현재 `RAG/res/pdf`를 기준으로 새 `vector_store`를 생성합니다. RAG 부트스트랩 전에는 LLM이 기동되어도 검색 요청이 `No vector store found`로 실패하고, 응답은 `rag_degraded=true` 상태가 될 수 있습니다. RAG의 `Application startup complete`와 `/health`의 `models_ready: true`를 확인한 뒤 LLM을 시작하면 첫 질문이 모델 적재를 떠안지 않습니다.
 
 ## API
 
@@ -23,7 +25,7 @@ Django WEB (8000) → LLM (8002) → RAG (8001) → MySQL + FAISS
 ## 환경 준비
 
 ```powershell
-cd D:\SKN32-4th-2Team\LLM
+cd D:\Dev_Tools\SKN32-4th-2Team\LLM
 py -3.11 -m venv .venv
 .\.venv\Scripts\python.exe -m pip install -r requirements.txt
 Copy-Item .env.example .env
@@ -46,17 +48,18 @@ Copy-Item .env.example .env
 
 ## 첫 실행과 일반 실행
 
-새 PC·새 DB라면 아래 순서가 선행되어야 합니다.
+새 PC·새 DB라면 아래 순서가 선행되어야 합니다. 이전 DB가 없는 팀원은 2단계 뒤 바로 4단계로 진행합니다.
 
-1. MySQL과 세 서비스의 `.env`를 준비합니다.
+1. WEB의 `DATABASE_URL`과 RAG의 `RAG_DB_NAME`을 같은 신규 DB `rag_chatbot_v4`로 준비하고, 세 서비스의 나머지 `.env`를 작성합니다. LLM에는 DB URL을 넣지 않습니다.
 2. `web/manage.py migrate --noinput`으로 공용 테이블을 만듭니다.
-3. `RAG/scripts/bootstrap_documents.py --apply`로 PDF 등록과 FAISS 색인을 만듭니다.
-4. RAG → LLM → Django 순으로 서버를 실행합니다.
+3. 이전 DB 보유자만 `web/.env`의 `LEGACY_DATABASE_URL`로 사용자·채팅 데이터와 `chat_source` 스냅샷을 이관합니다. 이 설정은 LLM에 추가하지 않으며, document·PDF·FAISS 인덱스는 이관하지 않습니다.
+4. `RAG/scripts/bootstrap_documents.py --apply`로 현재 `RAG/res/pdf`에서 document 등록과 새 FAISS 색인을 만듭니다.
+5. RAG → LLM → Django 순으로 서버를 실행합니다.
 
 LLM 서버 자체의 실행 명령은 다음과 같습니다.
 
 ```powershell
-cd D:\SKN32-4th-2Team\LLM
+cd D:\Dev_Tools\SKN32-4th-2Team\LLM
 .\.venv\Scripts\python.exe -m app.main
 ```
 
@@ -72,7 +75,7 @@ CPU/GPU 또는 검색 후보 수 비교 시에는 같은 PDF 코퍼스와 같은
 
 ## 관련 문서
 
-- [전체 실행 가이드](../RAG/SETUP.md)
+- [전체 실행 가이드](../SETUP.md)
 - [RAG API·운영 문서](../RAG/README.md)
 - [WEB 연동 문서](../web/README.md)
 - [API 계약](docs/API.md)

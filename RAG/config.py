@@ -44,7 +44,9 @@ class Config:
     DB_PORT = _int_env("RAG_DB_PORT", 3306)
     DB_USER = os.getenv("RAG_DB_USER", "")
     DB_PASSWORD = os.getenv("RAG_DB_PASSWORD", "")
-    DB_NAME = os.getenv("RAG_DB_NAME", "rag_chatbot")
+    # Django's migration target. The optional legacy source is configured only
+    # in web/LEGACY_DATABASE_URL and must never be used by the RAG runtime.
+    DB_NAME = os.getenv("RAG_DB_NAME", "rag_chatbot_v4")
 
     # Files and local FAISS indexes
     BASE_DIR = str(_BASE_DIR)

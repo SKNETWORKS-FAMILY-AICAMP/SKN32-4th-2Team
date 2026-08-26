@@ -1,9 +1,9 @@
 # Smart HR RAG Service
 
-사내 HR 규정 PDF를 MySQL 문서 목록과 문서별 FAISS 인덱스로 관리하고 검색하는 FastAPI 서비스입니다.
+사내 HR 규정 PDF를 새 MySQL `rag_chatbot_v4`의 문서 목록과 문서별 FAISS 인덱스로 관리하고 검색하는 FastAPI 서비스입니다.
 이 서비스는 Django로 이관하지 않습니다. Django WEB은 사용자·채팅·세션을 담당하고, RAG는 FastAPI로 독립 실행되어 LLM이 HTTP로 호출합니다.
 
-팀원이 새 환경에서 처음 실행하는 절차와 이후의 일반 실행 절차는 [SETUP.md](SETUP.md)를 기준으로 합니다.
+팀원이 새 환경에서 처음 실행하는 절차와 이후의 일반 실행 절차는 [SETUP.md](../SETUP.md)를 기준으로 합니다.
 
 첫 PDF 부트스트랩이 성공한 같은 PC·같은 DB에서는 이후 `python app.py`로 RAG 서버만 다시 실행하면 됩니다. 새 PC, 새 DB, 삭제된 `vector_store`, 새 PDF, 파이프라인 설정 변경 시에만 부트스트랩 또는 재색인이 다시 필요합니다.
 
@@ -26,7 +26,7 @@ Django WEB  →  LLM FastAPI  →  RAG FastAPI
 Python 3.11과 MySQL 8을 권장합니다. 실제 DB 자격 증명은 코드에 넣지 말고 RAG/.env에만 둡니다.
 
 ~~~powershell
-cd D:\SKN32-4th-2Team\RAG
+cd D:\Dev_Tools\SKN32-4th-2Team\RAG
 py -3.11 -m venv .venv
 .\.venv\Scripts\Activate.ps1
 pip install -r requirements.txt
@@ -42,17 +42,27 @@ RAG_DB_HOST=127.0.0.1
 RAG_DB_PORT=3306
 RAG_DB_USER=실제_계정
 RAG_DB_PASSWORD=실제_비밀번호
-RAG_DB_NAME=rag_chatbot
+RAG_DB_NAME=rag_chatbot_v4
 RAG_CORS_ORIGINS=http://127.0.0.1:8000,http://localhost:8000
 ~~~
+
+`RAG_DB_HOST`·`RAG_DB_PORT`·`RAG_DB_NAME`은 `web/.env`의 `DATABASE_URL`과 같은 **새 운영 대상**을 가리켜야 합니다. 레거시 이관 원본 `LEGACY_DATABASE_URL`은 WEB 이관 도구에서만 쓰며 RAG/.env에는 넣지 않습니다.
 
 서버는 모델과 FAISS 캐시 워밍업이 끝난 뒤에만 `Application startup complete`를 출력합니다. 처음 기동할 때는 모델 다운로드·메모리 적재 때문에 시간이 걸릴 수 있으므로, 이 로그와 `/health`의 `models_ready: true`를 확인한 뒤 LLM과 Django를 실행합니다. 기본 `RAG_WARM_VECTOR_STORES=1`은 문서별 FAISS 캐시도 미리 읽어 첫 질문 지연을 없앱니다.
 
 서버가 뜨면 http://127.0.0.1:8001/docs 에서 API 문서를, /health에서 프로세스 상태를 확인할 수 있습니다.
 
-## MySQL 초기화와 문서 부트스트랩
+## 새 RAG 초기화와 문서 부트스트랩
 
-공유 MySQL 스키마는 Django 마이그레이션이 소유합니다. RAG는 시작할 때 테이블을 자동 생성하지 않습니다.
+모든 팀원은 새 MySQL `rag_chatbot_v4`와 현재 프로젝트의 PDF 코퍼스에서 RAG를 새로 시작합니다. RAG 절차에는 기존 `document` 행·PDF·FAISS 인덱스를 이관하는 단계가 없습니다. `chat_source`는 과거 LLM 답변에 표시된 파일명·페이지를 보존하는 채팅 근거 스냅샷으로 WEB 이관 범위이며, PDF를 등록하거나 RAG 검색 인덱스를 만드는 데 사용하지 않습니다. 공유 MySQL 스키마는 Django 마이그레이션이 소유하며, RAG는 시작할 때 테이블을 자동 생성하지 않습니다.
+
+### 첫 부트스트랩 전 `vector_store` 확인
+
+`RAG/vector_store`는 PC별 런타임 파일입니다. 폴더가 이미 있다면 이전 실행의 인덱스를 새 환경에 재사용하지 않도록, 첫 부트스트랩 전에 **사용자가 직접** 안전한 백업 위치로 옮기거나 정리해 빈 상태로 만듭니다. 이 스크립트는 기존·고아 `vector_store/<doc_id>`를 자동 삭제하지 않습니다.
+
+이 확인이 필요한 이유는 기본 `skip` 모드가 유효한 기존 `vector_store/<doc_id>`를 발견하면 새로 만들지 않고 상태만 복구할 수 있기 때문입니다. 즉 새 시작에서는 DB와 PDF뿐 아니라 로컬 `vector_store`도 의도적으로 깨끗한 상태여야 합니다.
+
+### 모든 팀원의 첫 실행
 
 ```powershell
 cd ..\web
@@ -63,11 +73,19 @@ cd ..\RAG
 .\.venv\Scripts\python.exe scripts\bootstrap_documents.py --apply
 ```
 
-`bootstrap_documents.py`는 `res/pdf`의 PDF를 모두 `document`에 비파괴적으로 등록하고 FAISS 인덱스까지 만든다. 기본 실행은 미리보기이며, `--apply`일 때만 실제 쓰기가 일어난다. 중단된 경우 같은 명령을 다시 실행하면 적재되지 않은 문서부터 이어서 처리한다.
+`bootstrap_documents.py`는 `RAG_UPLOAD_DIR` 바로 아래의 PDF(기본값: `RAG/res/pdf`)만 스캔해 새 `document` 행에 등록하고 문서별 FAISS 인덱스를 만듭니다. 레거시 프로젝트 폴더는 자동으로 읽지 않습니다. 기본 실행은 미리보기이며, `--apply`일 때만 실제 쓰기가 일어납니다. 중단된 경우 같은 명령을 다시 실행하면 적재되지 않은 문서부터 이어서 처리합니다.
+
+첫 부트스트랩에는 합의된 현재 PDF 코퍼스만 둡니다. 이 도구는 PDF 내용 해시로 동일성을 판별하지 않고 활성 문서의 파일 경로·파일명을 사용합니다. 같은 파일명으로 내용을 교체하는 경우에는 새 문서로 간주하지 말고 `--mode overwrite`로 재색인하고, 다른 문서라면 먼저 파일명을 바꾼 뒤 등록합니다.
+
+이미 정상 초기화가 끝난 뒤 PDF 내용을 교체했거나, 청킹·임베딩 모델·조문 머리 설정을 바꾼 경우에만 `--mode overwrite`로 다시 색인합니다. 이 모드는 현재 PDF로 임시 FAISS 인덱스를 완성한 뒤에만 기존 `vector_store/<doc_id>`를 교체하고, 교체 실패 시 기존 인덱스를 복구합니다.
+
+```powershell
+.\.venv\Scripts\python.exe scripts\bootstrap_documents.py --apply --mode overwrite
+```
 
 `RAG/sql/rag_document.sql`은 과거의 고정 코퍼스용 파일로 `TRUNCATE TABLE document`를 포함한다. 현재 초기화에는 사용하지 않는다. `POST /api/documents/load-all`도 이미 등록된 DB 행만 색인하므로, PDF를 폴더에 복사한 뒤 최초 등록 용도로 사용하면 안 된다.
 
-자세한 팀별 설정, 서버 기동 순서, 재색인 조건과 문제 해결은 [SETUP.md](SETUP.md)를 참고한다.
+자세한 팀별 설정, 서버 기동 순서, 재색인 조건과 문제 해결은 [SETUP.md](../SETUP.md)를 참고한다.
 
 ## API
 
