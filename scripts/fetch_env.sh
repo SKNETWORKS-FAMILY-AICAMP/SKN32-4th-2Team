@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 SERVICE=$1
-OUT_FILE="${SERVICE^^}/.env"
+OUT_FILE="${SERVICE}/.env"
 
 aws ssm get-parameters-by-path \
   --path "/SKN32-4th-2Team/${SERVICE}" \
