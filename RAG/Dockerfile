@@ -18,7 +18,6 @@ COPY . .
 
 COPY entrypoint.sh /app/entrypoint.sh
 RUN chmod +x /app/entrypoint.sh
-RUN python scripts/bootstrap_documents.py --apply
 
 EXPOSE 8001
 

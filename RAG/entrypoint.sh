@@ -6,7 +6,7 @@ FLAG_FILE="/app/.initialized"
 if [ ! -f "$FLAG_FILE" ]; then
     echo "최초 세팅 실행..."
     python scripts/bootstrap_documents.py
-    # createsuperuser는 대화형이라 별도 처리 (아래 참고)
+    python scripts/bootstrap_documents.py --apply
     touch "$FLAG_FILE"
 fi
 
