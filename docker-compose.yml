@@ -16,8 +16,8 @@ services:
     restart: unless-stopped
 
   web:
-    build: ./WEB
-    env_file: ./WEB/.env
+    build: ./web
+    env_file: ./web/.env
     volumes:
       - static_volume:/app/staticfiles
     expose:
