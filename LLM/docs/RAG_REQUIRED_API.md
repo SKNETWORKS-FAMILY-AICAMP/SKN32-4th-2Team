@@ -11,29 +11,27 @@ LLM 서비스가 답변을 만들려면 관련 문서를 검색해야 합니다.
 
 ---
 
-## 필요한 엔드포인트: `POST /v1/search`
+## 현재 연동 엔드포인트: `POST /api/search`
 
 ### 요청 (제가 보냅니다)
 
 ```
-POST http://localhost:8001/v1/search
+POST http://localhost:8001/api/search
 Content-Type: application/json
 ```
 
 ```json
 {
-  "query": "연차 며칠까지 쓸 수 있나요?",
-  "top_k": 5
+  "query": "연차 며칠까지 쓸 수 있나요?"
 }
 ```
 
 | 필드 | 타입 | 설명 |
 |---|---|---|
 | `query` | string | 검색할 자연어 문장. 보통 사용자 질문 원문이고, 후속 질문일 때는 직전 질문을 앞에 붙여 보냅니다 (최대 500자) |
-| `top_k` | int | 받고 싶은 청크 개수. **선택으로 만들어 주세요** — 안 보내면 그쪽 기본값(5 정도), 너무 큰 값이 오면 상한선으로 잘라주시면 됩니다 |
 
-> `top_k` 를 제가 보내는 이유는, 받은 청크가 전부 **제 프롬프트로 들어가** 토큰 비용·응답 지연·답변 품질에 직접 영향을 주기 때문입니다.
-> 성능 보고서에서 3/5/10 으로 바꿔가며 비교할 계획이라 제 쪽에서 조절할 수 있어야 합니다.
+현재 RAG API는 `query`만 받으며, RAG의 검색 후보 수는 RAG 설정이 결정합니다. LLM은 받은
+결과 중 `RAG_TOP_K`개만 프롬프트에 사용하므로, LLM 환경의 `RAG_TOP_K`로 문맥 길이를 조절합니다.
 
 ### 응답 (제가 받습니다)
 
@@ -55,13 +53,16 @@ Content-Type: application/json
 |---|---|---|---|
 | `original_file_name` | string | ✅ | **필수.** 챗봇 답변 하단 "근거 문서" 표시에 그대로 씁니다 (스토리보드 13p). `document.original_file_name` 과 같은 값이면 좋습니다 |
 | `content` | string | ✅ | **필수.** LLM 프롬프트의 [참고 문서] 블록에 넣습니다. 이게 없으면 답변 근거가 없습니다 |
-| `doc_id` | int | ❌ | `document.doc_id`. 있으면 프론트가 문서 원본으로 링크를 걸 수 있습니다 |
+| `doc_id` | int 또는 숫자 문자열 | ❌ | 현재 RAG 코퍼스의 `rag_chatbot_v4.document.doc_id`. 있으면 프론트가 문서 원본으로 링크를 걸 수 있습니다 |
 | `page` | int | ❌ | 있으면 "복무규정.pdf p.5" 형태로 표시합니다 |
 | `score` | float | ❌ | 유사도. 디버깅/성능 보고서용 |
 | `article` | string | ⚠ | **연동 후 추가로 요청드립니다.** `"제60조(연차 유급휴가)"` 형태. 아래 참조 |
 
 > **`original_file_name` 과 `content` 두 개만 있으면 동작합니다.** 나머지는 없으면 `null` 로 두셔도 되고, 있으면 사용자 경험이 좋아집니다.
 > 필드명이 다르면(`file_name`, `text` 등) 말씀만 해주세요. 제 쪽 `app/services/rag_client.py` 의 매핑만 바꾸면 됩니다.
+
+> 레거시 DB 이관과 현재 RAG 코퍼스는 분리합니다. 과거 대화의 `chat_source`는 파일명·페이지
+> 표시용 스냅샷으로만 보존하며, 그 과거 `doc_id`를 이 API의 새 `document`와 연결하지 않습니다.
 
 ### `content` 는 조문 머리부터 시작해야 합니다 ⚠
 

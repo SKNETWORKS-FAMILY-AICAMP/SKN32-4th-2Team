@@ -100,6 +100,10 @@ services/answer.py  generate_answer()          ★ 여기가 전부다
 WEB 이 chat / chat_source 테이블에 저장
 ```
 
+LLM에는 `DATABASE_URL`이 없습니다. Django WEB과 RAG가 같은 신규 DB `rag_chatbot_v4`를
+소유하며, 이전 DB가 있는 경우에도 사용자·채팅·`chat_source` 표시 스냅샷만 WEB 이관 도구로
+가져옵니다. `document`·PDF·`vector_store`는 이관하지 않고 새 RAG 코퍼스에서 다시 만듭니다.
+
 ### 각 단계에서 실제로 하는 일
 
 **1. 검색어 만들기** (`build_search_query`)
@@ -134,6 +138,9 @@ RAG 응답을 내부 모델로 바꾸는 어댑터다. RAG 쪽 필드명이 여�
 
 질문을 받아 답변·주제·근거를 JSON 으로 돌려줄 뿐이고, 저장은 WEB 이 한다.
 그래서 **WEB·RAG 가 완성되기 전에도 이 파트를 끝까지 만들 수 있었다.**
+
+현재 대상 DB는 `rag_chatbot_v4`이지만, 이는 WEB/RAG 설정값이다. LLM의 `.env`에는
+`DATABASE_URL`·`RAG_DB_NAME`·`LEGACY_DATABASE_URL`을 추가하지 않고 `RAG_BASE_URL`만 둔다.
 
 ### (2) 프로바이더 계층을 따로 뒀다
 

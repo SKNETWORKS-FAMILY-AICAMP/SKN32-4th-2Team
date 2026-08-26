@@ -19,6 +19,8 @@
 
 from __future__ import annotations
 
+import re
+
 from app import prompts
 from app.domain import TOPIC_CATEGORIES
 
@@ -175,14 +177,24 @@ _CITE_NEGATIVE = """3. 조문 번호는 **[참고 문서]에 `제N조` 형태로
    수치와 표현도 문서에 적힌 대로 쓰세요. (문서가 "통상임금의 100분의 50을
    가산"이라고 하면 그렇게 쓰고, "1.5배" 처럼 바꿔 말하지 마세요)"""
 
-_CITE_POSITIVE_START = "3. 출처를 밝힐 때는"
-_CITE_POSITIVE_END = '"1.5배" 처럼 바꿔 말하지 마세요)'
+_RULE3 = re.compile(r"(?ms)^3\..*?(?=^4\.)")
 
 
 def _swap_rule3(text: str, replacement: str) -> str:
-    start = text.index(_CITE_POSITIVE_START)
-    end = text.index(_CITE_POSITIVE_END, start) + len(_CITE_POSITIVE_END)
-    return text[:start] + replacement + text[end:]
+    """현재 운영 프롬프트의 3번 규칙만 실험 문안으로 교체한다.
+
+    규칙의 첫 문장을 고정 문자열로 찾으면 운영 문구를 조금만 다듬어도 baseline
+    벤치까지 import 단계에서 깨진다. 번호 경계(3번부터 4번 직전)를 사용해 문안
+    변화와 무관하게 동일한 규칙 블록만 바꾼다.
+    """
+
+    match = _RULE3.search(text)
+    if not match:
+        raise SystemExit(
+            "prompts.ANSWER_SYSTEM에서 3번 답변 규칙 경계를 찾지 못했습니다. "
+            "variants.py의 _RULE3 패턴을 확인하세요."
+        )
+    return text[: match.start()] + replacement.rstrip() + "\n" + text[match.end() :]
 
 
 ANSWER_SYSTEM_CITE_NEGATIVE = _swap_rule3(prompts.ANSWER_SYSTEM, _CITE_NEGATIVE)

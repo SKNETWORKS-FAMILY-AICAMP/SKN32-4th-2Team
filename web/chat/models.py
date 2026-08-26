@@ -43,6 +43,8 @@ class ChatSource(models.Model):
     chat = models.ForeignKey(Chat, on_delete=models.CASCADE, db_column='chat_id')
     doc_id = models.IntegerField(null=True, blank=True)
     file_name = models.CharField(max_length=255, null=False)
+    document_title = models.CharField(max_length=255, null=True, blank=True)
+    article = models.CharField(max_length=255, null=True, blank=True)
     page = models.IntegerField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, null=False)
 

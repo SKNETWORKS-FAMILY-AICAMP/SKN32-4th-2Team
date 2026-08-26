@@ -54,7 +54,7 @@ class RetrievedChunk:
     계측에 쓴다. 둘 다 화면에 표시할 값이 아니라 응답에서는 뺀다 — 특히 `content` 는
     청크당 수백 자라, 그대로 실어 보내면 응답 대부분이 버려지는 데이터가 된다.
 
-    WEB 에 나가는 것은 `to_source()` 로 추린 문서명·페이지·doc_id 뿐이다.
+    WEB 에 나가는 것은 `to_source()` 로 추린 문서명·조문·페이지·doc_id 뿐이다.
     """
 
     original_file_name: str
@@ -62,6 +62,11 @@ class RetrievedChunk:
     doc_id: int | None = None
     page: int | None = None
     score: float | None = None
+    article: str | None = None
+    section_type: str | None = None
+    document_title: str | None = None
+    authority: str | None = None
+    audience: tuple[str, ...] = ()
 
     def to_source(self) -> "Source":
         from app.schemas import Source
@@ -70,4 +75,6 @@ class RetrievedChunk:
             doc_id=self.doc_id,
             original_file_name=self.original_file_name,
             page=self.page,
+            document_title=self.document_title,
+            article=self.article,
         )

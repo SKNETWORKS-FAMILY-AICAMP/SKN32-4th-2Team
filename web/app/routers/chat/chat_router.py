@@ -70,10 +70,11 @@ def send_message_api(
     except ChatServiceError as e:
         return JSONResponse(status_code=e.status_code, content={"detail": e.message})
 
-    # reply = {"answer": str, "sources": list[dict], "rag_degraded": bool}
-    # sources/rag_degraded는 DB에 저장하지 않고 화면 표시(근거 문서 영역, 저하 안내)에만 쓴다.
+    # 상태값과 sources/rag_degraded는 DB에 저장하지 않고 현재 응답의 화면 처리에만 쓴다.
     return {
         "message": reply["answer"],
+        "answer_status": reply["answer_status"],
+        "clarification_question": reply["clarification_question"],
         "sources": reply["sources"],
         "rag_degraded": reply["rag_degraded"],
     }

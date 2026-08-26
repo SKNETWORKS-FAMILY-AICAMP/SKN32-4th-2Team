@@ -23,7 +23,7 @@ class Settings(BaseSettings):
     default_provider: Literal["openai", "gemini"] = "openai"
     llm_timeout_sec: float = 15.0
 
-    # 답변 길이 상한. 프롬프트로 "3~6문장" 을 요구하지만 지시일 뿐이라
+    # 답변 길이 안전 상한. 실제 길이는 질문 복잡도에 맞춰 프롬프트가 조절하므로
     # 모델이 안 지킬 수 있다 — Qwen2.5:7b 는 벤치에서 2415자를 57초에 걸쳐
     # 뱉었다. 지시를 안 지키는 모델 때문에 사용자가 기다리는 일이 없도록
     # 디코더 단에서 막는다. 정상 답변은 중앙값 226자(≈200토큰)라 여유가 있다.
@@ -45,6 +45,10 @@ class Settings(BaseSettings):
     # RAG 가 청크에 조문 머리를 붙여 주면(docs/RAG_FEEDBACK.md 4-1, 패치 첨부)
     # 이 값을 true 로 바꾸면 된다. 그 구성에서 실측한 결과는 인용 11건 / 오류 0건이었다.
     answer_cite_articles: bool = False
+    # 고위험 급여·휴직·징계 답변은 근거 ID/숫자 검사에 더해 의미적 누락·범위
+    # 축약을 enum 제약 판정으로 한 번 확인한다. all은 모든 ANSWER/NOT_FOUND,
+    # off는 로컬 성능 비교용이다.
+    answer_verify_mode: Literal["off", "risky", "all"] = "risky"
 
     # live = 실제 API 호출 / mock = 고정 응답.
     # API 키 없이도 팀원이 UI를 붙여볼 수 있게 하는 용도. 공개 API 계약은 동일하다.

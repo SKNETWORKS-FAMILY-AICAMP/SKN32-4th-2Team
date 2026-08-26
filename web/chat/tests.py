@@ -1,6 +1,7 @@
 from django.test import Client, TestCase
 
-from chat.models import Chatroom
+from chat.models import Chat, Chatroom, ChatSource
+from chat.views import get_messages
 from users.models import User
 
 
@@ -72,3 +73,38 @@ class DeleteChatroomAPITests(TestCase):
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()["items"], [])
+
+
+class ChatSourceMetadataTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(
+            username="source-user",
+            password="test-password",
+            name="출처 사용자",
+            department="인사팀",
+        )
+        self.chatroom = Chatroom.objects.create(
+            chatroom_id="6fe2bc62-b85e-4ea4-a1a2-841385043bef",
+            user=self.user,
+            chatroom_name="병가 문의",
+        )
+
+    def test_article_metadata_survives_message_reload(self):
+        answer = Chat.objects.create(
+            chatroom=self.chatroom,
+            speaker="llm",
+            message="병가는 연 누계 2개월 범위에서 허가할 수 있습니다.",
+        )
+        ChatSource.objects.create(
+            chat=answer,
+            doc_id=10,
+            file_name="복무규정.pdf",
+            document_title="복무규정",
+            article="제21조(병가)",
+            page=5,
+        )
+
+        messages = get_messages(self.chatroom.chatroom_id, self.user.username)
+
+        self.assertEqual(messages[0]["sources"][0]["document_title"], "복무규정")
+        self.assertEqual(messages[0]["sources"][0]["article"], "제21조(병가)")
