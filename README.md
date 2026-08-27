@@ -537,14 +537,15 @@ Reranker
 
 각 서비스 및 실행 관련 상세 내용은 아래 문서를 참고하세요.
 
-| 구분 | 문서 |
-| --- | --- |
-| WEB | [web/README.md](web/README.md) |
-| LLM | [LLM/README.md](LLM/README.md) |
-| RAG | [RAG/README.md](RAG/README.md) |
-| 팀 실행 가이드 | [SETUP.md](SETUP.md) |
-| Django 이관·MySQL 통합 | [README2.md](README2.md) |
-| 통합 테스트 보고서 | [산출물/프로젝트_통합_테스트_계획_및_결과_보고서_20260826.md](산출물/프로젝트_통합_테스트_계획_및_결과_보고서_20260826.md) |
+| 구분                 | 문서                                                                                 |
+|--------------------|------------------------------------------------------------------------------------|
+| WEB                | [web/README.md](web/README.md)                                                     |
+| LLM                | [LLM/README.md](LLM/README.md)                                                     |
+| RAG                | [RAG/README.md](RAG/README.md)                                                     |
+| 팀 실행 가이드           | [SETUP.md](SETUP.md)                                                               |
+| Django 이관·MySQL 통합 | [README2.md](README2.md)                                                           |
+| 통합 테스트 보고서         | [산출물/프로젝트_통합_테스트_계획_및_결과_보고서_20260826.md](산출물/프로젝트_통합_테스트_계획_및_결과_보고서_20260826.md) |
+| AWS 배포 가이드         | [AWS배포가이드.md](AWS배포가이드.md)                                                          |
 
 ---
 
