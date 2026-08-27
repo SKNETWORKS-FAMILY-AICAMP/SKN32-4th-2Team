@@ -35,39 +35,59 @@ jobs:
       - name: Deploy to EC2 via SSM
         env:
           INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
-          PROJECT_DIR: ${{ env.PROJECT_DIR }}
         run: |
           set -e
 
+          # 1) EC2에서 ubuntu 사용자로 실행할 스크립트를 작성
+          #    (git 저장소가 ubuntu 소유라, root로 돌리면 "dubious ownership"으로 막힘)
+          RUN_SCRIPT=$(cat <<EOF
+          set -e
+          cd $PROJECT_DIR
+          git fetch origin
+          git reset --hard origin/main
+          chmod +x scripts/fetch_env.sh
+          ./scripts/fetch_env.sh web
+          ./scripts/fetch_env.sh rag
+          ./scripts/fetch_env.sh llm
+          docker compose build
+          docker compose up -d
+          docker image prune -f
+          EOF
+          )
+
+          # 2) 따옴표/줄바꿈 이스케이프 문제를 피하기 위해 base64로 인코딩해서 전달
+          ENCODED=$(echo "$RUN_SCRIPT" | base64 -w0)
+
+          # 3) SSM에 보낼 실제 명령: base64 디코드 -> 파일로 저장 -> ubuntu 권한으로 실행
+          REMOTE_CMD="echo $ENCODED | base64 -d > /tmp/skn_deploy.sh && chmod +x /tmp/skn_deploy.sh && sudo -u ubuntu -H /tmp/skn_deploy.sh"
+
+          # 4) jq로 SSM payload를 안전하게 조립 (수동 이스케이프 없이)
+          PAYLOAD=$(jq -n \
+            --arg id "$INSTANCE_ID" \
+            --arg cmd "$REMOTE_CMD" \
+            '{
+              InstanceIds: [$id],
+              DocumentName: "AWS-RunShellScript",
+              Comment: "Deploy",
+              TimeoutSeconds: 3600,
+              Parameters: { commands: [$cmd] }
+            }')
+
           COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "$INSTANCE_ID" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy $(git rev-parse --short HEAD)" \
-            --timeout-seconds 3600 \
-            --parameters commands="[
-              \"set -e\",
-              \"cd $PROJECT_DIR\",
-              \"git fetch origin\",
-              \"git checkout main\",
-              \"git pull origin main\",
-              \"chmod +x scripts/fetch_env.sh\",
-              \"./scripts/fetch_env.sh web\",
-              \"./scripts/fetch_env.sh rag\",
-              \"./scripts/fetch_env.sh llm\",
-              \"docker compose build\",
-              \"docker compose up -d\",
-              \"docker image prune -f\"
-            ]" \
+            --cli-input-json "$PAYLOAD" \
             --query "Command.CommandId" \
             --output text)
 
           echo "SSM Command ID: $COMMAND_ID"
 
           # 최초 배포(볼륨 없음) 시 RAG bootstrap이 최대 20분 이상 걸릴 수 있으므로
-          # wait 자체도 넉넉하게 폴링 (기본 wait는 내부적으로 재시도하며 최종 상태를 기다림)
+          # WaiterConfig를 SSM 명령의 TimeoutSeconds(3600s)와 맞춤 (Delay 15s * MaxAttempts 240 = 3600s)
           aws ssm wait command-executed \
-            --command-id "$COMMAND_ID" \
-            --instance-id "$INSTANCE_ID" || true
+            --cli-input-json "$(jq -n \
+              --arg cid "$COMMAND_ID" \
+              --arg iid "$INSTANCE_ID" \
+              '{CommandId: $cid, InstanceId: $iid, WaiterConfig: {Delay: 15, MaxAttempts: 240}}')" \
+            || true
 
           aws ssm get-command-invocation \
             --command-id "$COMMAND_ID" \
@@ -90,18 +110,21 @@ jobs:
       - name: Verify deployment
         env:
           INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
-          PROJECT_DIR: ${{ env.PROJECT_DIR }}
         run: |
           set -e
 
+          PAYLOAD=$(jq -n \
+            --arg id "$INSTANCE_ID" \
+            --arg dir "$PROJECT_DIR" \
+            '{
+              InstanceIds: [$id],
+              DocumentName: "AWS-RunShellScript",
+              Comment: "Verify deployment - docker compose ps",
+              Parameters: { commands: [("cd " + $dir + " && docker compose ps")] }
+            }')
+
           COMMAND_ID=$(aws ssm send-command \
-            --instance-ids "$INSTANCE_ID" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Verify deployment - docker compose ps" \
-            --parameters commands="[
-              \"cd $PROJECT_DIR\",
-              \"docker compose ps\"
-            ]" \
+            --cli-input-json "$PAYLOAD" \
             --query "Command.CommandId" \
             --output text)
 
