@@ -507,6 +507,32 @@ Reranker
 
 ---
 
+# 테스트 결과물
+
+통합 테스트 계획·판정은 [프로젝트 통합 테스트 계획 및 결과 보고서](산출물/프로젝트_통합_테스트_계획_및_결과_보고서_20260826.md)에 정리돼 있고,
+그 근거가 된 실측 로그·벤치 결과물의 사본을 [`산출물/테스트결과/`](산출물/테스트결과) 폴더에 모아 두었습니다.
+
+```text
+산출물/테스트결과/
+├── 배포_컨테이너_테스트/         # Docker 배포 실측 로그 (보고서 §6.4)
+│   ├── rag-build-test.log        # RAG 이미지 빌드: 157초, 2.94GB/662MB, nvidia-* 미포함(이전 CUDA ~10GB 대비 축소)
+│   └── compose-test.log          # 전체 스택 기동: 1차 실패 2건→수정→2차 전 서비스 healthy, /302·/rag/health 200·/llm/health 200
+└── 벤치_성능_품질/               # RAG·LLM 성능·품질 벤치 (보고서 §6.2·§6.3)
+    ├── 20260826_controlled-summary.json / .csv     # 검색 통제행렬 8조건(CPU FP32 vs CUDA FP16 등)
+    ├── 20260826_corpus-manifest.json               # 코퍼스 매니페스트(PDF 93건·청크)
+    ├── 20260826_llm_quality_review.csv             # 35문항 수기 품질 등급
+    ├── 20260826_llm_quality_summary.json           # LLM 자동 지표 + raw 해시
+    ├── 20260826_current_grounding_retest.md        # 근거 안전장치 적용 후 재검수·문항별 판정
+    ├── 20260826_current_grounding_summary.json     # 재검수 검색·E2E·수동 품질 요약
+    └── 20260826-155538_verify-e2e-grounding_openai.jsonl  # 최신 E2E raw(35문항·CUDA·gpt-4o-mini)
+```
+
+각 파일은 원본 위치(`RAG/`, `LLM/`)에도 그대로 있으며, 위 폴더에는 산출물 보존용 사본을 둡니다.
+배포 로그는 `RAG/.gitignore`의 `*.log`로 git 미추적이었으며, `b0b8b1a`(2026-08-26 그날 마지막 커밋) +
+테스트 중 로컬 수정(`.dockerignore`·`RAG/Dockerfile` CRLF 정규화, 미커밋) 기준으로 기록됐습니다.
+
+---
+
 # 상세 문서
 
 각 서비스 및 실행 관련 상세 내용은 아래 문서를 참고하세요.
@@ -518,6 +544,7 @@ Reranker
 | RAG | [RAG/README.md](RAG/README.md) |
 | 팀 실행 가이드 | [SETUP.md](SETUP.md) |
 | Django 이관·MySQL 통합 | [README2.md](README2.md) |
+| 통합 테스트 보고서 | [산출물/프로젝트_통합_테스트_계획_및_결과_보고서_20260826.md](산출물/프로젝트_통합_테스트_계획_및_결과_보고서_20260826.md) |
 
 ---
 

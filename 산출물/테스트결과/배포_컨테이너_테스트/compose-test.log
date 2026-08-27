@@ -1,0 +1,297 @@
+================================================================
+ 전체 스택 도커 기동 테스트 (web · rag · llm · nginx)
+ TEST START : 2026-08-26 23:46:17 +0900
+ docker     : 29.6.1
+ 접속 예정   : http://localhost/  (nginx :80)
+================================================================
+
+---- [1/4] docker compose build ----
+[23:46:18]  Image skn32-4th-2team-rag Building 
+[23:46:18]  Image skn32-4th-2team-llm Building 
+[23:46:18]  Image skn32-4th-2team-web Building 
+[23:46:18] #1 [internal] load local bake definitions
+[23:46:18] #1 reading from stdin 1.41kB 0.0s done
+[23:46:18] #1 DONE 0.0s
+[23:46:18] 
+[23:46:18] #2 [rag internal] load build definition from Dockerfile
+[23:46:18] #2 transferring dockerfile: 528B done
+[23:46:18] #2 DONE 0.0s
+[23:46:18] 
+[23:46:18] #3 [llm internal] load build definition from Dockerfile
+[23:46:18] #3 transferring dockerfile: 260B 0.0s done
+[23:46:18] #3 DONE 0.1s
+[23:46:18] 
+[23:46:18] #4 [web internal] load build definition from Dockerfile
+[23:46:18] #4 transferring dockerfile: 628B done
+[23:46:18] #4 DONE 0.1s
+[23:46:18] 
+[23:46:19] #5 [llm internal] load metadata for docker.io/library/python:3.11-slim
+[23:46:20] #5 DONE 1.4s
+[23:46:20] 
+[23:46:20] #6 [rag internal] load .dockerignore
+[23:46:20] #6 transferring context: 181B done
+[23:46:20] #6 DONE 0.0s
+[23:46:20] 
+[23:46:20] #7 [rag internal] load build context
+[23:46:20] #7 DONE 0.0s
+[23:46:20] 
+[23:46:20] #8 [llm internal] load .dockerignore
+[23:46:20] #8 transferring context: 181B 0.0s done
+[23:46:20] #8 DONE 0.1s
+[23:46:20] 
+[23:46:20] #9 [web 1/8] FROM docker.io/library/python:3.11-slim@sha256:be1575ed968de893bd54f4c56315ff7c4736ce522c1bca08fd521731aafc0d76
+[23:46:20] #9 resolve docker.io/library/python:3.11-slim@sha256:be1575ed968de893bd54f4c56315ff7c4736ce522c1bca08fd521731aafc0d76 0.1s done
+[23:46:20] #9 DONE 0.1s
+[23:46:20] 
+[23:46:20] #10 [web internal] load .dockerignore
+[23:46:20] #10 transferring context: 181B 0.0s done
+[23:46:20] #10 DONE 0.2s
+[23:46:20] 
+[23:46:20] #11 [web 2/8] WORKDIR /app
+[23:46:20] #11 CACHED
+[23:46:20] 
+[23:46:20] #7 [rag internal] load build context
+[23:46:20] #7 transferring context: 116.28kB 0.0s done
+[23:46:20] #7 DONE 0.1s
+[23:46:20] 
+[23:46:20] #12 [llm internal] load build context
+[23:46:20] #12 transferring context: 139B 0.0s done
+[23:46:20] #12 ERROR: error from sender: open D:\Dev_Tools\SKN32-4th-2Team\LLM\.pytest_cache: Access is denied.
+[23:46:20] 
+[23:46:20] #13 [rag 4/8] COPY requirements.txt .
+[23:46:20] #13 CACHED
+[23:46:20] 
+[23:46:20] #14 [rag 3/8] RUN apt-get update && apt-get install -y --no-install-recommends     pkg-config     default-libmysqlclient-dev     build-essential     curl     && rm -rf /var/lib/apt/lists/*
+[23:46:20] #14 CACHED
+[23:46:20] 
+[23:46:20] #15 [rag 5/8] RUN pip install --no-cache-dir -r requirements.txt
+[23:46:20] #15 CACHED
+[23:46:20] 
+[23:46:20] #16 [web internal] load build context
+[23:46:21] #16 transferring context: 74.17kB 0.1s done
+[23:46:21] #16 CANCELED
+[23:46:21] 
+[23:46:21] #17 [rag 6/8] COPY . .
+[23:46:21] #17 CANCELED
+[23:46:21] ------
+[23:46:21]  > [llm internal] load build context:
+[23:46:21] ------
+[23:46:21] target llm: failed to solve: error from sender: open D:\Dev_Tools\SKN32-4th-2Team\LLM\.pytest_cache: Access is denied.
+[23:46:21] 
+==> build 소요: 4s
+
+---- [2/4] docker compose up -d ----
+[23:46:21]  Image nginx:alpine Pulling 
+[23:46:25]  55afa1ecc21d Pulling fs layer 0B
+[23:46:25]  fb597529c916 Pulling fs layer 0B
+[23:46:25]  d94291c26261 Pulling fs layer 0B
+[23:46:25]  0ea935727878 Pulling fs layer 0B
+[23:46:25]  1ed8e39a7434 Pulling fs layer 0B
+[23:46:25]  0d62d88506ba Pulling fs layer 0B
+[23:46:25]  8cdfe4f23778 Pulling fs layer 0B
+[23:46:25]  da4dea1b00af Pulling fs layer 0B
+[23:46:25]  55afa1ecc21d Downloading 1.049MB
+[23:46:25]  55afa1ecc21d Downloading 2.097MB
+[23:46:25]  55afa1ecc21d Downloading 3.846MB
+[23:46:25]  fb597529c916 Downloading 2.097MB
+[23:46:25]  0ea935727878 Download complete 0B
+[23:46:25]  fb597529c916 Downloading 3.146MB
+[23:46:25]  1ed8e39a7434 Download complete 0B
+[23:46:25]  0d62d88506ba Download complete 0B
+[23:46:25]  8cdfe4f23778 Download complete 0B
+[23:46:25]  55afa1ecc21d Download complete 0B
+[23:46:25]  55afa1ecc21d Extracting 1B
+[23:46:25]  da4dea1b00af Download complete 0B
+[23:46:25]  fb597529c916 Downloading 4.194MB
+[23:46:25]  d94291c26261 Download complete 0B
+[23:46:25]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 6.291MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 7.34MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 8.389MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 10.49MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 11.53MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 12.58MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 14.68MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 15.73MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 17.83MB
+[23:46:26]  55afa1ecc21d Extracting 1B
+[23:46:26]  fb597529c916 Downloading 18.87MB
+[23:46:26]  fb597529c916 Downloading 20.5MB
+[23:46:26]  55afa1ecc21d Pull complete 0B
+[23:46:27]  d94291c26261 Pull complete 0B
+[23:46:27]  fb597529c916 Download complete 0B
+[23:46:27]  0ea935727878 Pull complete 0B
+[23:46:27]  1ed8e39a7434 Pull complete 0B
+[23:46:27]  0d62d88506ba Extracting 1B
+[23:46:27]  76cd5dde9375 Download complete 0B
+[23:46:27]  0d62d88506ba Pull complete 0B
+[23:46:27]  8cdfe4f23778 Pull complete 0B
+[23:46:27]  da4dea1b00af Extracting 1B
+[23:46:27]  da4dea1b00af Pull complete 0B
+[23:46:27]  fb597529c916 Extracting 1B
+[23:46:27]  43aeb74b2469 Downloading 866.6kB
+[23:46:27]  fb597529c916 Extracting 1B
+[23:46:27]  43aeb74b2469 Download complete 0B
+[23:46:27]  fb597529c916 Pull complete 0B
+[23:46:27]  Image nginx:alpine Pulled 
+[23:46:27]  Image skn32-4th-2team-rag Building 
+[23:46:27]  Image skn32-4th-2team-llm Building 
+[23:46:27]  Image skn32-4th-2team-web Building 
+[23:46:27] #1 [internal] load local bake definitions
+[23:46:27] #1 reading from stdin 1.41kB 0.0s done
+[23:46:27] #1 DONE 0.0s
+[23:46:28] 
+[23:46:28] #2 [rag internal] load build definition from Dockerfile
+[23:46:28] #2 transferring dockerfile: 528B done
+[23:46:28] #2 DONE 0.0s
+[23:46:28] 
+[23:46:28] #3 [web internal] load build definition from Dockerfile
+[23:46:28] #3 transferring dockerfile: 628B done
+[23:46:28] #3 DONE 0.0s
+[23:46:28] 
+[23:46:28] #4 [llm internal] load build definition from Dockerfile
+[23:46:28] #4 transferring dockerfile: 260B done
+[23:46:28] #4 DONE 0.1s
+[23:46:28] 
+[23:46:28] #5 [llm internal] load metadata for docker.io/library/python:3.11-slim
+[23:46:28] #5 DONE 0.4s
+[23:46:28] 
+[23:46:28] #6 [llm internal] load .dockerignore
+[23:46:28] #6 transferring context: 181B done
+[23:46:28] #6 DONE 0.0s
+[23:46:28] 
+[23:46:28] #7 [web internal] load .dockerignore
+[23:46:28] #7 transferring context: 181B done
+[23:46:28] #7 DONE 0.0s
+[23:46:28] 
+[23:46:28] #8 [rag internal] load .dockerignore
+[23:46:28] #8 transferring context: 181B done
+[23:46:28] #8 DONE 0.1s
+[23:46:28] 
+[23:46:28] #9 [web internal] load build context
+[23:46:28] #9 DONE 0.0s
+[23:46:28] 
+[23:46:28] #10 [rag internal] load build context
+[23:46:28] #10 DONE 0.0s
+[23:46:28] 
+[23:46:28] #11 [web 1/5] FROM docker.io/library/python:3.11-slim@sha256:be1575ed968de893bd54f4c56315ff7c4736ce522c1bca08fd521731aafc0d76
+[23:46:28] #11 resolve docker.io/library/python:3.11-slim@sha256:be1575ed968de893bd54f4c56315ff7c4736ce522c1bca08fd521731aafc0d76 0.1s done
+[23:46:28] #11 resolve docker.io/library/python:3.11-slim@sha256:be1575ed968de893bd54f4c56315ff7c4736ce522c1bca08fd521731aafc0d76 0.1s done
+[23:46:28] #11 DONE 0.1s
+[23:46:28] 
+[23:46:28] #12 [web 2/5] WORKDIR /app
+[23:46:28] #12 CACHED
+[23:46:29] 
+[23:46:29] #13 [llm internal] load build context
+[23:46:29] #13 transferring context: 139B done
+[23:46:29] #13 ERROR: error from sender: open D:\Dev_Tools\SKN32-4th-2Team\LLM\.pytest_cache: Access is denied.
+[23:46:29] 
+[23:46:29] #10 [rag internal] load build context
+[23:46:29] #10 transferring context: 23.39kB 0.0s done
+[23:46:29] #10 DONE 0.1s
+[23:46:29] 
+[23:46:29] #9 [web internal] load build context
+[23:46:29] #9 transferring context: 114.60kB 0.1s done
+[23:46:29] #9 CANCELED
+[23:46:29] 
+[23:46:29] #14 [rag 3/9] RUN apt-get update && apt-get install -y --no-install-recommends     pkg-config     default-libmysqlclient-dev     build-essential     curl     && rm -rf /var/lib/apt/lists/*
+[23:46:29] #14 CACHED
+[23:46:29] 
+[23:46:29] #15 [rag 4/8] COPY requirements.txt .
+[23:46:29] #15 CACHED
+[23:46:29] 
+[23:46:29] #16 [rag 5/8] RUN pip install --no-cache-dir -r requirements.txt
+[23:46:29] #16 CACHED
+[23:46:29] 
+[23:46:29] #17 [rag 6/8] COPY . .
+[23:46:29] #17 CANCELED
+[23:46:29] ------
+[23:46:29]  > [llm internal] load build context:
+[23:46:29] ------
+[23:46:29] target llm: failed to solve: error from sender: open D:\Dev_Tools\SKN32-4th-2Team\LLM\.pytest_cache: Access is denied.
+[23:46:29] 
+==> up 명령 소요: 8s
+
+---- [3/4] health 대기 (web·rag·llm, 최대 600s) ----
+[23:46:30] healthy=0 | 
+[23:46:46] healthy=0 | 
+[23:47:02] healthy=0 | 
+[23:47:18] healthy=0 | 
+[23:47:34] healthy=0 | 
+[23:47:50] healthy=0 | 
+[23:48:06] healthy=0 | 
+[23:48:22] healthy=0 | 
+[23:48:38] healthy=0 | 
+[23:48:54] healthy=0 | 
+[23:49:10] healthy=0 | 
+[23:49:26] healthy=0 | 
+[23:49:41] healthy=0 | 
+[23:49:57] healthy=0 | 
+[23:50:13] healthy=0 | 
+[23:50:29] healthy=0 | 
+[23:50:45] healthy=0 | 
+[23:51:01] healthy=0 | 
+[23:51:17] healthy=0 | 
+[23:51:33] healthy=0 | 
+[23:51:49] healthy=0 | 
+[23:52:05] healthy=0 | 
+[23:52:21] healthy=0 | 
+[23:52:37] healthy=0 | 
+[23:52:53] healthy=0 | 
+[23:53:09] healthy=0 | 
+[23:53:25] healthy=0 | 
+[23:53:41] healthy=0 | 
+[23:53:57] healthy=0 | 
+[23:54:13] healthy=0 | 
+[23:54:29] healthy=0 | 
+[23:54:44] healthy=0 | 
+[23:55:00] healthy=0 | 
+[23:55:16] healthy=0 | 
+[23:55:32] healthy=0 | 
+[23:55:48] healthy=0 | 
+[23:56:04] healthy=0 | 
+[23:56:20] healthy=0 | 
+[23:56:36] healthy=0 | 
+==> 타임아웃(600s)
+
+---- [4/4] 최종 상태 & 엔드포인트 ----
+[23:56:36] NAME      IMAGE     COMMAND   SERVICE   CREATED   STATUS    PORTS
+
+[GET http://localhost/ ]        -> 000
+[GET http://localhost/rag/health] -> 
+[GET http://localhost/llm/health] -> 
+
+ TEST END   : 2026-08-26 23:56:44 +0900
+================================================================
+
+################################################################
+ [재시도 — 문제 해결 후 성공]  2026-08-27 00:01:15 +0900
+################################################################
+ 원인 1: LLM 빌드 컨텍스트가 .pytest_cache 접근 거부로 실패
+   → 해결: web/RAG/LLM .dockerignore에 .pytest_cache/ 등 추가
+ 원인 2: rag 컨테이너 'exec /app/entrypoint.sh: no such file or directory'
+         (entrypoint.sh CRLF 줄바꿈) → web엔 있던 CRLF 변환이 RAG엔 누락
+   → 해결: RAG/Dockerfile에 RUN sed -i 's/\r$//' /app/entrypoint.sh 추가
+
+ 최종 상태 (docker compose ps):
+llm: Up 55 seconds (healthy)
+nginx: Up 50 seconds
+rag: Up About a minute (healthy)
+web: Up 2 minutes (healthy)
+
+ 엔드포인트 (nginx :80):
+   web  GET /            -> HTTP 302 (→ /login 리다이렉트)
+   rag  GET /rag/health  -> {"status":"ok","models_ready":true,"backend":"faiss","device":"cpu","search_initial_candidates":20,"search_top_k":5,"vec
+   llm  GET /llm/health  -> {"status":"ok","providers":{"openai":true,"gemini":true},"default_provider":"openai","rag":"up","topic_categories":["휴
+
+ 접속 URL: http://localhost/
+ RAG 기동: HF 모델캐시 마운트로 27초만에 healthy (2.7GB 재다운로드 없음)
+################################################################

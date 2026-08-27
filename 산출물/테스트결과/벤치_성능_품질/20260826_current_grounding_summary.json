@@ -1,0 +1,114 @@
+{
+  "schema_version": 2,
+  "title": "2026-08-26 current grounding RAG + LLM retest",
+  "git": {
+    "branch": "main",
+    "benchmark_base_head": "a36586b25695cbd2e4f556bc8bf245318f78af4c",
+    "benchmark_worktree_dirty": true,
+    "code_reflected_commit": "1b576e88b3627565775fe2baae458f49987ec129"
+  },
+  "questions": {
+    "count": 35,
+    "sha256": "1c3c0792004a2769ff9f9b7be47715df3b6b752bcfb336a5bea64d387ca30d4a"
+  },
+  "automated_tests": {
+    "llm": {"passed": 82, "failed": 0},
+    "rag": {"passed": 33, "failed": 0},
+    "rag_bench": {"passed": 21, "failed": 0},
+    "django": {"passed": 25, "failed": 0},
+    "total": {"passed": 161, "failed": 0},
+    "code_commit": "1b576e88b3627565775fe2baae458f49987ec129"
+  },
+  "scope_exclusions": {
+    "qwen_sft": {
+      "included_in_total": false,
+      "dataset_integrity_unit_tests_observed": 9,
+      "model_training_or_inference_executed": false,
+      "reason": "Qwen and SFT were excluded from the current validation scope."
+    }
+  },
+  "retrieval": {
+    "raw_local_file": "RAG/bench/results/20260826-152247_current-after-grounding-fix.json",
+    "raw_sha256": "e18a63fe6fa62d8c03cd27e6a38aa45d85dc3cb82f77ee7520be52b3cdc91c5f",
+    "backend": "faiss",
+    "device": "cuda",
+    "initial_candidates": 20,
+    "top_k": 5,
+    "questions": 35,
+    "repeats": 3,
+    "requests": 105,
+    "failed_requests": 0,
+    "unstable_rankings": 0,
+    "latency_ms": {"p50": 526.0, "p95": 700.9, "mean": 550.8, "max": 2256.2},
+    "quality": {
+      "eligible_questions": 32,
+      "source_hit_at_1": 0.6562,
+      "source_hit_at_3": 0.8438,
+      "source_hit_at_5": 0.9062,
+      "mean_reciprocal_rank": 0.7641,
+      "top_5_misses": ["work-duty-general", "pay-overtime-a", "pay-holiday-work"]
+    }
+  },
+  "end_to_end_manual_review_run": {
+    "raw_local_file": "LLM/bench/results/20260826-152557_e2e-current-grounding-20260826_openai.jsonl",
+    "raw_sha256": "5589ad00e5da9b694b53bc02db4ea240cd12d2bd38d38b7617da3d80a924fbb9",
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "llm_timeout_seconds": 15,
+    "questions": 35,
+    "errors": 0,
+    "rag_degraded": 0,
+    "topic_correct": 33,
+    "expected_actions_correct": 9,
+    "expected_actions_scored": 9,
+    "answer_status": {
+      "answered": 19,
+      "clarification_required": 8,
+      "not_found": 2,
+      "verification_failed": 6
+    },
+    "latency_ms": {"p50": 2293, "p95": 5960, "mean": 2333.1, "max": 6671},
+    "over_5_seconds": 2,
+    "over_15_seconds": 0,
+    "manual_review_performed": true
+  },
+  "end_to_end_runtime_only_repeat": {
+    "raw_local_file": "LLM/bench/results/20260826-155538_verify-e2e-grounding_openai.jsonl",
+    "raw_sha256": "c151d327f6c7d031d92a3f975dfb1527d6d43114c326d319fd5934f5267a6828",
+    "provider": "openai",
+    "model": "gpt-4o-mini",
+    "llm_timeout_seconds": 15,
+    "questions": 35,
+    "errors": 0,
+    "rag_degraded": 0,
+    "topic_correct": 33,
+    "expected_actions_correct": 9,
+    "expected_actions_scored": 9,
+    "answer_status": {
+      "answered": 20,
+      "clarification_required": 8,
+      "not_found": 2,
+      "verification_failed": 5
+    },
+    "latency_ms": {"p50": 2235, "p95": 5795, "mean": 2297.7, "max": 6353},
+    "over_5_seconds": 2,
+    "over_15_seconds": 0,
+    "manual_review_performed": false
+  },
+  "manual_groundedness_review": {
+    "method": "Each answer was compared with only the question, context, source and expected-action contract stored in the result row. Four critical candidates received a second independent review.",
+    "run_ref": "end_to_end_manual_review_run",
+    "previous_actual_rag": {"critical": 9, "major": 17, "minor": 5, "pass": 4},
+    "current": {"critical": 1, "major": 11, "minor": 7, "pass": 16},
+    "remaining_critical": ["work-duty-general"],
+    "pay_overtime_b_final_correction": "pay-overtime-b was downgraded to minor. The colloquial question '야근' does not establish work between 22:00 and 06:00, so retrieving the overtime formula was reasonable and the 150% formula was correct. The answer still mislabeled it as night-work allowance and attached the overtime-row exclusion note, leaving a terminology and condition mismatch.",
+    "detail_file": "RAG/bench/history/20260826_current_grounding_retest.md"
+  },
+  "limitations": [
+    "One warm sequential run on one local PC; not an AWS or concurrency benchmark.",
+    "The question contract and working tree differ from the initial report snapshot.",
+    "Severity is a strict qualitative HR guidance risk rating, not statistical accuracy.",
+    "Manual severity ratings apply only to end_to_end_manual_review_run; end_to_end_runtime_only_repeat was not manually graded.",
+    "Raw result files contain retrieved HR context and remain gitignored local artifacts."
+  ]
+}
