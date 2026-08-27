@@ -1,114 +1,528 @@
-# Smart HR RAG 챗봇
+# SKN32-4th-2Team
 
-사내 인사·총무 규정 PDF를 근거로 답변하는 Django 기반 RAG 챗봇입니다. 사용자·채팅 데이터는 MySQL에, 문서별 검색 인덱스는 각 PC의 FAISS `vector_store`에 저장합니다.
+# Smart HR — RAG 기반 사내 규정 질의응답 서비스
 
-## 구성
+사내 구성원이 인사·행정 규정 및 내부 문서를 기반으로 질문하면,
+**RAG(Retrieval-Augmented Generation) 기술로 실제 규정 문서를 검색해 근거 기반 답변을 제공하는 AI 행정 지원 서비스**입니다.
 
-```text
-Django WEB (8000) → LLM FastAPI (8002) → RAG FastAPI (8001)
-       │                                      ├─ MySQL: 사용자·채팅·document 메타데이터
-       │                                      ├─ RAG/res/pdf: PDF 코퍼스
-       └──────────────────────────────────────└─ RAG/vector_store: PC별 FAISS 인덱스
+일반적인 LLM은 공개된 지식은 알고 있지만, 기관별 내부 규정·업무 절차·행정 문서는 학습되어 있지 않습니다.
+
+본 서비스는 사내 규정 문서를 검색 가능한 지식 데이터로 구축하고,
+질문 시 관련 문서를 찾아 LLM에 함께 제공함으로써 **환각(Hallucination)을 줄이고 신뢰 가능한 답변**을 제공합니다.
+
+<br><br>
+
+<!--
+발표 자료 / 서비스 화면 스크린샷을 여기에 추가하세요.
+예)
+<img width="1912" height="1073" alt="시스템 소개" src="이미지_URL" />
+-->
+
+<br><br>
+
+---
+
+# 프로젝트 개요
+
+## 문제 상황
+
+사내 구성원은 다음과 같은 문의를 반복적으로 합니다.
+
+* 휴가 및 복무 관련 규정
+* 연구년 / 휴직 신청 조건
+* 출장 및 행정 처리 절차
+* 각종 내부 규정 확인
+* 담당 부서 및 처리 방법 문의
+
+하지만 기존 방식은:
+
+```
+질문 발생
+ ↓
+규정 문서 직접 검색
+ ↓
+담당 부서 문의
+ ↓
+답변 대기
 ```
 
-| 서비스 | 역할 | 실행 주소 |
-| --- | --- | --- |
-| `web/` | Django 5.2 웹 화면, 인증, 채팅·관리자 기능 | `http://127.0.0.1:8000` |
-| `LLM/` | 답변 생성, 주제 분류, RAG 호출 | `http://127.0.0.1:8002` |
-| `RAG/` | PDF 등록·색인·검색·재정렬 | `http://127.0.0.1:8001` |
+와 같은 비효율적인 과정을 거칩니다.
 
-## 가장 먼저 읽을 문서
+---
 
-새 PC·새 DB에서의 전체 준비 절차는 [SETUP.md](SETUP.md)가 기준입니다. 실제 DB 비밀번호와 API 키는 저장소에 넣지 말고 각 서비스의 `.env`에만 설정합니다.
+## 해결 방법
 
-주요 문서:
+```
+사용자 질문
+      ↓
+관련 규정 문서 검색 (RAG)
+      ↓
+검색 결과 기반 LLM 답변 생성
+      ↓
+답변 + 근거 문서 제공
+```
 
-- [Django WEB README](web/README.md)
-- [LLM README](LLM/README.md)
-- [RAG README](RAG/README.md)
-- [Django 이관·MySQL 통합 문서](README2.md)
+방식을 통해 사용자가 자연어로 질문하고 즉시 규정 기반 답변을 받을 수 있도록 구현했습니다.
 
-## 첫 실행
+---
 
-처음 한 번은 MySQL 스키마와 PDF 검색 인덱스를 준비해야 합니다. RAG 서버는 부트스트랩이 끝날 때까지 켜지 않는 것을 권장합니다.
+# 시스템 아키텍처
+
+```text
+                     사내 구성원 (브라우저)
+                            │
+                    Nginx Reverse Proxy (:80)
+                 /  ·  /rag/  ·  /llm/  ·  /static/
+                            │
+                            ▼
+                  WEB Service · Django (8000)
+          로그인 / 채팅 / 관리자 / 데이터 저장(MySQL)
+                            │
+                            ▼
+                  LLM Service · FastAPI (8002)
+          답변 생성 / 주제 분류 / 채팅 제목 생성
+                            │
+                            ▼
+                  RAG Service · FastAPI (8001)
+          문서 관리 / 임베딩 / 검색 / 재정렬
+                            │
+                            ▼
+                MySQL 8.0  +  FAISS Vector Store
+                            │
+                            ▼
+                  사내 규정 및 행정 문서 (PDF)
+```
+
+세 서비스는 각각 독립 컨테이너로 동작하며, `docker compose`로 한 번에 기동합니다.
+외부에는 Nginx(:80)만 노출되고, 사용자 요청은 경로에 따라 WEB·RAG·LLM으로 프록시됩니다.
+
+---
+
+# 서비스 구성
+
+## 1. WEB Service · Django (Port : 8000)
+
+사내 구성원이 사용하는 웹 서비스 영역입니다.
+
+### 담당 기능
+
+* 사용자 인증 / 세션 관리
+* 채팅 화면 제공
+* 대화 이력 저장·관리
+* 관리자 기능 (사용자 / 문서 / 통계)
+* 문서 관리 화면 ↔ RAG 연동
+
+### 주요 기능
+
+**사용자**
+
+* 회원가입 / 로그인
+* AI 규정 질의응답
+* 채팅방 관리
+* 답변 근거 문서 확인
+
+**관리자**
+
+* 사용자 관리
+* 규정 문서 관리 (RAG API 연동)
+* 문의 통계 확인
+
+### 기술 스택
+
+* Django 5.2 (WSGI / gunicorn)
+* Django ORM
+* Django Templates (Server Side Rendering)
+* 커스텀 사용자 모델 · bcrypt 비밀번호 처리
+* MySQL 8.0
+* JavaScript / CSS
+
+---
+
+## 2. LLM Service · FastAPI (Port : 8002)
+
+AI 답변 생성과 자연어 처리 영역을 담당합니다.
+사용자의 질문과 RAG 검색 결과를 기반으로 답변을 생성하며, **상태를 저장하지 않는 Stateless 서비스**입니다.
+
+### 주요 역할
+
+* 규정 기반 답변 생성
+* 문의 주제 분류
+* 채팅방 제목 생성
+* LLM Provider 관리 / 추상화
+
+지원 Provider:
+
+* OpenAI
+* Gemini
+
+> Qwen(Ollama)은 운영 API에는 연결하지 않고, 별도의 파인튜닝·연구 트랙(`LLM/qwen-sft/`)에서만 사용합니다.
+
+### 답변 생성 흐름
+
+```text
+사용자 질문
+      ↓
+RAG 서비스 요청
+      ↓
+관련 규정 검색 결과 수신
+      ↓
+질문 + 검색 문서 Prompt 구성
+      ↓
+LLM 답변 생성
+      ↓
+주제 분류
+      ↓
+WEB 서비스 반환
+```
+
+### 주제 분류 설계
+
+관리자 통계 활용을 위해 LLM이 주제를 자유롭게 생성하게 하지 않고,
+고정 카테고리 기반 분류 방식을 적용했습니다.
+
+```
+"휴가 며칠 사용할 수 있나요?"
+"연차 기준 알려주세요"
+"휴가 규정 궁금합니다"
+```
+
+같은 질문은 모두 `휴가/휴직`으로 저장됩니다.
+
+```
+Enum 제약 출력
+        ↓
+화이트리스트 검증
+        ↓
+정규화 캐시
+        ↓
+DB 저장
+```
+
+이를 통해 통계 데이터의 일관성을 유지합니다.
+
+---
+
+## 3. RAG Service · FastAPI (Port : 8001)
+
+사내 규정 문서를 관리하고 검색하는 지식 기반 서비스입니다.
+
+### 주요 역할
+
+* PDF 문서 관리 (업로드 / 색인 / 소프트 삭제)
+* 문서 텍스트 추출
+* Chunk 분할
+* Embedding 생성
+* Vector 검색
+* 검색 결과 재정렬
+
+### RAG Pipeline
+
+```text
+사내 규정 PDF
+       ↓
+텍스트 추출
+       ↓
+Chunk Split
+       ↓
+Embedding 생성
+       ↓
+FAISS 저장
+       ↓
+사용자 질문 Vector 검색
+       ↓
+BM25 + Vector Search
+       ↓
+Reranker 재정렬
+       ↓
+LLM 전달
+```
+
+### 기술 스택
+
+* FastAPI
+* MySQL (mysql-connector-python)
+* FAISS
+* sentence-transformers
+* BM25 (rank-bm25)
+* Cross Encoder Reranker
+* LangChain (텍스트 분할 파이프라인)
+
+Embedding:
+
+```
+jhgan/ko-sroberta-multitask
+```
+
+Reranker:
+
+```
+BAAI/bge-reranker-v2-m3
+```
+
+---
+
+# RAG를 적용한 이유
+
+일반 LLM은 기관 내부 규정을 알 수 없습니다.
+
+```
+질문:
+"연구년 신청 기준이 어떻게 되나요?"
+```
+
+일반 LLM:
+
+```
+기관마다 다르므로 확인이 필요합니다.
+```
+
+또는 학습 데이터 기반으로 잘못된 답변을 생성할 수 있습니다.
+
+RAG 적용:
+
+```
+질문
+ ↓
+사내 규정 검색
+ ↓
+실제 문서 전달
+ ↓
+근거 기반 답변 생성
+```
+
+따라서 기관별 규정과 절차를 반영한 정확한 답변이 가능합니다.
+
+---
+
+# 프로젝트 구조
+
+```text
+SKN32-4th-2Team/
+├── web/                       # WEB 서비스 · Django (8000)
+│   ├── config/                # settings / urls / wsgi · asgi
+│   ├── users/                 # 인증·회원가입·관리자(사용자/문서/통계)
+│   ├── chat/                  # 채팅방·메시지·LLM 호출
+│   ├── documents/             # document 모델·마이그레이션
+│   ├── legacy_import/         # 레거시 DB 일회성 이관
+│   ├── templates/  static/
+│   ├── manage.py
+│   └── README.md
+│
+├── LLM/                       # LLM 서비스 · FastAPI (8002)
+│   ├── app/
+│   │   ├── providers/         # openai / gemini / mock
+│   │   ├── routers/           # chat / meta
+│   │   └── services/          # answer / topic / grounding ...
+│   ├── qwen-sft/              # 파인튜닝·연구 트랙
+│   ├── bench/
+│   └── README.md
+│
+├── RAG/                       # RAG 서비스 · FastAPI (8001)
+│   ├── app.py
+│   ├── rag_pipeline.py
+│   ├── scripts/               # bootstrap_documents.py 등
+│   ├── res/pdf/               # 규정 PDF 코퍼스
+│   ├── vector_store/          # PC별 FAISS 인덱스 (Git 제외)
+│   └── README.md
+│
+├── nginx/                     # 리버스 프록시 설정
+├── scripts/                   # 배포 보조 스크립트
+├── docker-compose.yml         # 전체 스택 오케스트레이션
+├── SETUP.md                   # 팀 실행 가이드 (정본)
+└── README.md
+```
+
+---
+
+# 실행 방법
+
+## 방법 A. Docker로 한 번에 실행 (권장)
+
+레포 루트에서 세 서비스(web · rag · llm)와 Nginx를 한 번에 기동합니다.
+
+```bash
+docker compose up -d --build
+```
+
+접속: `http://localhost`
+
+기동 순서는 healthcheck로 `web → rag → llm → nginx` 가 보장됩니다.
+RAG는 모델 적재와 최초 PDF 부트스트랩 때문에 첫 기동이 다소 오래 걸립니다.
+
+---
+
+## 방법 B. 로컬(venv) 첫 실행 — 처음 실행하는 분들
+
+Windows PowerShell 기준입니다. 처음 실행하는 팀원은 아래 순서를 그대로 따라갑니다.
+
+### 1. 준비물
+
+* Python 3.11
+* MySQL 8 이상, 비어 있는 데이터베이스 `rag_chatbot_v4`
+* 실제 LLM 테스트 시 OpenAI 또는 Gemini API 키
+
+DB가 없으면 한 번만 생성합니다.
+
+```sql
+CREATE DATABASE rag_chatbot_v4 CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+```
+
+### 2. 가상환경 · 환경변수(.env)
+
+서비스마다 가상환경을 만들고 `.env.example`을 복사해 실제 값을 채웁니다.
 
 ```powershell
-# 1) MySQL의 빈 rag_chatbot_v4 DB를 준비하고, 각 서비스 .env를 설정한다.
+cd web
+py -3.11 -m venv .venv-django
+.\.venv-django\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
 
-# 2) Django가 공용 MySQL 테이블을 만든다.
-cd D:\Dev_Tools\SKN32-4th-2Team\web
+cd ..\RAG
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+
+cd ..\LLM
+py -3.11 -m venv .venv
+.\.venv\Scripts\python.exe -m pip install -r requirements.txt
+Copy-Item .env.example .env
+```
+
+세 `.env`는 같은 MySQL을 바라봐야 합니다.
+
+| 파일 | 확인할 값 |
+| --- | --- |
+| `web/.env` | `DATABASE_URL`의 DB명 = `rag_chatbot_v4`, `CHAT_API_BASE_URL=http://127.0.0.1:8002`, `DOC_API_BASE_URL=http://127.0.0.1:8001` |
+| `RAG/.env` | `RAG_DB_*`가 같은 MySQL의 `rag_chatbot_v4`, `RAG_API_PORT=8001` |
+| `LLM/.env` | `RAG_BASE_URL=http://127.0.0.1:8001`, 실제 테스트 시 LLM API 키 |
+
+### 3. DB 마이그레이션
+
+```powershell
+cd web
 .\.venv-django\Scripts\python.exe manage.py migrate --noinput
 ```
 
-레거시 이관은 **이전 DB가 남아 있는 팀원만** PDF 부트스트랩 전에 한 번 수행합니다. 이관 범위는 사용자·로그인 이력·채팅방·채팅 메시지와 각 답변의 근거 표시 스냅샷인 `chat_source`입니다. RAG 문서 메타데이터 `document`는 옮기지 않습니다. 이전 DB가 없는 팀원은 다음 블록을 건너뜁니다. `web/.env`의 `LEGACY_DATABASE_URL`은 읽기 전용 원본이고 `DATABASE_URL`과 다른 물리 DB여야 합니다. 이전 DB에는 Django `migrate`를 실행하지 않습니다.
+이 명령이 `document`를 포함한 공용 테이블을 만듭니다. 과거 SQL 파일(`RAG/sql/rag_document.sql`, `sql/rag_chatbot_schema.sql`)은 실행하지 않습니다.
+
+### 4. (선택) 기존 MySQL 데이터 이관
+
+**이전 MySQL DB를 보유한 팀원만** 사용자·채팅 이력을 이관합니다. 절차는 [SETUP.md](SETUP.md)의 "기존 DB 데이터 이관"을 참고하세요. 이전 DB가 없으면 이 단계를 건너뜁니다.
+
+### 5. PDF 등록 · FAISS 색인 (부트스트랩)
+
+`RAG/res/pdf`의 규정 PDF를 `document` 행으로 등록하고 검색 인덱스를 만듭니다. 기본 실행은 미리보기이고, `--apply`에서만 실제 기록됩니다.
 
 ```powershell
-cd D:\Dev_Tools\SKN32-4th-2Team\web
-# 기본 dry-run: 결과만 확인
-.\.venv-django\Scripts\python.exe manage.py import_legacy_data
-
-# dry-run 결과를 검토한 뒤에만 새 운영 DB로 실제 이관
-.\.venv-django\Scripts\python.exe manage.py import_legacy_data --apply
-```
-
-이관이 끝난 뒤에는 Django와 RAG 모두 새 운영 DB `rag_chatbot_v4`만 사용합니다. 이전 채팅의 근거 파일명·페이지 표시는 `chat_source`로 보존되지만, 그 안의 과거 `doc_id`는 새 RAG 문서와 연결하지 않습니다. RAG는 모든 팀원 PC에서 새 PDF 코퍼스와 새 인덱스로 시작합니다. 상세 절차는 [Django 이관·MySQL 통합 문서](README2.md)를 참고합니다.
-
-현재 사용할 정본 PDF만 `RAG/res/pdf`에 준비한 뒤 `document` 행과 FAISS 인덱스를 새로 생성합니다. 기존 `RAG/vector_store`가 있다면 자동으로 재사용하거나 삭제하지 말고, 보존 필요성을 확인한 뒤 별도 백업 위치로 옮기거나 정리해 빈 상태로 만듭니다. 그 다음 기본 부트스트랩으로 새 인덱스를 만듭니다.
-
-```powershell
-cd D:\Dev_Tools\SKN32-4th-2Team\RAG
+cd RAG
 .\.venv\Scripts\python.exe scripts\bootstrap_documents.py
 .\.venv\Scripts\python.exe scripts\bootstrap_documents.py --apply
 ```
 
-`RAG/sql/rag_document.sql`은 과거의 일부 문서를 위한 `TRUNCATE` 포함 스크립트이므로 현재 초기화에는 실행하지 않습니다. PDF를 폴더에 복사한 것만으로는 검색되지 않으며, 위 부트스트랩이 DB 등록과 색인을 함께 수행합니다.
+> PDF를 폴더에 넣기만 해서는 검색되지 않습니다. 위 부트스트랩이 등록과 색인을 함께 수행합니다.
 
-## 일반 실행
+### 6. 서버 실행 (RAG → LLM → WEB)
 
-초기화가 완료된 뒤에는 MySQL을 실행하고 다음 순서로 서버만 켭니다. RAG 창에서 `RAG 워밍업 완료` 및 `Application startup complete`가 나온 뒤 다음 서버를 시작합니다.
+RAG 창에서 `Application startup complete`가 나온 뒤 다음 서버를 켭니다.
 
 ```powershell
 # 창 1 — RAG
-cd D:\Dev_Tools\SKN32-4th-2Team\RAG
+cd RAG
 .\.venv\Scripts\python.exe app.py
 
 # 창 2 — LLM
-cd D:\Dev_Tools\SKN32-4th-2Team\LLM
+cd LLM
 .\.venv\Scripts\python.exe -m app.main
 
-# 창 3 — Django WEB
-cd D:\Dev_Tools\SKN32-4th-2Team\web
+# 창 3 — WEB
+cd web
 .\.venv-django\Scripts\python.exe manage.py runserver 127.0.0.1:8000 --noreload
 ```
 
-브라우저에서 `http://127.0.0.1:8000`으로 접속합니다. 각 서버는 해당 PowerShell 창에서 `Ctrl+C`로 종료합니다.
+브라우저에서 `http://127.0.0.1:8000`으로 접속합니다.
 
-## PDF와 vector_store 안전 기준
+### 7. 동작 확인
 
-부트스트랩이 검사하는 대상은 선택한 PDF 폴더이며, 기본값은 `RAG/res/pdf`입니다. 하위 폴더는 자동으로 스캔하지 않으므로 검색 대상 PDF만 이 폴더의 최상위에 둡니다. 보관·삭제 PDF는 이 폴더 밖 또는 하위 보관 폴더에 둡니다.
+* `http://127.0.0.1:8001/health` — RAG 상태
+* `http://127.0.0.1:8002/health` — LLM · RAG 연결 상태
+* Django 로그인 후 질문 → 답변과 근거 문서 표시 확인
 
-`document` 행과 PDF를 연결할 때 파일 경로와 원본 파일명을 함께 사용합니다. 따라서 다음 기준을 지켜야 합니다.
+> 재색인 조건, 트러블슈팅 등 상세 운영 절차는 [SETUP.md](SETUP.md)를 참고하세요.
 
-- “파일명 중복”은 이전 프로젝트 폴더 전체를 대상으로 검사한다는 뜻이 아니라, **현재 부트스트랩 PDF 폴더의 파일**과 새 DB의 활성 `document` 행 사이의 이름·경로 연결 기준입니다.
-- 다른 위치에서 PDF를 가져올 때 같은 파일명이지만 내용이 다르면, 현재 도구는 파일 내용 해시를 비교하지 않아 기존 문서로 잘못 연결할 수 있습니다. RAG 시작 전에 정본 PDF 코퍼스를 하나로 정하고, 내용이 다른 파일은 이름을 바꿉니다.
-- 기본 `--mode skip`은 유효한 `vector_store/<doc_id>`가 이미 있으면 재색인하지 않고 적재 상태만 복구할 수 있습니다. 따라서 RAG 최초 구축 전에는 기존 `vector_store`를 깨끗이 분리하고, 초기화가 끝난 뒤 청킹 규칙·청크 크기·오버랩·임베딩 모델을 변경했을 때는 반드시 `--apply --mode overwrite`를 사용합니다.
-- `--mode overwrite`는 현재 설정으로 임시 인덱스를 완성한 뒤 같은 `doc_id`의 기존 인덱스를 교체하므로, 빌드 실패 시 기존 인덱스를 보존합니다. DB 행과 연결되지 않은 고아 `vector_store` 폴더는 자동 삭제하지 않습니다. 물리적으로 완전히 비운 RAG 작업 공간이 필요하면, 대상 폴더를 먼저 백업하거나 범위를 확인한 뒤 수동으로 정리합니다.
+---
 
-## 다시 부트스트랩해야 하는 경우
+# 주요 설계 포인트
 
-- 새 PC 또는 새 로컬 MySQL을 준비했을 때
-- `RAG/vector_store`를 삭제했거나 새로 받은 환경일 때
-- PDF를 `RAG/res/pdf`에 직접 추가했을 때
-- 청킹·임베딩 모델·조문 머리 설정을 바꿔 재색인이 필요할 때 (`--apply --mode overwrite` 사용)
+## 1. 서비스 분리 구조
 
-`vector_store`는 Git에 저장하지 않는 로컬 파일입니다. 같은 MySQL을 여러 팀원이 공유해도 각 팀원 PC에서는 한 번씩 부트스트랩을 실행해야 합니다. 팀이 같은 검색 결과를 재현하려면 PDF 코퍼스도 동일하게 커밋하거나 안전한 방식으로 공유해야 합니다.
+WEB / LLM / RAG를 독립 서비스로 분리했습니다.
 
-## 검증 순서
+* 서비스별 독립 개발 가능
+* 장애 영향 최소화
+* 모델 교체 용이
+* API 계약 기반 확장 가능
 
-1. `http://127.0.0.1:8001/health`에서 RAG 상태를 확인합니다.
-2. `http://127.0.0.1:8002/health`에서 LLM과 RAG 연결 상태를 확인합니다.
-3. Django에 로그인해 질문을 보내고 답변의 근거 문서가 표시되는지 확인합니다.
+## 2. Stateless LLM 구조
 
-## Git 정책
+LLM 서비스는 DB를 직접 관리하지 않습니다.
 
-커밋 대상은 코드, 마이그레이션, 실행 문서, 검증된 PDF 코퍼스입니다. `.env`, API 키, DB 자격 증명, 가상환경, 로그, `vector_store`, 로컬 벤치마크 원본은 커밋하지 않습니다.
+```
+Request
+ ↓
+AI 처리
+ ↓
+JSON Response
+```
+
+저장과 관리는 WEB(Django) 서비스에서 담당합니다.
+
+## 3. 검색 품질 개선
+
+단순 Vector Search가 아닌:
+
+```
+Vector Search
++
+BM25 Keyword Search
++
+Reranker
+```
+
+구조를 적용하여 검색 정확도를 개선했습니다.
+
+## 4. Django 전환 · 컨테이너 배포
+
+* WEB 계층을 Django로 구성하고, 공용 `document` 테이블의 마이그레이션 소유권을 Django가 가집니다.
+* 세 서비스가 같은 MySQL `rag_chatbot_v4`를 바라보며, RAG는 스키마를 자동 생성하지 않습니다.
+* `docker compose` + Nginx 리버스 프록시로 전체 스택을 한 번에 배포합니다.
+
+## 5. 운영 고려 사항
+
+* API Error 규격 통일
+* Timeout 처리
+* Provider 추상화 / Mock 모드 지원
+* 성능 측정(bench) 환경 구성
+* 개인정보 로그 보호
+* 근거 기반 답변(Grounding) 처리
+
+---
+
+# 상세 문서
+
+각 서비스 및 실행 관련 상세 내용은 아래 문서를 참고하세요.
+
+| 구분 | 문서 |
+| --- | --- |
+| WEB | [web/README.md](web/README.md) |
+| LLM | [LLM/README.md](LLM/README.md) |
+| RAG | [RAG/README.md](RAG/README.md) |
+| 팀 실행 가이드 | [SETUP.md](SETUP.md) |
+| Django 이관·MySQL 통합 | [README2.md](README2.md) |
+
+---
+
+# Team Project
+
+사내 규정과 행정 문서를 기반으로
+구성원이 쉽고 빠르게 정보를 찾을 수 있도록 지원하는
+**RAG 기반 AI 행정 지원 서비스**입니다.

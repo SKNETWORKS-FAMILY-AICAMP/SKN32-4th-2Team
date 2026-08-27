@@ -22,6 +22,10 @@ LLM은 MySQL에 직접 연결하지 않습니다. 대상 DB는 WEB의 `DATABASE_
 
 일반 채팅 흐름에서는 `/v1/chat`만 호출합니다. 답변 API는 RAG 검색이 일시적으로 실패해도 서비스 자체를 500으로 끝내지 않고, `rag_degraded`와 빈 `sources`를 내려줄 수 있습니다.
 
+`POST /v1/chat/stream`(SSE)은 현재 미사용 상태로 남겨 둔 실험 경로입니다.
+
+전체 스택(web·rag·llm·nginx)을 한 번에 띄우는 Docker Compose 배포는 레포 루트에서 실행하며, 그 절차는 루트 README와 [SETUP.md](../SETUP.md)를 따릅니다. 아래는 컨테이너 없이 LLM만 로컬(venv)에서 직접 실행하는 절차입니다.
+
 ## 환경 준비
 
 ```powershell

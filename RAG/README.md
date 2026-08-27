@@ -21,6 +21,8 @@ Django WEB  →  LLM FastAPI  →  RAG FastAPI
 - 최신 고도화: 조문 머리 보강, 요청당 질문 임베딩 1회, FAISS 스토어 캐시, CPU/GPU 선택
 - 벡터 인덱스는 Git에 저장하지 않습니다. 문서 DB 행·PDF 원본·vector_store/<doc_id>가 같은 시점의 한 묶음입니다.
 
+전체 스택(web·rag·llm·nginx)을 한 번에 띄우는 Docker Compose 배포는 레포 루트에서 실행하며, 그 절차는 루트 README와 [SETUP.md](../SETUP.md)를 따릅니다. 아래는 컨테이너 없이 RAG만 로컬(venv)에서 직접 실행하는 절차입니다.
+
 ## 준비
 
 Python 3.11과 MySQL 8을 권장합니다. 실제 DB 자격 증명은 코드에 넣지 말고 RAG/.env에만 둡니다.
@@ -89,15 +91,21 @@ cd ..\RAG
 
 ## API
 
-| Method | Path | 용도 |
-| --- | --- | --- |
-| GET | /health | LLM이 확인하는 경량 상태 점검 |
-| GET | /api/documents | 활성 문서 목록 |
-| POST | /api/documents/upload | PDF 업로드 및 자동 인덱싱 |
-| PUT | /api/documents/{doc_id}/load | 단일 문서 재적재 |
-| POST | /api/documents/load-all?mode=skip | 미적재 문서만 적재 |
-| POST | /api/documents/load-all?mode=overwrite | 대상 문서 인덱스를 다시 생성 |
-| POST | /api/search | LLM이 호출하는 검색 API |
+현재 스택에서 실제로 호출되는 엔드포인트만 정리했습니다. 호출자는 두 곳입니다 — Django 관리자 문서 화면이 로드하는 `web/static/js/rag.js`(브라우저 → nginx `/rag/`)와 LLM 서비스(`rag_client.py`).
+
+| Method | Path | 호출자 | 용도 |
+| --- | --- | --- | --- |
+| GET | /health | LLM | 경량 상태 점검(up/down 표시) |
+| GET | /api/documents | 관리자 화면(rag.js) | 활성 문서 목록 |
+| POST | /api/documents/upload | 관리자 화면(rag.js) | PDF 업로드 및 자동 인덱싱 |
+| DELETE | /api/documents/{doc_id} | 관리자 화면(rag.js) | 문서 소프트 삭제 |
+| PUT | /api/documents/{doc_id}/load | 관리자 화면(rag.js) | 단일 문서 재적재 |
+| POST | /api/documents/load-all?mode=skip | 관리자 화면(rag.js) | 미적재 문서만 적재 |
+| POST | /api/documents/load-all?mode=overwrite | 관리자 화면(rag.js) | 대상 문서 인덱스를 다시 생성 |
+| GET | /api/documents/{doc_id}/file | 관리자 화면(rag.js) | PDF 원본 반환 (뷰어용) |
+| POST | /api/search | LLM | 검색 (일반 채팅 흐름의 핵심 호출) |
+
+`GET /`(정적 루트 마운트)와 `GET /api/documents/{doc_id}`(문서 상세)는 RAG에 구현돼 있지만 현재 Django·LLM 어느 쪽도 호출하지 않습니다.
 
 전체 재적재는 해당 MySQL·PDF·vector_store 묶음이 명확한 환경에서만 수행합니다. 다른 PC 또는 다른 DB에서 만든 vector_store를 복사하면 doc_id가 달라 잘못된 문서가 검색될 수 있습니다.
 
@@ -146,6 +154,6 @@ rag_pipeline.py의 청킹·조문 머리·임베딩 모델이 바뀌어도 기�
 - 가상환경, 캐시, 로그, 임시 PDF
 - vector_store, vector_store_backup, qdrant_data
 - 검색 랭킹 테스트 원본 응답, 압축 백업
-- django_rag/와 run_django_rag.py 같은 FastAPI-to-Django 비교 실험본
+- 빌드·테스트 로그(예: rag-build-test.log, compose-test.log)와 컨테이너 임시 산출물
 
 기존에 이미 추적된 임시 PDF·랭킹 테스트 응답은 이 브랜치에서 Git 추적만 해제합니다. 로컬 파일은 삭제하지 않습니다.

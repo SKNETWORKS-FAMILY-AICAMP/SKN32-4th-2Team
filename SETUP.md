@@ -15,7 +15,7 @@ Django WEB (8000) → LLM (8002) → RAG (8001)
 - `RAG_UPLOAD_DIR`(기본 `RAG/res/pdf`)에 PDF를 복사하는 것만으로는 검색 대상이 되지 않는다. PDF마다 `document` 행과 `vector_store/<doc_id>` 인덱스가 필요하다.
 - `vector_store`는 Git에 넣지 않는 PC별 런타임 파일이다. 따라서 같은 MySQL을 공유해도 새 PC에서는 한 번씩 인덱스를 만들어야 한다.
 - 현재 로컬 PDF 폴더에는 93개 PDF가 있다. 그중 Git에 아직 추가되지 않은 PDF가 있다면, 팀원이 같은 코퍼스로 실행하기 전에 해당 PDF를 커밋하거나 별도 공유해야 한다. 이 스크립트는 없는 PDF를 내려받지 않는다.
-- RAG의 `document`·현재 PDF·로컬 FAISS 인덱스는 새로 시작한다. `chat_source`는 과거 LLM 답변 시점의 파일명·페이지를 보존하는 채팅 근거 스냅샷으로 WEB 이관 범위이며, RAG 검색 인덱스에는 사용하지 않는다.
+- RAG의 `document`·현재 PDF·로컬 FAISS 인덱스는 새로 시작한다. (과거 채팅 근거 스냅샷 `chat_source`는 WEB 이관 범위이며 RAG 검색에는 쓰지 않는다 — 자세히는 2-2 참고.)
 - 실제 `.env`, DB 비밀번호, API 키, `vector_store`는 커밋하지 않는다.
 
 ## 0. 준비물
@@ -60,7 +60,7 @@ Copy-Item .env.example .env
 | `RAG/.env` | `RAG_DB_*`가 위와 같은 MySQL의 `rag_chatbot_v4`, `RAG_API_PORT=8001` |
 | `LLM/.env` | `RAG_BASE_URL=http://127.0.0.1:8001`, 실제 테스트라면 LLM API 키 |
 
-모든 팀원은 아래의 동일한 새 RAG 초기화 절차를 따릅니다. `manage.py migrate`는 `rag_chatbot_v4`에 스키마를 만들며, RAG 초기화에는 기존 `document`·PDF·FAISS 인덱스를 가져오는 명령이 포함되지 않습니다. `chat_source`의 과거 LLM 답변 근거 스냅샷 이관은 별도 WEB 범위입니다.
+모든 팀원은 아래의 동일한 새 RAG 초기화 절차를 따릅니다. `manage.py migrate`는 `rag_chatbot_v4`에 스키마를 만들며, RAG 초기화에는 기존 `document`·PDF·FAISS 인덱스를 가져오는 명령이 포함되지 않습니다.
 
 기본 `RAG_DEVICE=auto`는 CUDA 지원 PyTorch와 GPU가 있으면 CUDA를, 아니면 CPU를 선택한다. CPU/GPU 비교를 할 때만 `RAG_DEVICE=cpu` 또는 `RAG_DEVICE=cuda`로 강제한다.
 
@@ -210,7 +210,7 @@ cd D:\Dev_Tools\SKN32-4th-2Team\web
 
 기본 `skip` 모드는 이미 정상 색인이 있는 문서를 건너뛴다. PDF 내용을 교체했거나 파이프라인 설정을 바꾼 **초기화 이후**에만 `--mode overwrite`를 사용한다. `overwrite`는 현재 PDF로 임시 FAISS 인덱스를 완성한 뒤에만 기존 `vector_store/<doc_id>`를 교체하고, 교체 실패 시 기존 인덱스를 복구한다.
 
-공유 MySQL을 여러 PC가 쓸 경우에는 한 명이 Django 마이그레이션과 문서 행 등록을 완료하면 된다. 단, 각 PC의 `vector_store`는 로컬이므로 각 팀원이 자신의 PC에서 한 번씩 부트스트랩을 실행해야 한다. 스크립트는 같은 파일명의 활성 문서 행을 재사용하므로, 내용이 바뀐 파일은 위 규칙대로 `overwrite`로 재색인한다.
+공유 MySQL을 여러 PC가 쓸 경우, Django 마이그레이션과 문서 행 등록은 한 명이 완료하면 된다(`vector_store`만 PC별 로컬이라 각자 한 번씩 부트스트랩 — 위 `먼저 알아둘 점` 참고). 스크립트는 같은 파일명의 활성 문서 행을 재사용하므로, 내용이 바뀐 파일은 `overwrite`로 재색인한다.
 
 ## 5. 자주 발생하는 문제
 
