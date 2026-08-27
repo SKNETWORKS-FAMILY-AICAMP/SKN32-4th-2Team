@@ -18,6 +18,8 @@ services:
   rag:
     build: ./RAG
     env_file: ./RAG/.env
+    volumes:
+      - rag_vector_store:/app/vector_store
     expose:
       - "8001"
     depends_on:
@@ -25,10 +27,10 @@ services:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 10s
+      interval: 15s
       timeout: 5s
-      retries: 40
-      start_period: 180s
+      retries: 90
+      start_period: 1200s   # 20분 (18분 실측 + 여유분)
     restart: unless-stopped
 
   llm:
@@ -65,3 +67,4 @@ services:
 
 volumes:
   static_volume:
+  rag_vector_store:
